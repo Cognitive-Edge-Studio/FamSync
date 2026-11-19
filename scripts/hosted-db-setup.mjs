@@ -6,20 +6,25 @@
 //   FAMSYNC_API_PASSWORD="..." FAMSYNC_JOBS_PASSWORD="..." node scripts/hosted-db-setup.mjs
 import pg from 'pg';import {readdir,readFile} from 'node:fs/promises';
 
+// Resolve project files from this script, even when launched from another folder.
+const migrationsDirectory = new URL('../supabase/migrations/', import.meta.url);
+
 const url=process.env.ADMIN_DATABASE_URL,apiPassword=process.env.FAMSYNC_API_PASSWORD,jobsPassword=process.env.FAMSYNC_JOBS_PASSWORD;
 if(!url||!apiPassword||!jobsPassword){console.error('Set ADMIN_DATABASE_URL, FAMSYNC_API_PASSWORD and FAMSYNC_JOBS_PASSWORD.');process.exit(1);}
 for(const p of [apiPassword,jobsPassword])if(p.length<24){console.error('Use database passwords of at least 24 characters.');process.exit(1);}
 
 // Hosted Supabase requires TLS; `sslmode=disable` in the URL is only for a local rehearsal.
-const local=/sslmode=disable/.test(url),db=new pg.Client({connectionString:url.replace(/[?&]sslmode=disable/,''),ssl:local?false:{rejectUnauthorized:false}});await db.connect();
+const files=(await readdir(migrationsDirectory)).filter(f=>f.endsWith('.sql')).sort();
+const local=/sslmode=disable/.test(url),db=new pg.Client({connectionString:url.replace(/[?&]sslmode=disable/,''),ssl:local?false:{rejectUnauthorized:false},connectionTimeoutMillis:15000});
+try{await db.connect();}
+catch(e){console.error('Database connection failed ('+(e.code||'connection error')+'). Check the database password, session pooler host, and network connection.');process.exit(1);}
 try{
  await db.query('create schema if not exists famsync_meta; create table if not exists famsync_meta.migrations (name text primary key); revoke all on schema famsync_meta from public;');
- const files=(await readdir('supabase/migrations')).filter(f=>f.endsWith('.sql')).sort();
  const done=new Set((await db.query('select name from famsync_meta.migrations')).rows.map(r=>r.name));
  let applied=0;
  for(const name of files){
   if(done.has(name))continue;
-  const sql=await readFile('supabase/migrations/'+name,'utf8');
+  const sql=await readFile(new URL(name,migrationsDirectory),'utf8');
   try{await db.query('begin');await db.query(sql);await db.query('insert into famsync_meta.migrations(name) values($1)',[name]);await db.query('commit');applied++;console.log('applied '+name);}
   catch(e){await db.query('rollback');console.error('FAILED '+name+': '+e.message);console.error('Stopped. Earlier migrations stay applied; fix the cause and rerun.');process.exit(1);}
  }

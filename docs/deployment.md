@@ -30,6 +30,12 @@ Values written as `<LIKE-THIS>` come from the step that creates them. Keep every
    ```bash
    ADMIN_DATABASE_URL="postgresql://postgres.<REF>:<DB-ADMIN-PASSWORD>@aws-0-<REGION>.pooler.supabase.com:5432/postgres" FAMSYNC_API_PASSWORD="<API-DB-PASSWORD>" FAMSYNC_JOBS_PASSWORD="<JOBS-DB-PASSWORD>" node scripts/hosted-db-setup.mjs
    ```
+   On Windows, use the PowerShell launcher instead. It prompts for all three passwords privately, validates the application password lengths, and works from any folder. Replace the path, project reference, and pooler host for your project:
+   ```powershell
+   & 'C:\shibly\FamSync\scripts\hosted-db-setup.ps1' -ProjectRef '<REF>' -PoolerHost 'aws-0-<REGION>.pooler.supabase.com'
+   ```
+   Keep the two application passwords in your password manager for the Render settings. The launcher does not save them to disk, and it restores the previous process environment after running.
+
    You can rerun it safely; migrations that already ran are skipped. If one fails, it stops and names the file. This script has only been rehearsed locally, so this first hosted run is its real test.
 5. **Authentication → URL Configuration:** set **Site URL** to `https://<SITE>` and add `https://<SITE>/auth/callback/**` to the redirect URLs.
 6. **Authentication → Emails → SMTP settings:** use Resend's SMTP (step 4) so sign-up and recovery emails aren't held to Supabase's small built-in limit.
