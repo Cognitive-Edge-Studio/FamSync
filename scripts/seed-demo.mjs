@@ -1,14 +1,22 @@
 // Seeds a realistic demo family through the public API, so every record passes the same
-// validation, audience and integrity rules as real use. Local development only; rerunning replaces the previous demo.
+// validation, audience and integrity rules as real use. Local runs replace their demo;
+// --staging creates a separate hosted demo and refuses to overwrite existing accounts.
 //
 // Usage (API and local Supabase running):  node --env-file=apps/api/.env.example scripts/seed-demo.mjs
 // Optional: DEMO_API=http://127.0.0.1:4016  (defaults to http://127.0.0.1:4000)
 import assert from 'node:assert/strict';import pg from 'pg';import sharp from 'sharp';
+import {randomBytes} from 'node:crypto';import {writeFile,appendFile} from 'node:fs/promises';
 import {invitationToken} from '../apps/api/dist/invitation-token.js';
 
-const API=(process.env.DEMO_API??'http://127.0.0.1:4000')+'/api/v1',AUTH='http://127.0.0.1:55431',ZONE='America/Chicago';
-const DOMAIN='demo.famsync.test',PASSWORD='FamSync-demo-2026!'; // Synthetic local accounts only; see docs/demo-accounts.md.
-const DB='postgresql://supabase_admin:famsync-local-admin@127.0.0.1:55432/postgres';
+const hosted=process.argv.includes('--staging');
+const API=(process.env.DEMO_API??(hosted?'https://famsync-api-staging.onrender.com':'http://127.0.0.1:4000'))+'/api/v1';
+const AUTH=hosted?process.env.SUPABASE_AUTH_URL:'http://127.0.0.1:55431',ZONE='America/Chicago';
+if(hosted){assert.equal(API,'https://famsync-api-staging.onrender.com/api/v1');assert.equal(AUTH,'https://axzyacocepjelsgqnsky.supabase.co/auth/v1');assert.ok(process.env.SUPABASE_STORAGE_KEY&&process.env.JOBS_DATABASE_URL&&process.env.INVITATION_TOKEN_SECRET,'Missing staging server configuration');}
+const DOMAIN=hosted?'staging.demo.famsync.test':'demo.famsync.test',PASSWORD=hosted?('Demo!'+randomBytes(18).toString('base64url')):'FamSync-demo-2026!';
+const DB=hosted?process.env.JOBS_DATABASE_URL:'postgresql://supabase_admin:famsync-local-admin@127.0.0.1:55432/postgres';
+const credentialFile=new URL('../.env.staging-demo.local',import.meta.url);
+const authHeaders=hosted?{apikey:process.env.SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'}:{'Content-Type':'application/json'};
+const adminHeaders=hosted?{apikey:process.env.SUPABASE_STORAGE_KEY,Authorization:'Bearer '+process.env.SUPABASE_STORAGE_KEY,'Content-Type':'application/json'}:{};
 const people={
  emily:{first:'Emily',last:'Carter',bio:'Product manager, family organizer, and keeper of the shared calendar.'},
  michael:{first:'Michael',last:'Carter',bio:'Civil engineer. Handles bills, the cars, and the Saturday Costco run.'},
@@ -33,25 +41,35 @@ async function api(who,method,path,body,expect=[200,201]){const headers={Authori
  if(!(Array.isArray(expect)?expect:[expect]).includes(r.status))throw Error(method+' '+path+' as '+who+' → '+r.status+' '+JSON.stringify(data));return data;}
 const step=t=>console.log('✓ '+t);
 
-const admin=new pg.Client({connectionString:DB});await admin.connect();
+const admin=new pg.Client({connectionString:DB,connectionTimeoutMillis:15000});await admin.connect();
 try{
  // 1. Remove an earlier demo (families first, so their records cascade), then recreate the accounts.
- const old=(await admin.query('select id from auth.users where email like $1',['%@'+DOMAIN])).rows.map(r=>r.id);
+ let old=[];
+ if(hosted){
+  // Hosted runs never delete or replace accounts/families, and only target this staging project.
+  const response=await fetch(AUTH+'/admin/users?per_page=1000',{headers:adminHeaders});assert.ok(response.ok,'Auth admin access failed: '+response.status);
+  const existing=await response.json();assert.ok(!(existing.users??[]).some(u=>u.email?.endsWith('@'+DOMAIN)),'Staging demo accounts already exist; refusing to overwrite them.');
+  await writeFile(credentialFile,'DEMO_PASSWORD='+PASSWORD+'\nDEMO_OWNER_EMAIL=emily@'+DOMAIN+'\n',{flag:'wx',mode:0o600});
+ }else old=(await admin.query('select id from auth.users where email like $1',['%@'+DOMAIN])).rows.map(r=>r.id);
  if(old.length){await admin.query('delete from app.families where id in (select family_id from app.family_memberships where user_id=any($1))',[old]);
   await admin.query('delete from auth.users where id=any($1)',[old]);step('Removed the previous demo ('+old.length+' accounts)');}
  for(const [k,p] of Object.entries(people)){
-  const r=await fetch(AUTH+'/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:p.email,password:PASSWORD})});assert.ok(r.ok,'signup '+p.email+' '+r.status);
-  await admin.query('update auth.users set email_confirmed_at=now() where email=$1',[p.email]);
-  const t=await (await fetch(AUTH+'/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:p.email,password:PASSWORD})})).json();
+  const r=await fetch(AUTH+(hosted?'/admin/users':'/signup'),{method:'POST',headers:hosted?adminHeaders:authHeaders,body:JSON.stringify({email:p.email,password:PASSWORD,...(hosted?{email_confirm:true,user_metadata:{demo:true}}:{})})});assert.ok(r.ok,'create demo account '+p.email+' '+r.status);
+  if(!hosted)await admin.query('update auth.users set email_confirmed_at=now() where email=$1',[p.email]);
+  const t=await (await fetch(AUTH+'/token?grant_type=password',{method:'POST',headers:authHeaders,body:JSON.stringify({email:p.email,password:PASSWORD})})).json();
   assert.ok(t.access_token,'sign-in '+p.email);tokens[k]=t.access_token;p.id=t.user.id;
-  await api(k,'PUT','/me/profile',{firstName:p.first,lastName:p.last,bio:p.bio});}
+  if(hosted)await appendFile(credentialFile,'DEMO_USER_'+k.toUpperCase()+'='+p.id+'\n');
+  await api(k,'PUT','/me/profile',{firstName:p.first,lastName:p.last,bio:(hosted?'Fictional staging demo. ':'')+p.bio});}
  step('Created and confirmed 5 accounts with profiles');
 
  // 2. Family and accepted invitations.
- const fam=await api('emily','POST','/families',{name:'The Carter Family',timeZone:ZONE});const F='/families/'+fam.id;ids.family=fam.id;
+ const fam=await api('emily','POST','/families',{name:hosted?'The Carter Family (Staging Demo)':'The Carter Family',timeZone:ZONE});const F='/families/'+fam.id;ids.family=fam.id;
+ if(hosted)await appendFile(credentialFile,'DEMO_FAMILY_ID='+fam.id+'\n');
  for(const k of ['michael','jake','lily','linda']){const inv=await api('emily','POST',F+'/invitations',{email:people[k].email});
-  const {rows:[row]}=await admin.query('select delivery_attempt from app.family_invitations where id=$1',[inv.id]);
-  await api(k,'POST','/invitations/accept',{token:invitationToken(row.delivery_attempt)});}
+  const {rows:[row]}=hosted?await admin.query("select payload->>'attempt' as delivery_attempt from app.outbox where kind='invitation.email' and payload->>'invitationId'=$1",[inv.id]):await admin.query('select delivery_attempt from app.family_invitations where id=$1',[inv.id]);
+  assert.ok(row?.delivery_attempt,'Invitation delivery attempt not found');
+  await api(k,'POST','/invitations/accept',{token:invitationToken(row.delivery_attempt)});
+  if(hosted)await admin.query("update app.outbox set status='done',finished_at=now() where kind='invitation.email' and payload->>'invitationId'=$1 and family_id=$2",[inv.id,fam.id]);}
  const U=k=>people[k].id;step('Family "The Carter Family" (America/Chicago) with 4 accepted invitations');
 
  // 3. Calendar.
@@ -168,5 +186,5 @@ try{
  await upload('jake',tripF,'ski-trip-last-winter.jpg','image/jpeg',photo);
  step('4 folders (selected, family, conversation) with 6 files');
 
- console.log('\nDemo ready. Owner: '+people.emily.email+'. Members: '+['michael','jake','lily','linda'].map(k=>people[k].email).join(', ')+'. Password: docs/demo-accounts.md.');
+ console.log('\nDemo ready. Owner: '+people.emily.email+'. Members: '+['michael','jake','lily','linda'].map(k=>people[k].email).join(', ')+'. Password: '+(hosted?'.env.staging-demo.local':'docs/demo-accounts.md')+'.');
 }finally{await admin.end();}

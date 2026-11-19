@@ -1,6 +1,32 @@
-# Demo accounts (local only)
+# Demo accounts
 
-Synthetic accounts for demos on the local Docker stack. They do not exist on staging or production.
+Fictional family data for local and staging demos. The two environments use separate accounts.
+
+## Staging demo
+
+The hosted demo is separate from the local accounts below. Sign in at https://famsync.goppopi.com/sign-in/.
+
+| Person | Role | Staging email |
+|---|---|---|
+| Emily Carter | Family owner; primary demo login | `emily@staging.demo.famsync.test` |
+| Michael Carter | Member | `michael@staging.demo.famsync.test` |
+| Jake Carter | Member | `jake@staging.demo.famsync.test` |
+| Lily Carter | Member | `lily@staging.demo.famsync.test` |
+| Linda Brooks | Member | `linda@staging.demo.famsync.test` |
+
+These are fictional, confirmed accounts in **The Carter Family (Staging Demo)**. Dates are relative to the seed day in America/Chicago. They share a generated demo password kept in the Git-ignored `.env.staging-demo.local` file and provided to the staging owner, rather than committed to this document. Demo email addresses do not receive mail.
+
+The hosted seed creates confirmed users through Supabase's admin API without changing the project's email-confirmation settings. It uses the application API for profiles and family content, and the existing restricted jobs database login to resolve synthetic invitation attempts. It marks those demo invitation emails done without sending them.
+
+To create this demo on the explicitly allowed staging project, export the service environment privately from Render, set `NODE_EXTRA_CA_CERTS` to the absolute path of `apps/api/certs/supabase-ca.crt`, then run:
+
+```powershell
+node --env-file='C:\path\to\private-render-export.env' scripts/seed-demo.mjs --staging
+```
+
+Hosted mode refuses existing staging demo accounts or an existing credential file; it does not delete or replace staging data. The local reset behavior below only runs without `--staging`.
+
+## Local accounts
 
 | Person | Role | Email |
 |---|---|---|

@@ -25,7 +25,11 @@ Verified on 19 November 2026 (Asia/Dhaka).
 - Render's `WEB_ORIGINS` and `INVITATION_WEB_ORIGIN` are set to the website origin. The readiness endpoint returned the matching `Access-Control-Allow-Origin` header.
 - Supabase Auth Site URL is the website origin; its redirect allowlist contains `https://famsync.goppopi.com/auth/callback/**`.
 
-## Still required for the complete staging application
+## Demo access
+
+The hosted Carter family demo is seeded with five confirmed fictional accounts, 13 calendar events, 16 tasks, four recurring chores, six goals, three channels, two direct conversations, and six files across four folders. The owner login `emily@staging.demo.famsync.test` and the populated Today dashboard were verified in the hosted browser. See `demo-accounts.md` for the other personas. The generated shared demo password is kept only in the Git-ignored `.env.staging-demo.local` file and handed to the staging owner.
+
+## Remaining integrations
 
 - Sign in to Inngest, configure its event/signing keys in Render, set `INNGEST_SERVE_ORIGIN` to the API origin, and sync `/api/inngest`.
 - Sign in to Resend, configure its sending key and sender in Render, and configure Supabase Auth SMTP.
