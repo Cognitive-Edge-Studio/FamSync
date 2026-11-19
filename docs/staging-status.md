@@ -17,6 +17,12 @@ Verified on 19 November 2026 (Asia/Dhaka).
 
 ## Frontend
 
+- Latest frontend release: `b27c150`, published 19 November 2026. Includes the updated Today agenda and family progress chart, default-family selection, realistic photos, and the product tour video.
+- Latest artifact: `output/famsync-web-staging-20261119-update.zip`, 50,581,580 bytes, 293 entries. Build ID: `9Q-a8saJUdvllxpKqRJlq`.
+- Both homepage and Today HTML matched the local production build by SHA-256 after extraction. New photo, video, and caption URLs returned HTTP 200; API readiness and CORS checks passed.
+- The owner demo login and populated Today dashboard were verified after publication. Selecting Jake Carter showed his one visible goal at 75% and corresponding task counts; no browser console errors were observed.
+- This release changed no API code or migrations and did not reseed the hosted database. Changes to the seed script apply to future seed runs, not existing demo records.
+
 - Website: https://famsync.goppopi.com
 - The static Next.js production build exported all 31 routes. The deployment ZIP has 278 entries, includes `.htaccess`, and excludes environment files.
 - Build artifact: `output/famsync-web-staging.zip` (generated locally, not committed).
