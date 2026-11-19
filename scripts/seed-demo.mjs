@@ -25,6 +25,8 @@ const people={
  linda:{first:'Linda',last:'Brooks',bio:'Grandma. Retired schoolteacher who hosts Sunday dinner.'},
 };
 for(const [k,p] of Object.entries(people))p.email=k+'@'+DOMAIN;
+if(hosted)people.emily.email='emily@famsync.test';
+for(const [k,p] of Object.entries(people))p.password=hosted&&k==='emily'?(process.env.DEMO_OWNER_PASSWORD??PASSWORD):PASSWORD;
 
 // ---- dates relative to "today" in the family time zone ----
 const [Y,M,D]=new Intl.DateTimeFormat('en-CA',{timeZone:ZONE,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()).split('-').map(Number);
@@ -48,15 +50,15 @@ try{
  if(hosted){
   // Hosted runs never delete or replace accounts/families, and only target this staging project.
   const response=await fetch(AUTH+'/admin/users?per_page=1000',{headers:adminHeaders});assert.ok(response.ok,'Auth admin access failed: '+response.status);
-  const existing=await response.json();assert.ok(!(existing.users??[]).some(u=>u.email?.endsWith('@'+DOMAIN)),'Staging demo accounts already exist; refusing to overwrite them.');
-  await writeFile(credentialFile,'DEMO_PASSWORD='+PASSWORD+'\nDEMO_OWNER_EMAIL=emily@'+DOMAIN+'\n',{flag:'wx',mode:0o600});
+  const existing=await response.json();assert.ok(!(existing.users??[]).some(u=>u.email===people.emily.email||u.email?.endsWith('@'+DOMAIN)),'Staging demo accounts already exist; refusing to overwrite them.');
+  await writeFile(credentialFile,'DEMO_PASSWORD='+PASSWORD+'\nDEMO_OWNER_EMAIL='+people.emily.email+'\nDEMO_OWNER_PASSWORD='+people.emily.password+'\n',{flag:'wx',mode:0o600});
  }else old=(await admin.query('select id from auth.users where email like $1',['%@'+DOMAIN])).rows.map(r=>r.id);
  if(old.length){await admin.query('delete from app.families where id in (select family_id from app.family_memberships where user_id=any($1))',[old]);
   await admin.query('delete from auth.users where id=any($1)',[old]);step('Removed the previous demo ('+old.length+' accounts)');}
  for(const [k,p] of Object.entries(people)){
-  const r=await fetch(AUTH+(hosted?'/admin/users':'/signup'),{method:'POST',headers:hosted?adminHeaders:authHeaders,body:JSON.stringify({email:p.email,password:PASSWORD,...(hosted?{email_confirm:true,user_metadata:{demo:true}}:{})})});assert.ok(r.ok,'create demo account '+p.email+' '+r.status);
+  const r=await fetch(AUTH+(hosted?'/admin/users':'/signup'),{method:'POST',headers:hosted?adminHeaders:authHeaders,body:JSON.stringify({email:p.email,password:p.password,...(hosted?{email_confirm:true,user_metadata:{demo:true}}:{})})});assert.ok(r.ok,'create demo account '+p.email+' '+r.status);
   if(!hosted)await admin.query('update auth.users set email_confirmed_at=now() where email=$1',[p.email]);
-  const t=await (await fetch(AUTH+'/token?grant_type=password',{method:'POST',headers:authHeaders,body:JSON.stringify({email:p.email,password:PASSWORD})})).json();
+  const t=await (await fetch(AUTH+'/token?grant_type=password',{method:'POST',headers:authHeaders,body:JSON.stringify({email:p.email,password:p.password})})).json();
   assert.ok(t.access_token,'sign-in '+p.email);tokens[k]=t.access_token;p.id=t.user.id;
   if(hosted)await appendFile(credentialFile,'DEMO_USER_'+k.toUpperCase()+'='+p.id+'\n');
   await api(k,'PUT','/me/profile',{firstName:p.first,lastName:p.last,bio:(hosted?'Fictional staging demo. ':'')+p.bio});}

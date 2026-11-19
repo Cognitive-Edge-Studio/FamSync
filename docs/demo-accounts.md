@@ -8,13 +8,13 @@ The hosted demo is separate from the local accounts below. Sign in at https://fa
 
 | Person | Role | Staging email |
 |---|---|---|
-| Emily Carter | Family owner; primary demo login | `emily@staging.demo.famsync.test` |
+| Emily Carter | Family owner; primary demo login | `emily@famsync.test` |
 | Michael Carter | Member | `michael@staging.demo.famsync.test` |
 | Jake Carter | Member | `jake@staging.demo.famsync.test` |
 | Lily Carter | Member | `lily@staging.demo.famsync.test` |
 | Linda Brooks | Member | `linda@staging.demo.famsync.test` |
 
-These are fictional, confirmed accounts in **The Carter Family (Staging Demo)**. Dates are relative to the seed day in America/Chicago. They share a generated demo password kept in the Git-ignored `.env.staging-demo.local` file and provided to the staging owner, rather than committed to this document. Demo email addresses do not receive mail.
+These are fictional, confirmed accounts in **The Carter Family (Staging Demo)**. Dates are relative to the seed day in America/Chicago. Passwords are kept in the Git-ignored `.env.staging-demo.local` file and provided to the staging owner, rather than committed to this document. Emily uses `DEMO_OWNER_PASSWORD`; the other four personas use `DEMO_PASSWORD`. Demo email addresses do not receive mail. A new hosted seed accepts an optional `DEMO_OWNER_PASSWORD` environment variable; otherwise it generates a password.
 
 The hosted seed creates confirmed users through Supabase's admin API without changing the project's email-confirmation settings. It uses the application API for profiles and family content, and the existing restricted jobs database login to resolve synthetic invitation attempts. It marks those demo invitation emails done without sending them.
 

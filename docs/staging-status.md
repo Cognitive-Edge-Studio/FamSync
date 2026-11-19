@@ -27,7 +27,7 @@ Verified on 19 November 2026 (Asia/Dhaka).
 
 ## Demo access
 
-The hosted Carter family demo is seeded with five confirmed fictional accounts, 13 calendar events, 16 tasks, four recurring chores, six goals, three channels, two direct conversations, and six files across four folders. The owner login `emily@staging.demo.famsync.test` and the populated Today dashboard were verified in the hosted browser. See `demo-accounts.md` for the other personas. The generated shared demo password is kept only in the Git-ignored `.env.staging-demo.local` file and handed to the staging owner.
+The hosted Carter family demo is seeded with five confirmed fictional accounts, 13 calendar events, 16 tasks, four recurring chores, six goals, three channels, two direct conversations, and six files across four folders. The owner login is `emily@famsync.test`; its updated credentials were verified against Supabase Auth and the family API, preserving the same user ID and seeded family. The populated Today dashboard was also verified in the hosted browser. See `demo-accounts.md` for the other personas. Demo passwords are kept only in the Git-ignored `.env.staging-demo.local` file and handed to the staging owner.
 
 ## Remaining integrations
 
