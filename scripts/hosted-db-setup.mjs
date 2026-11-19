@@ -19,6 +19,10 @@ const local=/sslmode=disable/.test(url),db=new pg.Client({connectionString:url.r
 try{await db.connect();}
 catch(e){console.error('Database connection failed ('+(e.code||'connection error')+'). Check the database password, session pooler host, and network connection.');process.exit(1);}
 try{
+ if(process.argv.includes('--fresh')){
+  const {rows:[existing]}=await db.query("select exists(select 1 from pg_namespace where nspname in ('app','famsync_meta')) or exists(select 1 from pg_roles where rolname in ('famsync_api','famsync_jobs')) as present");
+  if(existing.present){console.error('Fresh setup stopped: this database already contains FamSync objects. Use the normal setup command to resume; nothing was deleted.');await db.end();process.exit(1);}
+ }
  await db.query('create schema if not exists famsync_meta; create table if not exists famsync_meta.migrations (name text primary key); revoke all on schema famsync_meta from public;');
  const done=new Set((await db.query('select name from famsync_meta.migrations')).rows.map(r=>r.name));
  let applied=0;

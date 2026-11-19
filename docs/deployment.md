@@ -36,6 +36,8 @@ Values written as `<LIKE-THIS>` come from the step that creates them. Keep every
    ```
    Keep the two application passwords in your password manager for the Render settings. The launcher does not save them to disk, and it restores the previous process environment after running.
 
+   For a **fresh, empty project**, add `-Fresh`. This mode asks only for the Supabase admin password and generates cryptographically random application passwords. It stops if FamSync schemas or roles already exist; it never drops existing data. On success it saves `DATABASE_URL` and `JOBS_DATABASE_URL` to the Git-ignored `.env.hosted-db.local` file for Render. Keep that file private. It does not store the admin password and is never overwritten by another fresh setup.
+
    You can rerun it safely; migrations that already ran are skipped. If one fails, it stops and names the file. This script has only been rehearsed locally, so this first hosted run is its real test.
 5. **Authentication → URL Configuration:** set **Site URL** to `https://<SITE>` and add `https://<SITE>/auth/callback/**` to the redirect URLs.
 6. **Authentication → Emails → SMTP settings:** use Resend's SMTP (step 4) so sign-up and recovery emails aren't held to Supabase's small built-in limit.
