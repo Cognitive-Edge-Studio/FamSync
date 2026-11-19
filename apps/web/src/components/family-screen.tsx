@@ -5,6 +5,7 @@ import { ArrowLeft, MailPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { getBrowserApi } from "@/lib/browser-auth";
+import {defaultFamily} from '@/lib/default-family';
 import { Field, FormFeedback, inputClass } from "./account-fields";
 import { FamilyMembers, FamilySettings } from "./family-management";
 import { familyError, FamilyLayout, familyPath, FamilySession } from "./family-session";
@@ -185,7 +186,7 @@ function Workspace({ accessToken, userId }: { accessToken: string; userId: strin
           if (controller.signal.aborted) return;
           if (!families) throw new Error("Families unavailable");
           const wanted = new URL(window.location.href).searchParams.get("family");
-          const chosen = families.find(({ id }) => id === wanted) ?? families[0];
+          const chosen = families.find(({ id }) => id === wanted) ?? defaultFamily(families,userId);
           if (!chosen) { window.location.replace("/families/"); return; }
           familyId = chosen.id;
           window.history.replaceState(window.history.state, "", familyPath(familyId));

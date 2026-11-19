@@ -24,7 +24,7 @@ export function useTodayTasks(accessToken: string, familyId: string) {
   const status = useTaskStatus(accessToken, familyId, refresh);
   const summary = useTaskSummary(accessToken, familyId, scope, revision);
   const list = useTaskList(accessToken, familyId, { due: "today", ...(scope === "mine" ? { scope: "mine" } : {}) }, revision);
-  return { scope, setScope, status, summary, list };
+  return { scope, setScope, status, summary, list, revision };
 }
 
 export function TodayTasks({ familyId, state }: { familyId: string; state: ReturnType<typeof useTodayTasks> }) {

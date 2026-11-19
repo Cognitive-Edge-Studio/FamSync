@@ -2,7 +2,7 @@
 
 import type { components } from "@famsync/api-client";
 import type { Session } from "@supabase/auth-js";
-import { ArrowRight, CalendarDays, Clock3, Users } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { ModuleIcon, type ModuleIconName } from "./ui/module-icon";
 import { audienceLabels, calendarPath, dayInZone, eventDays, eventKey, eventPath, eventTime, formatDay, shiftDay, type EventSummary } from "@/lib/calendar-date";
 import { AppShell } from "./app-shell";
@@ -18,6 +18,7 @@ import { EmptyState } from "./ui/empty-state";
 import { PageHeader } from "./ui/page-header";
 import { FadeIn } from "./ui/motion";
 import { cn } from "@/lib/utils";
+import { FamilyProgressCard } from "./family-progress-card";
 
 type Family = components["schemas"]["FamilyDto"];
 
@@ -72,7 +73,7 @@ function EventRow({ event, familyId, timeZone, day }: { event: EventSummary; fam
 
 function TodayDashboard({ family, session }: { family: Family; session: Session }) {
   const today = dayInZone(new Date(), family.timeZone);
-  const weekEnd = shiftDay(today, 7);
+  const weekEnd = shiftDay(today, 8);
   const { range, error, retry } = useEventRange(session.access_token, family.id, today, weekEnd);
   const tasks = useTodayTasks(session.access_token, family.id);
   const summary = tasks.summary.summary;
@@ -81,7 +82,7 @@ function TodayDashboard({ family, session }: { family: Family; session: Session 
   const todayEvents = datedEvents
     .filter(({ first, last }) => first <= today && today <= last)
     .map(({ event }) => event);
-  const upcoming = Array.from({ length: 6 }, (_, index) => shiftDay(today, index + 1))
+  const upcoming = Array.from({ length: 7 }, (_, index) => shiftDay(today, index + 1))
     .map((date) => ({
       date,
       events: datedEvents
@@ -90,27 +91,30 @@ function TodayDashboard({ family, session }: { family: Family; session: Session 
     }))
     .filter(({ events }) => events.length > 0);
 
+  const upcomingCount = new Set(upcoming.flatMap(({ events }) => events.map(eventKey))).size;
+
   return (
     <div className="grid gap-5">
       <PageHeader className="mb-0" title="Today" description={formatDay(today)} />
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-        <SummaryCard index={0} label="Today" value={String(todayEvents.length)} note="events on your schedule" icon="calendar" tone="sky" />
-        <SummaryCard index={1} label="Next 7 days" value={String(datedEvents.length)} note="events coming up" icon="schedule" tone="lavender" />
-        <SummaryCard index={2} label="Active tasks" value={summary ? String(summary.todo + summary.inProgress) : "–"}
-          note={tasks.scope === "mine" ? "for you, not yet done" : "for the family, not yet done"} icon="tasks" tone="sage" />
-        <SummaryCard index={3} label="Overdue tasks" value={summary ? String(summary.overdue) : "–"}
-          note={tasks.scope === "mine" ? "yours past their due time" : "past their due time"} icon="overdue" tone={summary?.overdue ? "rose" : "peach"} />
+        <SummaryCard index={0} label="Today’s plans" value={range && !error ? String(todayEvents.length) : "–"} note={error ? "schedule unavailable" : "events on your schedule"} icon="calendar" tone="sky" />
+        <SummaryCard index={1} label="Next 7 days" value={range && !error ? String(upcomingCount) : "–"} note={error ? "schedule unavailable" : "events after today"} icon="schedule" tone="lavender" />
+        <SummaryCard index={2} label={tasks.scope === "mine" ? "My open tasks" : "Family open tasks"} value={summary && !tasks.summary.error ? String(summary.todo + summary.inProgress) : "–"}
+          note={tasks.summary.error ? "task totals unavailable" : tasks.scope === "mine" ? "for you, not yet done" : "for the family, not yet done"} icon="tasks" tone="sage" />
+        <SummaryCard index={3} label={tasks.scope === "mine" ? "My overdue tasks" : "Family overdue tasks"} value={summary && !tasks.summary.error ? String(summary.overdue) : "–"}
+          note={tasks.summary.error ? "task totals unavailable" : tasks.scope === "mine" ? "yours past their due time" : "past their due time"} icon="overdue" tone={summary?.overdue ? "rose" : "peach"} />
       </div>
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(18rem,1fr)]">
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <FamilyProgressCard familyId={family.id} accessToken={session.access_token} today={today} timeZone={timeZone} taskRevision={tasks.revision} />
         <Card aria-labelledby="today-schedule-title">
           <CardHeader>
             <div>
-              <CardTitle id="today-schedule-title">On today’s schedule</CardTitle>
+              <CardTitle id="today-schedule-title">Family agenda</CardTitle>
               <CardDescription>{formatDay(today)}</CardDescription>
             </div>
-            {range && <Badge tone="sky">{todayEvents.length} {todayEvents.length === 1 ? "event" : "events"}</Badge>}
+            {range && <Badge tone="sky">{todayEvents.length} today</Badge>}
           </CardHeader>
           {error ? (
             <div className="flex flex-wrap items-center gap-3">
@@ -126,21 +130,13 @@ function TodayDashboard({ family, session }: { family: Family; session: Session 
               {todayEvents.map((event) => <EventRow key={eventKey(event)} event={event} familyId={family.id} timeZone={timeZone} day={today} />)}
             </ul>
           )}
-        </Card>
-
-        <Card aria-labelledby="upcoming-title">
-          <CardHeader>
-            <div>
-              <CardTitle id="upcoming-title">Coming up</CardTitle>
-              <CardDescription>Your schedule over the next seven days</CardDescription>
-            </div>
-          </CardHeader>
+          <div className="mt-5 mb-3 border-t border-border pt-4"><h3 id="upcoming-title" className="text-sm font-semibold">Next 7 days</h3><p className="mt-1 text-xs text-muted-foreground">Starting tomorrow</p></div>
           {error ? (
             <FormFeedback note="Upcoming events are unavailable until your schedule loads." />
           ) : !range ? (
             <FormFeedback note="Loading upcoming events…" />
           ) : upcoming.length === 0 ? (
-            <p className="rounded-xl bg-muted px-4 py-5 text-sm text-muted-foreground">No more events are planned this week.</p>
+            <p className="rounded-xl bg-muted px-4 py-5 text-sm text-muted-foreground">No events planned for the next seven days.</p>
           ) : (
             <div className="grid gap-4">
               {upcoming.map(({ date, events }) => (

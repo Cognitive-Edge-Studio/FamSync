@@ -42,7 +42,7 @@ Password for every demo account: `FamSync-demo-2026!`
 
 One family, **The Carter Family** (America/Chicago), with dates relative to the day you run it:
 
-- **Calendar:** weekly soccer practice and piano lessons, Sunday dinner at Grandma's, Thanksgiving, a parent–teacher conference and a cardiology visit shared with selected members, a ski trip, a private monthly book club, two appointments today, a past birthday, and an anniversary dinner only Emily and Michael can see. One practice is cancelled and one lesson moved.
+- **Calendar:** weekly soccer practice and piano lessons, Sunday dinner at Grandma's, Christmas shopping with Grandma, a parent–teacher conference and a cardiology visit shared with selected members, a ski trip, a private monthly book club, two appointments today, a past birthday, and an anniversary dinner only Emily and Michael can see. One practice is cancelled and one lesson moved.
 - **Tasks and chores:** 16 tasks across members (event-linked, private, selected-audience, overdue, in progress and completed) and 4 repeating chores.
 - **Goals:** a ski-trip checklist with linked tasks, reading, piano and savings progress, a manual goal and a completed goal.
 - **Conversations:** Household, Ski trip and a parents-only School run channel, with replies and a mention, plus two direct conversations.

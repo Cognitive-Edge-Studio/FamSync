@@ -73,7 +73,7 @@ Messages are saved as plain text, with one-level replies and five reversible rea
 
 Supabase Realtime listens locally on port `55437`. Copy the Realtime values from both environment examples if your local files predate Channels. `NEXT_PUBLIC_SUPABASE_REALTIME_URL` and `NEXT_PUBLIC_SUPABASE_REALTIME_KEY` configure the browser; keeping the latter separate avoids changing the direct local Auth service's CORS behavior. The outbox worker uses `SUPABASE_REALTIME_URL`, `SUPABASE_REALTIME_KEY`, and the local-only `SUPABASE_REALTIME_HOST`. It sends empty refresh signals to private topics for current participants. NestJS supplies all message content and enforces current access on every request. Reconnect, browser focus, and a periodic check recover missed changes; **Refresh conversation** is available manually.
 
-The local preview verified in ChatGPT's browser is available at `http://127.0.0.1:3013/channels/` while `node output/playwright/start-s13-preview.mjs` is running. That verification build points to the separate API on `4013`. Normal local development uses the ports in the environment examples.
+For the local browser preview, run `npm run build:preview` and then `npm run preview:local`. Open `http://127.0.0.1:3013/`. This preview uses local Auth and API `4016`, and serves `apps/web/out-local`. Hosted builds still export to `apps/web/out`, so preparing a staging deployment does not replace the local preview. Re-run `build:preview` after frontend changes. Normal local development uses the ports in the environment examples.
 
 ## Reminders and notifications
 

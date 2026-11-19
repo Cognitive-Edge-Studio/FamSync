@@ -3,12 +3,13 @@ import { ModuleIcon } from "./ui/module-icon";
 import { Avatar } from "./ui/avatar";
 
 
-import { ArrowRight, ArrowUpRight, Bell, CalendarDays, Check, FileText, Folder, House, Image as ImageIcon, Lock, Menu, MessageCircle, Plus, Target, Users, X } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Bell, CalendarDays, Check, FileText, Folder, House, Image as ImageIcon, Lock, Menu, MessageCircle, Play, Plus, Target, Users, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { ease, MotionProvider } from "./ui/motion";
 import { ButtonLink } from "./ui/button";
 import { ThemeMenu } from "./theme-menu";
+import {familyPhotos} from '@/lib/family-photos';
 
 // Public landing page. Style follows a soft, editorial look: warm stone canvas, large bold headings,
 // rounded white panels, numbered steps and small illustrative product cards. Every card shows
@@ -332,6 +333,31 @@ function Feature({ id, eyebrow, title, text, points, demo, flip = false }: { id?
   );
 }
 
+// Product tour: the video loads nothing until someone presses play; the large button hides once it starts.
+function TourVideo() {
+  const video = useRef<HTMLVideoElement>(null);
+  const [started, setStarted] = useState(false);
+  return (
+    <figure className="relative mt-8 overflow-hidden rounded-[2rem] border border-border bg-panel shadow-[0_30px_80px_-40px_rgba(36,36,36,0.45)]">
+      <video ref={video} controls={started} playsInline preload="none" poster="/video/famsync-tour-poster.jpg" width={1920} height={1080}
+        className="aspect-video w-full bg-muted" aria-describedby="tour-note" onPlay={() => setStarted(true)}>
+        <source src="/video/famsync-tour.mp4" type="video/mp4" />
+        <track kind="captions" src="/video/famsync-tour.en.vtt" srcLang="en" label="English" />
+        <a href="/video/famsync-tour.mp4">Download the FamSync tour (MP4)</a>
+      </video>
+      {!started && (
+        <button type="button" onClick={() => { setStarted(true); void video.current?.play(); }} aria-label="Play the FamSync product tour"
+          className="group absolute inset-0 grid place-items-center bg-black/10 transition-colors hover:bg-black/20 focus-visible:outline-none">
+          <span className="flex items-center gap-3 rounded-full bg-panel/95 py-3 pr-6 pl-3 text-base font-semibold shadow-lg ring-1 ring-border transition-transform group-hover:scale-105 group-focus-visible:ring-2 group-focus-visible:ring-ring">
+            <span className="grid size-11 place-items-center rounded-full bg-primary text-primary-foreground"><Play className="size-5 translate-x-px fill-current" aria-hidden="true" /></span>
+            Play the tour
+          </span>
+        </button>
+      )}
+    </figure>
+  );
+}
+
 export function LandingPage() {
   const [signedIn, setSignedIn] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -387,8 +413,8 @@ export function LandingPage() {
           {/* Hero */}
           <section className="pt-4 pb-14 sm:pb-20">
             <motion.div initial={{ scale: 0.985 }} animate={{ scale: 1 }} transition={{ duration: 0.8, ease }} className="overflow-hidden rounded-[2rem] bg-accent">
-              <img data-dim src="/landing/hero-1600.webp" srcSet="/landing/hero-900.webp 900w, /landing/hero-1600.webp 1600w" sizes="(min-width: 1152px) 1104px, 100vw"
-                width={1600} height={893} alt="A family planning their week together around a big calendar and checklist, with two plush companions" className="h-auto w-full" fetchPriority="high" />
+              <img src={familyPhotos.planning.wide} srcSet={`${familyPhotos.planning.src} 640w, ${familyPhotos.planning.wide} 1536w`} sizes="(min-width: 1152px) 1104px, 100vw"
+                width={1536} height={1024} alt={familyPhotos.planning.alt} className="aspect-[16/9] w-full object-cover object-top" fetchPriority="high" />
             </motion.div>
             <div className="mx-auto mt-10 max-w-3xl text-center">
               <motion.h1 initial={{ y: 16 }} animate={{ y: 0 }} transition={{ duration: 0.6, ease, delay: 0.15 }}
@@ -400,6 +426,7 @@ export function LandingPage() {
               <motion.div initial={{ y: 10 }} animate={{ y: 0 }} transition={{ duration: 0.6, ease, delay: 0.35 }} className="mt-8 flex flex-wrap justify-center gap-3">
                 <ButtonLink href={primary.href} className="h-12 gap-2 rounded-full px-6 text-base">{primary.label}<ArrowRight aria-hidden="true" /></ButtonLink>
                 <ButtonLink href="#how" variant="outline" className="h-12 rounded-full bg-panel px-6 text-base">See how it works</ButtonLink>
+                <ButtonLink href="#tour" variant="ghost" className="h-12 gap-2 rounded-full px-5 text-base"><Play aria-hidden="true" />Watch the tour</ButtonLink>
               </motion.div>
               <p className="mt-6 text-sm text-muted-foreground">Your schedule. Your people. Your say.</p>
             </div>
@@ -431,6 +458,28 @@ export function LandingPage() {
               </div>
             </section>
           </Reveal>
+
+          {/* Product tour video. "Ask Family Base" near the end is a concept, so the note below says so. */}
+          <section id="tour" aria-labelledby="tour-title" className="scroll-mt-24 pt-14 sm:pt-20">
+            <Reveal>
+              <div className="mx-auto max-w-2xl text-center">
+                <Eyebrow>Product tour</Eyebrow>
+                <h2 id="tour-title" className="mt-3 text-[clamp(2rem,4.4vw,3.4rem)] leading-[1.04] font-bold tracking-[-0.035em] text-balance">See FamSync in under three minutes</h2>
+                <p className="mt-4 text-lg leading-relaxed text-muted-foreground">Plans, chores, conversations and files, then Family Base: your family as a living universe.</p>
+              </div>
+              <TourVideo />
+              <p id="tour-note" className="mt-4 text-center text-sm text-muted-foreground">2:46 with narration and captions. “Ask Family Base”, near the end, is a preview of a feature we’re building.</p>
+            </Reveal>
+          </section>
+
+          <section aria-labelledby="family-moments-title" className="pt-14 sm:pt-20">
+            <Reveal><Eyebrow>Life together</Eyebrow><h2 id="family-moments-title" className="mt-3 max-w-2xl text-3xl leading-tight font-bold tracking-tight sm:text-4xl">For the moments you plan.<br/>And the ones you remember.</h2><p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">From Christmas morning to a mountain road trip, keep the plans together so you can enjoy being there.</p></Reveal>
+            <div className="mt-8 grid gap-5 sm:grid-cols-3">{[
+              {photo:familyPhotos.christmas,title:'Christmas morning'},
+              {photo:familyPhotos.roadTrip,title:'On the road together'},
+              {photo:familyPhotos.birthday,title:'Another year, together'},
+            ].map(({photo,title},index)=><Reveal key={title} delay={index*.08}><figure className="overflow-hidden rounded-2xl border border-border bg-panel"><img src={photo.src} alt={photo.alt} width={640} height={427} loading="lazy" className="aspect-[4/3] w-full object-cover"/><figcaption className="p-4 text-sm font-medium">{title}</figcaption></figure></Reveal>)}</div>
+          </section>
 
           {/* How it works */}
           <section id="how" className="scroll-mt-24 py-14 sm:py-24">
@@ -515,7 +564,7 @@ export function LandingPage() {
                     {!signedIn && <ButtonLink href="/sign-in/" variant="outline" className="h-12 rounded-full px-6 text-base">Sign in</ButtonLink>}
                   </div>
                 </div>
-                <img data-dim src="/landing/family-right.webp" alt="A teenager with a soccer ball, a girl holding a plant and a grandmother with a notebook" width={720} height={805} loading="lazy" className="mx-auto h-auto w-full max-w-xs [mask-image:linear-gradient(to_right,transparent,black_22%,black_88%,transparent),linear-gradient(to_bottom,transparent,black_12%)] [mask-composite:intersect] md:mr-6 md:max-w-sm" />
+                <img src={familyPhotos.beach.src} alt={familyPhotos.beach.alt} width={640} height={427} loading="lazy" className="h-full min-h-72 w-full object-cover md:min-h-96" />
               </div>
             </section>
           </Reveal>

@@ -77,14 +77,14 @@ try{
  // 3. Calendar.
  async function event(who,e){const form=new FormData();form.set('event',JSON.stringify({id:id(),note:'',location:'',...e}));const d=await api(who,'POST',F+'/events',form);return d.id??d.event?.id;}
  const tue=next(2,1)-7,sat=next(6,1)-7; // most recent past Tuesday / Saturday, so the series has history
- const nov1=new Date(Date.UTC(Y,10,1)),thanks=new Date(Date.UTC(Y,10,1+(4-nov1.getUTCDay()+7)%7+21)); // 4th Thursday of November
- let tg=Math.round((thanks-Date.UTC(Y,M-1,D))/864e5);if(tg<-20)tg+=364;
+ const nov1=new Date(Date.UTC(Y,10,1)),shopDay=new Date(Date.UTC(Y,10,1+(4-nov1.getUTCDay()+7)%7+21)); // 4th Thursday of November: Christmas shopping day
+ let tg=Math.round((shopDay-Date.UTC(Y,M-1,D))/864e5);if(tg<-20)tg+=364;
  ids.soccer=await event('emily',{title:'Jake — soccer practice',allDay:false,start:at(tue,'16:30'),end:at(tue,'18:00'),location:'Riverside Park, Field 4',note:'Bring water, shin guards and the navy training jersey.',audience:'family',recurrence:{frequency:'weekly',interval:1,until:day(120)},remindMinutes:60,remindAudience:'everyone'});
  ids.piano=await event('emily',{title:'Lily — piano lesson',allDay:false,start:at(sat,'10:00'),end:at(sat,'11:00'),location:'Allegro Music Studio',note:'Practice book: Faber Level 2B.',audience:'family',recurrence:{frequency:'weekly',interval:1,until:day(120)},remindMinutes:60,remindAudience:'everyone'});
  ids.conf=await event('emily',{title:'Parent–teacher conference (Jake)',allDay:false,start:at(2,'09:30'),end:at(2,'10:15'),location:'Lincoln High School, Room 214',note:'Ask about the geometry midterm and next year’s AP courses.',audience:'selected',selectedMemberIds:[U('michael')],remindMinutes:1440,remindAudience:'everyone'});
  ids.doctor=await event('emily',{title:'Grandma — cardiology follow-up',allDay:false,start:at(6,'11:00'),end:at(6,'12:00'),location:'Heart & Vascular Center, Suite 300',note:'Bring the last ECG report and the medication list.',audience:'selected',selectedMemberIds:[U('linda')],remindMinutes:1440,remindAudience:'everyone'});
  ids.dinner=await event('linda',{title:'Sunday dinner at Grandma’s',allDay:false,start:at(next(0),'17:30'),end:at(next(0),'20:00'),location:'Grandma’s house',note:'Pot roast night. Lily is bringing dessert.',audience:'family',recurrence:{frequency:'weekly',interval:1,until:day(60)}});
- ids.thanks=await event('linda',{title:'Thanksgiving at Grandma’s 🦃',allDay:false,start:at(tg,'14:00'),end:at(tg,'19:00'),location:'Grandma’s house',note:'Grandma: turkey. Emily: sides. Michael: pies. Kids: table and cleanup.',audience:'family',remindMinutes:1440,remindAudience:'everyone'});
+ ids.xmas=await event('linda',{title:'Christmas shopping with Grandma 🎄',allDay:false,start:at(tg,'14:00'),end:at(tg,'19:00'),location:'Grandma’s house',note:'Grandma: gift list. Emily: driving. Michael: tree stand and lights. Kids: wrapping paper.',audience:'family',remindMinutes:1440,remindAudience:'everyone'});
  ids.trip=await event('emily',{title:'Winter break ski trip',allDay:true,start:day(30),end:day(34),location:'Pine Ridge Lodge',note:'Morning flight out, rental car to the cabin. Ski school for Lily on day 2.',audience:'family'});
  ids.science=await event('emily',{title:'Lily — school science fair',allDay:true,start:day(9),end:day(10),location:'Westview Middle School gym',note:'Project: water filter from sand and charcoal.',audience:'family'});
  ids.bookclub=await event('emily',{title:'Book club',allDay:false,start:at(next(4,8),'19:30'),end:at(next(4,8),'21:00'),location:'Corner Bookshop café',note:'This month: “Lessons in Chemistry”.',audience:'private',recurrence:{frequency:'monthly',interval:1,until:day(200)}});
@@ -95,7 +95,7 @@ try{
  // Real-world changes: one practice rained out, one piano lesson moved.
  await api('emily','PUT',F+'/events/'+ids.soccer+'/occurrences/'+day(tue+7),{action:'cancel'});
  await api('emily','PUT',F+'/events/'+ids.piano+'/occurrences/'+day(sat+7),{action:'move',start:at(sat+8,'16:00'),end:at(sat+8,'17:00')});
- step('13 events, two of them today: practice, lessons and dinners, appointments, Thanksgiving, a ski trip, a private book club; one practice cancelled, one lesson moved');
+ step('13 events, two of them today: practice, lessons and dinners, appointments, Christmas shopping, a ski trip, a private book club; one practice cancelled, one lesson moved');
 
  // 4. Tasks (assignment, statuses, event links, reminders).
  const tasks={};
@@ -108,8 +108,8 @@ try{
  await task('costco','michael',{title:'Costco run for Sunday dinner',description:'Rotisserie chicken, salad kit, paper towels, sparkling water, coffee beans.',assigneeId:U('michael'),dueDate:day(next(6)),dueTime:'11:00',eventLink:{eventId:ids.dinner,occurrenceDate:day(next(0))},remindMinutes:60});
  await task('meds','emily',{title:'Pick up Grandma’s prescriptions',description:'Amlodipine 5 mg and atorvastatin 10 mg — 30-day supply each.',audience:'selected',selectedMemberIds:[U('linda')],assigneeId:U('emily'),dueDate:day(-2)});
  await task('reg','michael',{title:'Renew car registration',description:'Inspection passed. Renew online and watch for the sticker in the mail.',assigneeId:U('michael'),dueDate:day(10)},'in_progress');
- await task('turkey','linda',{title:'Order the Thanksgiving turkey',description:'14–16 lb fresh turkey, pickup the day before.',assigneeId:U('linda'),dueDate:day(Math.max(1,tg-3)),eventLink:{eventId:ids.thanks}});
- await task('pies','michael',{title:'Bake pies for Thanksgiving',description:'Pecan and pumpkin.',assigneeId:U('michael'),dueDate:day(Math.max(1,tg-1)),eventLink:{eventId:ids.thanks}});
+ await task('tree','linda',{title:'Pick up the Christmas tree',description:'7 ft Fraser fir from the lot on Main Street.',assigneeId:U('linda'),dueDate:day(Math.max(1,tg-3)),eventLink:{eventId:ids.xmas}});
+ await task('cookies','michael',{title:'Bake Christmas cookies',description:'Gingerbread and sugar cookies.',assigneeId:U('michael'),dueDate:day(Math.max(1,tg-1)),eventLink:{eventId:ids.xmas}});
  await task('cabin','emily',{title:'Book the ski cabin',description:'Confirmed: 3 bedrooms, 4 nights, hot tub, 10 minutes to the lifts.',assigneeId:U('emily'),dueDate:day(-5),eventLink:{eventId:ids.trip}},'completed');
  await task('lift','michael',{title:'Buy lift tickets',description:'3-day passes for 4 adults/teens and 1 child. Prices go up next month.',assigneeId:U('michael'),dueDate:day(12),eventLink:{eventId:ids.trip}});
  await task('pack','emily',{title:'Pack ski clothes and goggles',assigneeId:U('lily'),dueDate:day(29),eventLink:{eventId:ids.trip}});

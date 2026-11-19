@@ -8,6 +8,7 @@ import { postAuthPath } from "@/lib/pending-invitation";
 import { AppShell } from "./app-shell";
 import { Field, FormFeedback, inputClass } from "./account-fields";
 import { Button } from "./ui/button";
+import {familyPhotos} from '@/lib/family-photos';
 
 type Mode = "sign-in" | "sign-up" | "recovery";
 
@@ -110,7 +111,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         <div className="hidden flex-col justify-between gap-6 bg-muted p-8 lg:flex">
           <div><p className="text-lg font-semibold">Plan the day together.</p>
             <p className="mt-1 text-sm text-muted-foreground">One calm place for your family’s schedule, tasks, goals and conversations.</p></div>
-          <img data-dim src="/illustrations/family-planning.svg" alt="" className="w-full" />
+          <img src={familyPhotos.planning.src} alt={familyPhotos.planning.alt} width={640} height={427} className="aspect-[4/3] w-full rounded-xl object-cover" />
         </div>
         <div className="p-6 sm:p-10">
         <h1 className="text-xl font-semibold">{text[mode].title}</h1>

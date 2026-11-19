@@ -12,6 +12,8 @@
   "scripts": {
     "dev:web": "npm run dev --workspace @famsync/web",
     "dev:api": "npm run dev --workspace @famsync/api",
+    "build:preview": "node scripts/build-local-preview.mjs",
+    "preview:local": "node scripts/serve-local-preview.mjs",
     "build": "npm run build --workspaces --if-present",
     "start:api": "npm run start --workspace @famsync/api",
     "db:start": "docker compose -p famsync-local -f compose.local.yml up -d --wait database mailpit && docker compose -p famsync-local -f compose.local.yml exec -T database bash /famsync/local/prepare-services.sh && docker compose -p famsync-local -f compose.local.yml up -d --wait auth storage realtime inngest && docker compose -p famsync-local -f compose.local.yml exec -T realtime sh /app/famsync-prepare.sh && npm run db:apply",
