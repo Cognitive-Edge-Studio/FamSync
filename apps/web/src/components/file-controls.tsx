@@ -1,0 +1,49 @@
+"use client";
+import {Dialog} from '@base-ui/react/dialog';import type {Session} from '@supabase/auth-js';import type {components} from '@famsync/api-client';
+import {useEffect,useRef,useState,type FormEvent} from 'react';
+import {getBrowserApi} from '@/lib/browser-auth';import {apiUploadUrl,fileSize,type StoredFile} from '@/lib/files';
+import {Field,FormFeedback,inputClass} from './account-fields';import {familyError} from './family-session';import {Button} from './ui/button';
+export function FileUpload({session,path,version,image=false,disabled=false,onUploaded,onReload,onBusyChange}:{session:Session;path:string;version:number;image?:boolean;disabled?:boolean;onUploaded:(file:StoredFile)=>void;onReload:()=>void;onBusyChange?:(busy:boolean)=>void}){
+ const [file,setFile]=useState<File>(),[busy,setBusy]=useState(false),[progress,setProgress]=useState(0),[error,setError]=useState(''),[note,setNote]=useState('');
+ const id=useRef(''),xhrRef=useRef<XMLHttpRequest|null>(null),input=useRef<HTMLInputElement>(null);
+ useEffect(()=>{id.current='';setError('');setNote('');},[path]);useEffect(()=>()=>xhrRef.current?.abort(),[]);
+ async function upload(e:FormEvent){e.preventDefault();if(!file||busy)return;setError('');setNote('');if(file.size>(image?2:5)*1048576){setError('Choose a file up to '+(image?2:5)+' MB.');return;}id.current||=crypto.randomUUID();setBusy(true);onBusyChange?.(true);setProgress(0);
+  try{const data=await new Promise<StoredFile>((resolve,reject)=>{const xhr=new XMLHttpRequest();xhrRef.current=xhr;xhr.open('POST',apiUploadUrl(path));xhr.setRequestHeader('Authorization','Bearer '+session.access_token);xhr.responseType='json';xhr.timeout=45000;
+   xhr.upload.onprogress=e=>{if(e.lengthComputable)setProgress(Math.min(100,Math.round(e.loaded/e.total*100)));};
+   xhr.onload=()=>{if(xhr.status>=200&&xhr.status<300&&xhr.response?.id)resolve(xhr.response);else reject(Error(familyError(xhr.response,'We couldn’t upload this file. Retry the selected file.')));};
+   xhr.onerror=()=>reject(Error('Upload interrupted. Refresh to check, or retry the selected file.'));xhr.ontimeout=xhr.onerror;
+   xhr.onabort=()=>reject(Error('Upload interrupted. Refresh to check, or retry the selected file.'));
+   const form=new FormData();form.set('id',id.current);form.set('version',String(version));form.set('file',file);xhr.send(form);
+  });setProgress(100);setFile(undefined);if(input.current)input.current.value='';id.current='';setNote(image?'Channel image saved.':'File saved.');onUploaded(data);
+  }catch(e){setError(e instanceof Error?e.message:'We couldn’t upload this file. Try again.');}finally{xhrRef.current=null;setBusy(false);onBusyChange?.(false);}
+ }
+ return <form onSubmit={e=>void upload(e)} className="grid gap-3 rounded-2xl border border-border bg-panel p-4" aria-label={image?'Channel image upload':'File upload'}>
+  <Field id={image?'channel-image-file':'folder-upload-file'} label={image?'Choose channel image':'Choose file'}><input ref={input} id={image?'channel-image-file':'folder-upload-file'} type="file" className={inputClass+' min-w-0 w-full'} accept={image?'.jpg,.jpeg,.png,.webp':'.pdf,.jpg,.jpeg,.png,.webp,.txt,.csv'} disabled={busy||disabled} onChange={e=>{setFile(e.target.files?.[0]);id.current='';setError('');setNote('');}} /></Field>
+  <p className="text-xs text-muted-foreground">{image?'JPEG, PNG or WebP · Up to 2 MB. Saved as a bounded channel image.':'PDF, JPEG, PNG, WebP, TXT or CSV · Up to 5 MB. Files inherit this folder’s audience.'}</p>
+  {file&&<p className="wrap-anywhere text-sm">{file.name} · {fileSize(file.size)}</p>}
+  {busy&&<div><progress aria-label="Upload progress" className="w-full" max={100} value={progress}/><p className="text-xs text-muted-foreground">{progress<100?'Uploading '+progress+'%…':'Saving file…'}</p></div>}
+  <FormFeedback error={error} note={note}/><div className="flex flex-wrap gap-2"><Button type="submit" disabled={!file||busy||disabled}>{busy?'Uploading…':error?'Retry upload':image?'Save channel image':'Upload file'}</Button>{busy&&<Button variant="outline" onClick={()=>xhrRef.current?.abort()}>Stop upload</Button>}
+   {error&&!busy&&<><Button variant="outline" onClick={onReload}>Reload destination</Button><Button variant="ghost" onClick={()=>{id.current='';setError('');setNote('Ready for a new upload attempt.');}}>Start new attempt</Button></>}
+  </div></form>;
+}
+type FileRef={id:string;fileName:string;preview:'image'|'text'|'none';canDownload:boolean};
+function Preview({familyId,accessToken,file,onClose}:{familyId:string;accessToken:string;file:FileRef;onClose:()=>void}){
+ const [data,setData]=useState<components['schemas']['FilePreviewDto']>(),[error,setError]=useState(''),[revision,setRevision]=useState(0);
+ useEffect(()=>{const timer=setInterval(()=>{if(document.visibilityState==='visible')setRevision(v=>v+1);},15000);return()=>clearInterval(timer);},[]);
+ useEffect(()=>{const c=new AbortController();setError('');void getBrowserApi(accessToken).POST('/api/v1/families/{familyId}/files/{fileId}/preview',{params:{path:{familyId,fileId:file.id}},signal:c.signal}).then(r=>{if(c.signal.aborted)return;if(!r.data)throw Error(familyError(r.error,'Preview unavailable.'));setData(r.data);}).catch(e=>{if(!c.signal.aborted){setData(undefined);setError(e instanceof Error?e.message:'Preview unavailable.');}});return()=>c.abort();},[accessToken,familyId,file.id,revision]);
+ return <Dialog.Root open onOpenChange={v=>{if(!v)onClose();}}><Dialog.Portal><Dialog.Backdrop className="fixed inset-0 z-40 bg-black/45 transition-opacity duration-200 data-[starting-style]:opacity-0 data-[ending-style]:opacity-0"/><Dialog.Popup className="transition-[opacity,scale] duration-200 ease-out data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-3xl -translate-1/2 overflow-y-auto rounded-2xl border border-border bg-panel p-5 shadow-xl">
+  <Dialog.Title className="text-xl font-semibold">File preview</Dialog.Title><Dialog.Description className="mt-2 wrap-anywhere text-sm text-muted-foreground">{file.fileName}</Dialog.Description><FormFeedback error={error} note={!data&&!error?'Loading preview…':undefined}/>
+  {data?.kind==='image'&&data.url&&!error&&<img className="mt-4 max-h-[65dvh] max-w-full rounded-xl object-contain" src={data.url} alt={data.fileName} onError={()=>{setData(undefined);setError('The image is unavailable or its preview expired. Retry to check access.');}}/>}
+  {data?.kind==='text'&&<><pre className="mt-4 max-h-[60dvh] overflow-auto rounded-xl bg-background p-4 text-sm whitespace-pre-wrap wrap-anywhere">{data.text}</pre><p className="mt-2 text-xs text-muted-foreground">Showing up to 50,000 characters. Download for the full file.</p></>}
+  <div className="mt-4 flex flex-wrap justify-end gap-2">{error&&<Button variant="outline" onClick={()=>setRevision(v=>v+1)}>Retry preview</Button>}<Button variant="outline" onClick={onClose}>Close preview</Button></div>
+ </Dialog.Popup></Dialog.Portal></Dialog.Root>;
+}
+export function FileActions({familyId,accessToken,file}:{familyId:string;accessToken:string;file:FileRef}){
+ const [busy,setBusy]=useState(false),[preview,setPreview]=useState(false),[error,setError]=useState('');
+ async function download(){setBusy(true);setError('');try{const r=await getBrowserApi(accessToken).POST('/api/v1/families/{familyId}/files/{fileId}/download',{params:{path:{familyId,fileId:file.id}}});if(!r.data)throw Error(familyError(r.error,'We couldn’t open this file.'));const link=document.createElement('a');link.href=r.data.url;link.download=r.data.fileName;link.rel='noreferrer';document.body.append(link);link.click();link.remove();}catch(e){setError(e instanceof Error?e.message:'We couldn’t open this file.');}finally{setBusy(false);}}
+ return <><div className="flex flex-wrap gap-2">{file.preview!=='none'&&<Button aria-label={'Preview '+file.fileName} variant="outline" className="h-9 px-3 text-xs" disabled={busy||!file.canDownload} onClick={()=>setPreview(true)}>Preview</Button>}<Button aria-label={'Download '+file.fileName} variant="outline" className="h-9 px-3 text-xs" disabled={busy||!file.canDownload} onClick={()=>void download()}>Download</Button></div><FormFeedback error={error}/>{preview&&<Preview familyId={familyId} accessToken={accessToken} file={file} onClose={()=>setPreview(false)}/>}</>;
+}
+export function StoredFileRow({familyId,session,file,onChanged}:{familyId:string;session:Session;file:StoredFile;onChanged:()=>void}){
+ const [busy,setBusy]=useState(false),[error,setError]=useState('');async function archive(){setBusy(true);setError('');try{const r=await getBrowserApi(session.access_token).PUT('/api/v1/families/{familyId}/files/{fileId}/archive',{params:{path:{familyId,fileId:file.id}},body:{version:file.version,archived:!file.archived}});if(!r.data)throw Error(familyError(r.error,'We couldn’t update this file.'));onChanged();}catch(e){setError(e instanceof Error?e.message:'We couldn’t update this file.');}finally{setBusy(false);}}
+ return <li className="grid min-w-0 gap-3 rounded-xl border border-border bg-panel p-4"><div><h3 className="wrap-anywhere font-semibold">{file.fileName}</h3><p className="mt-1 wrap-anywhere text-xs text-muted-foreground">{fileSize(file.byteSize)} · {file.mime}{file.archived?' · Archived':''}</p></div><FileActions familyId={familyId} accessToken={session.access_token} file={file}/>{file.canManage&&<Button aria-label={(file.archived?'Restore ':'Archive ')+file.fileName} className="justify-self-start" variant="ghost" disabled={busy} onClick={()=>void archive()}>{file.archived?'Restore':'Archive'}</Button>}<FormFeedback error={error}/></li>;
+}

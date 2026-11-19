@@ -1,0 +1,38 @@
+{
+  "name": "@famsync/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run build && concurrently --kill-others --names compiler,api \"tsc -p tsconfig.json --watch --preserveWatchOutput\" \"node --env-file-if-exists=.env --watch dist/main.js\"",
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test/calendar-recurrence.test.mjs test/task-rules.test.mjs test/task-series.test.mjs test/reminder-rules.test.mjs test/file-validation.test.mjs",
+    "test:jobs": "npm run build && node --test test/outbox.integration.mjs",
+    "test:calendar": "npm run build && node --test test/calendar-recurrence.test.mjs",
+    "start": "node --env-file-if-exists=.env dist/main.js",
+    "openapi": "node dist/generate-openapi.js"
+  },
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
+    "@nestjs/common": "^11.1.0",
+    "@nestjs/core": "^11.1.0",
+    "@nestjs/platform-express": "^11.1.0",
+    "@nestjs/swagger": "^11.0.0",
+    "@supabase/auth-js": "^2.90.0",
+    "@supabase/storage-js": "^2.119.0",
+    "inngest": "4.26.2",
+    "nodemailer": "^10.6.0",
+    "pg": "^8.16.3",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "sharp": "^0.35.5",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.15.4",
+    "concurrently": "^9.2.1",
+    "typescript": "~5.9.3"
+  }
+}

@@ -1,0 +1,133 @@
+@import "tailwindcss";
+
+/* Dark mode follows data-theme on <html>, set before paint by the theme script in layout.tsx. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Design tokens: Shadcn Space proportions with a soft, warm neutral palette (see docs/shadcnspace-visual-audit-and-plan.md §9–10). */
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-panel: var(--panel);
+  --color-sidebar: var(--sidebar);
+  /* Soft tints for status, categories and highlights. Each pairs a background with readable text. */
+  --color-sage: var(--sage);
+  --color-sage-foreground: var(--sage-foreground);
+  --color-peach: var(--peach);
+  --color-peach-foreground: var(--peach-foreground);
+  --color-lavender: var(--lavender);
+  --color-lavender-foreground: var(--lavender-foreground);
+  --color-sky: var(--sky);
+  --color-sky-foreground: var(--sky-foreground);
+  --color-rose: var(--rose);
+  --color-rose-foreground: var(--rose-foreground);
+  --font-sans: var(--font-geist), "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  /* The reference uses 8 px controls and 12 px panels; existing rounded-2xl/3xl panels follow these values. */
+  --radius-md: 0.5rem;
+  --radius-xl: 0.625rem;
+  --radius-2xl: 0.75rem;
+  --radius-3xl: 0.875rem;
+}
+
+:root {
+  color-scheme: light;
+  --canvas: #f5f5f4;
+  --background: #fafaf9;
+  --foreground: #242424;
+  --primary: #58725f;
+  --primary-hover: #526c58;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f0ec;
+  --secondary-foreground: #292929;
+  --muted: #f1f0ec;
+  --muted-foreground: #64666c;
+  --accent: #e9efe9;
+  --accent-foreground: #242424;
+  --border: #e7e7e5;
+  --ring: #47604e;
+  --destructive: #c0392b;
+  --panel: #ffffff;
+  --sidebar: #f5f5f4;
+  --sage: #e3efd9;
+  --sage-foreground: #3d5a2e;
+  --peach: #ffefd6;
+  --peach-foreground: #85520f;
+  --lavender: #ece8fb;
+  --lavender-foreground: #54469a;
+  --sky: #e2edf7;
+  --sky-foreground: #2c5679;
+  --rose: #fbe6e3;
+  --rose-foreground: #9a3328;
+}
+
+/* Night mode: warm charcoal surfaces, a lighter sage for actions and deeper pastel tints. Used when the person
+   chooses Dark, or chooses System while their device is dark. Light is the default, including without JavaScript. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas: #141413;
+  --background: #191918;
+  --foreground: #ecebe6;
+  --primary: #8fb59a;
+  --primary-hover: #9fc2a9;
+  --primary-foreground: #13201a;
+  --secondary: #2a2926;
+  --secondary-foreground: #ecebe6;
+  --muted: #2a2926;
+  --muted-foreground: #a7a59d;
+  --accent: #26302a;
+  --accent-foreground: #ecebe6;
+  --border: #33322e;
+  --ring: #8fb59a;
+  --destructive: #f0806f;
+  --panel: #201f1d;
+  --sidebar: #141413;
+  --sage: #233128;
+  --sage-foreground: #b8d6aa;
+  --peach: #382c1c;
+  --peach-foreground: #f1c88d;
+  --lavender: #2b2740;
+  --lavender-foreground: #c9bff6;
+  --sky: #1d2a36;
+  --sky-foreground: #a9cbea;
+  --rose: #3a2320;
+  --rose-foreground: #f2ada2;
+}
+
+body {
+  min-height: 100svh;
+  margin: 0;
+  background: var(--canvas);
+  color: var(--foreground);
+  accent-color: var(--primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-theme-switching] *, :root[data-theme-switching] *::before, :root[data-theme-switching] *::after {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, fill 0.25s ease !important;
+  }
+}
+
+/* Large light illustrations are dimmed slightly at night so they don't glare against dark surfaces. */
+:root[data-theme="dark"] img[data-dim] {
+  filter: brightness(0.86) saturate(0.95);
+}

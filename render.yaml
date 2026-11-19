@@ -1,0 +1,60 @@
+# Render blueprint for the FamSync API (staging). Create it from the Render dashboard:
+# New → Blueprint → connect this repository. Secrets marked `sync: false` are entered in the dashboard.
+# See docs/deployment.md for where each value comes from.
+services:
+  - type: web
+    name: famsync-api-staging
+    runtime: docker
+    plan: free
+    region: oregon            # keep close to the Supabase project's region
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: "4000"
+      # Free scheduler plans: poll every 5 minutes instead of every minute.
+      - key: JOBS_POLL_CRON
+        value: "*/5 * * * *"
+      # Your Hostinger site address, e.g. https://lightblue-xyz-123456.hostingersite.com
+      - key: WEB_ORIGINS
+        sync: false
+      - key: INVITATION_WEB_ORIGIN
+        sync: false
+      - key: INVITATION_FROM
+        sync: false
+      # Supabase: connection strings for the two FamSync database logins (session pooler, port 5432).
+      - key: DATABASE_URL
+        sync: false
+      - key: JOBS_DATABASE_URL
+        sync: false
+      - key: SUPABASE_AUTH_URL
+        sync: false
+      - key: SUPABASE_JWT_ISSUER
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_URL
+        sync: false
+      - key: SUPABASE_STORAGE_KEY
+        sync: false
+      - key: SUPABASE_REALTIME_URL
+        sync: false
+      - key: SUPABASE_REALTIME_KEY
+        sync: false
+      - key: INVITATION_TOKEN_SECRET
+        generateValue: true
+      # Inngest Cloud keys and the public address Inngest calls (this service's own URL).
+      - key: INNGEST_EVENT_KEY
+        sync: false
+      - key: INNGEST_SIGNING_KEY
+        sync: false
+      - key: INNGEST_SERVE_ORIGIN
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false

@@ -1,0 +1,16 @@
+{
+  "name": "@famsync/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "generate": "openapi-typescript openapi.json -o src/schema.d.ts"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.15.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.10.1"
+  }
+}
