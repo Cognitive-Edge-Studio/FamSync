@@ -47,13 +47,14 @@ Values written as `<LIKE-THIS>` come from the step that creates them. Keep every
 ## 2. Render (API)
 
 1. **New → Blueprint**, then pick the repository. Render reads [`render.yaml`](../render.yaml) and creates `famsync-api-staging` with the Docker image from `apps/api/Dockerfile`.
+   The API image includes Supabase's public root certificate from **Database → Settings → SSL configuration** and uses `NODE_EXTRA_CA_CERTS` to verify the database server certificate and hostname. Keep TLS verification enabled. For local hosted-API checks, set `NODE_EXTRA_CA_CERTS` to the absolute path of `apps/api/certs/supabase-ca.crt` before starting Node.
 2. Fill in the variables marked *sync: false*:
 
 | Variable | Value |
 |---|---|
 | `WEB_ORIGINS`, `INVITATION_WEB_ORIGIN` | `https://<SITE>` |
 | `INVITATION_FROM` | `FamSync <onboarding@resend.dev>`, or an address on your verified domain |
-| `DATABASE_URL` | `postgresql://famsync_api.<REF>:<API-DB-PASSWORD>@aws-0-<REGION>.pooler.supabase.com:5432/postgres?sslmode=require` |
+| `DATABASE_URL` | `postgresql://famsync_api.<REF>:<API-DB-PASSWORD>@aws-0-<REGION>.pooler.supabase.com:5432/postgres?sslmode=verify-full` |
 | `JOBS_DATABASE_URL` | the same, with `famsync_jobs.<REF>` and `<JOBS-DB-PASSWORD>` |
 | `SUPABASE_AUTH_URL`, `SUPABASE_JWT_ISSUER` | `https://<REF>.supabase.co/auth/v1` |
 | `SUPABASE_PUBLISHABLE_KEY` | `<PUBLISHABLE-KEY>` |

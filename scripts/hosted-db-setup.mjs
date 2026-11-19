@@ -15,7 +15,10 @@ for(const p of [apiPassword,jobsPassword])if(p.length<24){console.error('Use dat
 
 // Hosted Supabase requires TLS; `sslmode=disable` in the URL is only for a local rehearsal.
 const files=(await readdir(migrationsDirectory)).filter(f=>f.endsWith('.sql')).sort();
-const local=/sslmode=disable/.test(url),db=new pg.Client({connectionString:url.replace(/[?&]sslmode=disable/,''),ssl:local?false:{rejectUnauthorized:false},connectionTimeoutMillis:15000});
+const local=/sslmode=disable/.test(url);
+const connectionUrl=new URL(url);connectionUrl.searchParams.delete('sslmode');
+const ca=local?undefined:await readFile(new URL('../apps/api/certs/supabase-ca.crt',import.meta.url),'utf8');
+const db=new pg.Client({connectionString:connectionUrl.toString(),ssl:local?false:{ca,rejectUnauthorized:true},connectionTimeoutMillis:15000});
 try{await db.connect();}
 catch(e){console.error('Database connection failed ('+(e.code||'connection error')+'). Check the database password, session pooler host, and network connection.');process.exit(1);}
 try{

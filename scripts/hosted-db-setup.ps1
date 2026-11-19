@@ -76,8 +76,8 @@ try {
     if ($Fresh) {
         $lines = @(
             '# Server-only database connection strings. Do not commit or share.'
-            "DATABASE_URL=postgresql://famsync_api.${ProjectRef}:${apiPassword}@${PoolerHost}:5432/postgres?sslmode=require"
-            "JOBS_DATABASE_URL=postgresql://famsync_jobs.${ProjectRef}:${jobsPassword}@${PoolerHost}:5432/postgres?sslmode=require"
+            "DATABASE_URL=postgresql://famsync_api.${ProjectRef}:${apiPassword}@${PoolerHost}:5432/postgres?sslmode=verify-full"
+            "JOBS_DATABASE_URL=postgresql://famsync_jobs.${ProjectRef}:${jobsPassword}@${PoolerHost}:5432/postgres?sslmode=verify-full"
         )
         # CreateNew prevents replacing credentials if another setup finished first.
         $stream = [System.IO.File]::Open($credentialsFile, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write)
