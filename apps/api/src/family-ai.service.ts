@@ -14,7 +14,7 @@ const limits = { member: 20, family: 60 };
 type StatusRow = { enabled: boolean; canManage: boolean; consented: boolean; memberUsed: number; familyUsed: number; timeZone: string };
 
 /** FAMILY_AI_ENABLED is the operator's confirmation in docs/family-base-ai.md; a key alone does not switch questions on. */
-function provider() {
+export function provider() {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey || process.env.FAMILY_AI_ENABLED !== "true") return null;
   return {

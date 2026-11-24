@@ -1,19 +1,37 @@
 {
-  "cli": { "requireCommit": false, "appVersionSource": "local" },
+  "cli": {
+    "requireCommit": false,
+    "appVersionSource": "local"
+  },
   "build": {
     "development": {
       "developmentClient": true,
-      "env": { "FAMSYNC_ANDROID_APPLICATION_ID": "com.famsync.dev" },
+      "env": {
+        "FAMSYNC_ANDROID_APPLICATION_ID": "com.famsync.dev"
+      },
       "distribution": "internal",
       "credentialsSource": "remote",
       "node": "24.18.0",
-      "android": { "buildType": "apk" }
+      "android": {
+        "buildType": "apk"
+      }
     },
     "preview": {
       "distribution": "internal",
       "credentialsSource": "remote",
       "node": "24.18.0",
-      "android": { "buildType": "apk" }
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "FAMSYNC_ANDROID_APPLICATION_ID": "com.goppopi.famsync",
+        "FAMSYNC_GOOGLE_SERVICES_FILE": "./google-services.json",
+        "EXPO_PUBLIC_API_BASE_URL": "https://famsync-api-staging.onrender.com",
+        "EXPO_PUBLIC_SUPABASE_AUTH_URL": "https://axzyacocepjelsgqnsky.supabase.co/auth/v1",
+        "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_cFhnxbd5DgoAIUVekH9VZg_aacJe4cb",
+        "EXPO_PUBLIC_SUPABASE_REALTIME_URL": "wss://axzyacocepjelsgqnsky.supabase.co/realtime/v1",
+        "EXPO_PUBLIC_SUPABASE_REALTIME_KEY": "sb_publishable_cFhnxbd5DgoAIUVekH9VZg_aacJe4cb"
+      }
     }
   }
 }

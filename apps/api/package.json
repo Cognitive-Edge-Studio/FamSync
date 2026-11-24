@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npm run build && concurrently --kill-others --names compiler,api \"tsc -p tsconfig.json --watch --preserveWatchOutput\" \"node --env-file-if-exists=.env --watch dist/main.js\"",
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && node --test test/calendar-recurrence.test.mjs test/task-rules.test.mjs test/task-series.test.mjs test/reminder-rules.test.mjs test/file-validation.test.mjs test/family-base-graph.test.mjs test/family-ai.test.mjs test/push-media.test.mjs test/push-worker.test.mjs test/android-push.test.mjs test/mobile-version.test.mjs",
+    "test": "npm run build && node --test test/calendar-recurrence.test.mjs test/task-rules.test.mjs test/task-series.test.mjs test/reminder-rules.test.mjs test/file-validation.test.mjs test/family-base-graph.test.mjs test/family-ai.test.mjs test/push-media.test.mjs test/push-worker.test.mjs test/android-push.test.mjs test/mobile-version.test.mjs test/family-voice.test.mjs",
     "test:jobs": "npm run build && node --test test/outbox.integration.mjs",
     "test:calendar": "npm run build && node --test test/calendar-recurrence.test.mjs",
     "start": "node --env-file-if-exists=.env dist/main.js",

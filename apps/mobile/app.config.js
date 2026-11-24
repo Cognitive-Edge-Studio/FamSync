@@ -9,5 +9,5 @@ module.exports = ({ config }) => {
     const data = ["/join", "/join-channel", "/auth/callback"].map((pathPrefix) => ({ scheme: "https", host, pathPrefix }));
     android.intentFilters = [{ action: "VIEW", autoVerify: true, data, category: ["BROWSABLE", "DEFAULT"] }];
   }
-  return { ...config, android, plugins: [...(config.plugins ?? []), ['expo-notifications', { defaultChannel: 'famsync-updates' }], ['expo-audio', { recordAudioAndroid: true, enableBackgroundPlayback: false, enableBackgroundRecording: false }], ['expo-video', { supportsBackgroundPlayback: false, supportsPictureInPicture: false }]] };
+  return { ...config, android, plugins: [...(config.plugins ?? []), ['expo-notifications', { defaultChannel: 'famsync-updates', icon: './assets/notification.png', color: '#58725f' }], ['expo-audio', { recordAudioAndroid: true, enableBackgroundPlayback: false, enableBackgroundRecording: false }], ['expo-video', { supportsBackgroundPlayback: false, supportsPictureInPicture: false }]] };
 };

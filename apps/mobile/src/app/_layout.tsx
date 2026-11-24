@@ -3,6 +3,8 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef } from "react";
 import { View } from "react-native";
 import { Notice } from "@/components/ui";
+import { CelebrationProvider } from '@/components/celebrate';
+import { Splash } from '@/components/splash';
 import { VersionGate } from '@/components/version-gate';
 import { ChatProvider } from "@/lib/chat";
 import { FamilyProvider } from "@/lib/family";
@@ -50,7 +52,7 @@ function Root() {
   if (state.status === "misconfigured") return <View style={page}><Notice icon="warning-outline" title="FamSync can’t start" action={{ title: "Try again", onPress: retry }}>This build is missing its server settings. Install an updated version.</Notice></View>;
   const screens = (
     <Stack screenOptions={{ headerShown: false, animation: reduced ? 'none' : 'fade_from_bottom', contentStyle: { backgroundColor: colors.canvas }, headerStyle: { backgroundColor: colors.canvas }, headerTitleStyle: { fontWeight: '600' }, headerTintColor: colors.foreground, headerShadowVisible: false }}>
-      <Stack.Protected guard={signedIn}><Stack.Screen name="(tabs)" options={{ title: "Home" }} />{["module/[key]", "family-base/index", "family-base/record", "family-base/entry", "family-base/form", "goals", "goal/[id]", "goal/form", "task/[id]", "task/form", "event/[id]", "event/form", "chat/[id]", "chat/details", "chat/form", "chat/search", "chat/starred", "chat/guests", "files/index", "files/[id]", "files/form", "files/view", "family/index", "family/create", "family/settings", "family/invitations", "family/guests", "guests", "notifications", "push", "account/index", "account/privacy", "account/notifications", "account/security"].map((name) => <Stack.Screen key={name} name={name} options={{ headerShown: true }} />)}<Stack.Screen name="reset-password" /></Stack.Protected>
+      <Stack.Protected guard={signedIn}><Stack.Screen name="(tabs)" options={{ title: "Home" }} />{["module/[key]", "family-base/index", "family-base/record", "family-base/entry", "family-base/form", "family-base/ask", "family-base/call", "goals", "goal/[id]", "goal/form", "task/[id]", "task/form", "event/[id]", "event/form", "chat/[id]", "chat/details", "chat/form", "chat/search", "chat/starred", "chat/guests", "files/index", "files/[id]", "files/form", "files/view", "family/index", "family/create", "family/settings", "family/invitations", "family/guests", "guests", "notifications", "push", "account/index", "account/privacy", "account/notifications", "account/security"].map((name) => <Stack.Screen key={name} name={name} options={{ headerShown: true }} />)}<Stack.Screen name="reset-password" /></Stack.Protected>
       <Stack.Protected guard={!signedIn}><Stack.Screen name="sign-in" /><Stack.Screen name="sign-up" /><Stack.Screen name="forgot-password" /></Stack.Protected>
       <Stack.Screen name="join" /><Stack.Screen name="join-channel" /><Stack.Screen name="auth/callback" />
     </Stack>
@@ -65,5 +67,5 @@ function SupportedApp() {
 }
 
 export default function Layout() {
-  return <GestureHandlerRootView style={{ flex: 1 }}><ThemeProvider><MotionProvider><VersionGate><SupportedApp /></VersionGate></MotionProvider></ThemeProvider></GestureHandlerRootView>;
+  return <GestureHandlerRootView style={{ flex: 1 }}><ThemeProvider><MotionProvider><Splash><VersionGate><CelebrationProvider><SupportedApp /></CelebrationProvider></VersionGate></Splash></MotionProvider></ThemeProvider></GestureHandlerRootView>;
 }

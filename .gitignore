@@ -6,6 +6,9 @@ out-local/
 dist/
 *.tsbuildinfo
 coverage/
+.claude/
+.playwright-cli/
+output/
 .env*
 !.env.example
 output/backups/

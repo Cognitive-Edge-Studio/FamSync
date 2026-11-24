@@ -1,5 +1,6 @@
 import { createFamSyncClient } from "@famsync/api-client";
 import { checkedUrl } from "./config";
+import { requestLimit } from "./family-ask";
 
 export class ApiError extends Error {
   constructor(readonly status: number) { super("Request failed (" + status + ")"); }
@@ -9,7 +10,7 @@ export class ApiError extends Error {
 async function plainFetch(request: Request) {
   const headers: Record<string, string> = {};
   request.headers.forEach((value, key) => { headers[key] = value; });
-  const limit = new AbortController(), timer = setTimeout(() => limit.abort(), 15_000);
+  const limit = new AbortController(), timer = setTimeout(() => limit.abort(), requestLimit(request.url));
   const stop = () => limit.abort();
   if (request.signal?.aborted) stop();
   request.signal?.addEventListener("abort", stop);

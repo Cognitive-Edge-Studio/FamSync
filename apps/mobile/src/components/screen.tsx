@@ -7,6 +7,7 @@ import { useFamilyState } from "@/lib/family";
 import type { QueryError } from "@/lib/query";
 import { deviceZone, guestStore, type Scope } from "@/lib/scope";
 import { useTheme } from "@/lib/theme";
+import { Mascot } from "./mascot";
 import { Button, Card, Icon, Loading, Notice, Text, type IconName } from "./ui";
 import { MotionPressable, Reveal } from './motion';
 
@@ -15,7 +16,7 @@ export function WithFamily({ children }: { children: (family: Family, onLost: ()
   const { state, reload } = useFamilyState();
   if (state.status === "loading") return <Loading label="Opening your family…" />;
   if (state.status === "error") return <Notice icon={state.offline ? "cloud-offline-outline" : "warning-outline"} title={state.offline ? "You’re offline" : "We couldn’t open your family"} action={{ title: "Try again", onPress: reload }}>{state.offline ? "Check your connection and try again." : "Something went wrong. Please try again."}</Notice>;
-  if (state.status === "none") return <Notice icon="people-outline" title="No family yet" action={{ title: "Create a family", onPress: () => router.push("/family/create") }}>Create a family, or open the invitation sent to your email. Guest channels are under More.</Notice>;
+  if (state.status === "none") return <View style={{ flex: 1, justifyContent: "center" }}><View style={{ alignItems: "center" }}><Mascot size={140} /></View><Notice icon="people-outline" title="No family yet" action={{ title: "Create a family", onPress: () => router.push("/family/create") }}>Create a family, or open the invitation sent to your email. Guest channels are under More.</Notice></View>;
   return children(state.family, reload);
 }
 

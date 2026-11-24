@@ -26,7 +26,7 @@ export function useSave() {
       if (data !== undefined) return { ok: true, data };
       const status = response.status;
       if (status === 401) await sessionRefused();
-      if (mounted.current) setError([400, 403, 404, 409, 413, 503].includes(status) ? serverMessage(problem) ?? fallback : fallback);
+      if (mounted.current) setError([400, 403, 404, 409, 413, 422, 429, 502, 503].includes(status) ? serverMessage(problem) ?? fallback : fallback);
       return { ok: false, conflict: status === 409, gone: status === 403 || status === 404 };
     } catch {
       if (mounted.current) setError("You’re offline, or FamSync can’t be reached. Nothing was lost; try again when you’re connected.");

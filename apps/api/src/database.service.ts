@@ -52,6 +52,7 @@ export class DatabaseService implements OnModuleDestroy {
           and row_security_active('app.family_entries'::regclass)
           and row_security_active('app.family_entry_links'::regclass)
           and has_function_privilege('app.family_ai_status(uuid, integer)', 'EXECUTE')
+          and has_function_privilege('app.family_voice_status(uuid, integer)', 'EXECUTE')
           and has_table_privilege('app.channel_change_counters', 'SELECT') and has_table_privilege('app.message_stars', 'SELECT') and has_table_privilege('app.chat_privacy', 'SELECT') and has_table_privilege('app.push_subscriptions', 'SELECT')
           and has_table_privilege('app.families', 'SELECT')
           and has_table_privilege('app.android_push_devices', 'SELECT')

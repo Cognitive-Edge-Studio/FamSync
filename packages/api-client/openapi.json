@@ -6789,6 +6789,180 @@
           "FamilyAi"
         ]
       }
+    },
+    "/api/v1/families/{familyId}/base/voice": {
+      "get": {
+        "operationId": "getFamilyVoice",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyVoiceStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyVoice"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/base/voice/settings": {
+      "put": {
+        "operationId": "updateFamilyVoice",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FamilyAiSettingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyVoiceStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Turns voice on or off. Owner only.",
+        "tags": [
+          "FamilyVoice"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/base/voice/consent": {
+      "put": {
+        "operationId": "updateFamilyVoiceConsent",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FamilyAiConsentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyVoiceStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyVoice"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/base/voice/turns": {
+      "post": {
+        "operationId": "talkToFamilyBase",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/FamilyVoiceTurnDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyVoiceReplyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyVoice"
+        ]
+      }
     }
   },
   "info": {
@@ -12263,6 +12437,85 @@
           "answer",
           "nodeIds",
           "remaining"
+        ]
+      },
+      "FamilyVoiceStatusDto": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "description": "True when this server is set up for voice."
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "True when the family owner turned voice on."
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "consented": {
+            "type": "boolean"
+          },
+          "remainingSeconds": {
+            "type": "number",
+            "description": "Seconds the caller can still use today."
+          }
+        },
+        "required": [
+          "available",
+          "enabled",
+          "canManage",
+          "consented",
+          "remainingSeconds"
+        ]
+      },
+      "FamilyVoiceTurnDto": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "description": "MP4 or WebM audio up to 2 MB."
+          },
+          "turns": {
+            "type": "string",
+            "description": "JSON list of earlier turns in this call: [{you, reply}], at most six."
+          }
+        },
+        "required": [
+          "file"
+        ]
+      },
+      "FamilyVoiceReplyDto": {
+        "type": "object",
+        "properties": {
+          "heard": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "nodeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "audio": {
+            "type": "string",
+            "nullable": true,
+            "description": "MP3 as base64, or null when the answer could not be spoken."
+          },
+          "remainingSeconds": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "heard",
+          "answer",
+          "nodeIds",
+          "audio",
+          "remainingSeconds"
         ]
       }
     }

@@ -7,6 +7,7 @@ import { randomUUID } from "expo-crypto";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
+import { useCelebrate } from "@/components/celebrate";
 import { ErrorText, Field, Row, Sheet } from "@/components/form";
 import { Progress } from "@/components/goals";
 import { Badge, confirm, Facts, LinkRow, Page, queryState, WithFamily } from "@/components/screen";
@@ -27,7 +28,7 @@ export default function GoalScreen() {
 }
 
 function Details({ family, id }: { family: Family; id: string }) {
-  const { access_token } = useSignedIn(), { colors } = useTheme(), { busy, error, setError, save } = useSave(), path = { familyId: family.id, goalId: id };
+  const { access_token } = useSignedIn(), { colors } = useTheme(), { busy, error, setError, save } = useSave(), path = { familyId: family.id, goalId: id }, celebrate = useCelebrate();
   const load = useCallback((signal: AbortSignal) => getApi(access_token).GET("/api/v1/families/{familyId}/goals/{goalId}", { params: { path: { familyId: family.id, goalId: id } }, signal }).then(required), [access_token, family.id, id]);
   const query = useQuery(family.id, "goal:" + id, load), goal = query.data;
   const [note, setNote] = useState(""), [step, setStep] = useState(""), [current, setCurrent] = useState<string>(), [renaming, setRenaming] = useState<{ item: Item; label: string }>(), [linking, setLinking] = useState(false);
@@ -38,7 +39,7 @@ function Details({ family, id }: { family: Family; id: string }) {
   async function change(call: (api: ReturnType<typeof getApi>) => Promise<Result>, done: string) {
     setNote("");
     const result = await save(() => call(getApi(access_token)), "We couldn’t save the goal change. Try again.");
-    if (result.ok) { query.replace(() => result.data); setNote(done); return true; }
+    if (result.ok) { if (result.data.status === "completed" && goal?.status !== "completed") celebrate(); query.replace(() => result.data); setNote(done); return true; }
     // Someone changed the goal first: show the latest, and keep what was typed here.
     if (result.conflict || result.gone) query.refresh();
     return false;

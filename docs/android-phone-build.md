@@ -1,6 +1,6 @@
 # Android phone build
 
-Prepared on 24 November 2026. **No APK exists yet.** The configuration is ready; building needs the choices below.
+Prepared on 24 November 2026. **The first developer APK was built that day** in Expo's cloud (project `shibly_noman/famsync`, test ID `com.famsync.dev`, build 1; link expires 8 December 2026). It has not been installed on a phone. [Build page](https://expo.dev/accounts/shibly_noman/projects/famsync/builds/3f18498e-f58a-417e-8d44-e6b2e1f39d0a).
 
 ## Where it stands
 
@@ -11,19 +11,19 @@ Prepared on 24 November 2026. **No APK exists yet.** The configuration is ready;
 | Build profiles | `apps/mobile/eas.json`: `development` (with developer tools) and `preview` (self-contained), both APKs |
 | Cloud upload filter | `.easignore` leaves out every `.env` file, backups, database files, docs, and the API and web source |
 | This computer | Java 21 only. No Android SDK, about 2 GB free of 237 GB, 6 GB memory, and no phone connected. A local build needs roughly 20 GB free and will be slow |
-| Application ID | Not chosen. It cannot change after publishing |
-| Firebase | Not set up. Push stays off; everything else works without it |
+| Application ID | `com.famsync.dev` for development; `com.goppopi.famsync` for the self-contained preview/release APK |
+| Firebase | Android app registered in `famsync-staging`. The matching client config is Git-ignored at `apps/mobile/google-services.json` and included in EAS uploads. API service-account authentication passed; phone push delivery remains untested |
 
 ## Choose one way to build
 
 **A. Expo's cloud (suggested).** Needs an Expo account. The app's source, shared packages and public addresses are uploaded, and Expo keeps the signing key. From `apps/mobile`:
 
 1. Sign in: `npx eas-cli@latest login`
-2. Link the project once: `npx eas-cli@latest init`. Copy the project ID it prints into `app.config.js` under `extra.eas.projectId` if it cannot write it.
-3. In the project's environment variables on expo.dev, set `FAMSYNC_ANDROID_APPLICATION_ID`. For `preview`, also set every `EXPO_PUBLIC_…` address from `.env.example` to HTTPS staging.
-4. PowerShell: `$env:EAS_NO_VCS='1'; npx eas-cli@latest build --platform android --profile development`
+2. The project is already linked in `app.json`.
+3. The test ID and Node version are in `eas.json`. For `preview`, set every `EXPO_PUBLIC_…` address on expo.dev to HTTPS staging.
+4. PowerShell: `$env:EAS_NO_VCS='1'; $env:EAS_PROJECT_ROOT='../..'; $env:FAMSYNC_ANDROID_APPLICATION_ID='com.famsync.dev'; npx eas-cli@latest build --platform android --profile development`
 
-Step 4 uploads source. Run `npx eas-cli@latest build:inspect --platform android --profile development --stage archive --output ../../output/eas-check` with the same `EAS_NO_VCS` first, to see exactly what would be sent.
+Step 4 uploads source. Run `npx eas-cli@latest build:inspect --platform android --profile development --stage archive --output ../../output/eas-check` with the same variables first, to see exactly what would be sent.
 
 **B. This computer.** Free about 20 GB, install Android Studio or the command-line SDK, accept its licences, set `ANDROID_HOME`, then run `npm run build:android:local --workspace @famsync/mobile` with `FAMSYNC_ANDROID_APPLICATION_ID` set. Turn on Windows long paths first.
 

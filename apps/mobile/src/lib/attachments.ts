@@ -40,7 +40,7 @@ export async function chooseDocuments(): Promise<Picked[]> {
 export { attachmentProblem };
 
 /** Sends one file. Reusing the same ID after a lost response does not store it twice. */
-export async function uploadFile<T>({ path, fields, file, token, signal, onProgress, limit = 5 }: { path: string; fields: Record<string, string>; file?: Picked; token: string; signal: AbortSignal; onProgress: (percent: number) => void; limit?: number }) {
+export async function uploadFile<T>({ path, fields, file, token, signal, onProgress, limit = 5, isReply = (body) => !!body.id }: { path: string; fields: Record<string, string>; file?: Picked; token: string; signal: AbortSignal; onProgress: (percent: number) => void; limit?: number; isReply?: (body: Record<string, unknown>) => boolean }) {
   const form = new FormData();
   for (const [name, value] of Object.entries(fields)) form.append(name, value);
   if (file && Platform.OS === "web") form.append("file", await (await fetch(file.uri)).blob(), file.name);
@@ -53,9 +53,9 @@ export async function uploadFile<T>({ path, fields, file, token, signal, onProgr
     request.timeout = 90_000;
     request.upload.onprogress = (event) => { if (event.lengthComputable) onProgress(Math.min(100, Math.round(event.loaded / event.total * 100))); };
     request.onload = () => {
-      let body: { id?: string; message?: unknown } = {};
+      let body: Record<string, unknown> = {};
       try { body = JSON.parse(request.responseText); } catch { /* Reported below. */ }
-      if (request.status >= 200 && request.status < 300 && body.id) resolve(body as T);
+      if (request.status >= 200 && request.status < 300 && isReply(body)) resolve(body as T);
       else reject(new Error(request.status === 413 ? "Choose a file up to " + limit + " MB." : typeof body.message === "string" ? body.message : "We couldn’t upload this file. Try again."));
     };
     request.onerror = interrupted;

@@ -9,24 +9,26 @@ import { useTheme } from "@/lib/theme";
 import { ErrorText, Row, Sheet } from "./form";
 import { Badge } from "./screen";
 import { Button, Card, Icon, Text } from "./ui";
+import { useCelebrate } from './celebrate';
 import { MotionPressable } from './motion';
 
 type Change = Pick<Task, "id" | "version" | "status">;
 
 /** Status changes carry the version they were based on; a conflict reloads instead of overwriting. Undo is offered once. */
 export function useTaskStatus(familyId: string, onChanged: (task?: TaskDetail) => void) {
-  const { access_token } = useSignedIn(), { busy, error, save } = useSave();
+  const { access_token } = useSignedIn(), { busy, error, save } = useSave(), celebrate = useCelebrate();
   const [notice, setNotice] = useState<{ task: TaskDetail; previous: TaskStatus }>();
   const send = useCallback(async (task: Change, status: TaskStatus, undo: boolean) => {
     const result = await save(() => getApi(access_token).PUT("/api/v1/families/{familyId}/tasks/{taskId}/status", { params: { path: { familyId, taskId: task.id } }, body: { status, version: task.version } }), "We couldn’t update the task. Try again.");
     if (result.ok) {
+      if (!undo && result.data.status === "completed" && task.status !== "completed") celebrate();
       setNotice(undo ? undefined : { task: result.data, previous: task.status });
       onChanged(result.data);
     } else {
       setNotice(undefined);
       if (result.conflict || result.gone) onChanged();
     }
-  }, [access_token, familyId, onChanged, save]);
+  }, [access_token, familyId, onChanged, save, celebrate]);
   return {
     busy,
     change: (task: Change, status: TaskStatus) => void send(task, status, false),

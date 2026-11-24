@@ -38,14 +38,16 @@ import {FilesService} from './files.service.js';
 import { FamilyBaseController } from "./family-base.controller.js";
 import { FamilyEntriesService } from "./family-entries.service.js";
 import { FamilyAiController } from "./family-ai.controller.js";
+import { FamilyVoiceController } from "./family-voice.controller.js";
+import { FamilyVoiceService } from "./family-voice.service.js";
 import { FamilyAiService } from "./family-ai.service.js";
 import { FamilyBaseService } from "./family-base.service.js";
 
 @Module({
   controllers: [HealthController, MobileVersionController, ProfileController, StatusController, FamilyController, PrivacyController, CalendarController,
     TasksController, TaskSeriesController, InngestController,
-    NotificationsController, GoalsController, ChannelsController,GuestsController,FilesController,ChatStatusController,PushController,AndroidPushController,AndroidPushRevocationController,FamilyBaseController,FamilyAiController],
+    NotificationsController, GoalsController, ChannelsController,GuestsController,FilesController,ChatStatusController,PushController,AndroidPushController,AndroidPushRevocationController,FamilyBaseController,FamilyAiController,FamilyVoiceController],
   providers: [AuthGuard, DatabaseService, FamilyService, InvitationMailService, CalendarService, AttachmentStorageService,
-    TasksService, TaskSeriesService, JobsDatabaseService, JobsService, RemindersService, GoalsService, ChannelsService, ChannelRealtimeService,PushService,AndroidPushService,GuestsService,FilesService,FamilyBaseService,FamilyEntriesService,FamilyAiService],
+    TasksService, TaskSeriesService, JobsDatabaseService, JobsService, RemindersService, GoalsService, ChannelsService, ChannelRealtimeService,PushService,AndroidPushService,GuestsService,FilesService,FamilyBaseService,FamilyEntriesService,FamilyAiService,FamilyVoiceService],
 })
 export class AppModule {}

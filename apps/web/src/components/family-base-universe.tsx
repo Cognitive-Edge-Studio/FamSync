@@ -3,7 +3,7 @@
 import { Component, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import ForceGraph3D, { type ForceGraphMethods } from 'react-force-graph-3d';
 import { BufferGeometry, Float32BufferAttribute, Points, PointsMaterial } from 'three';
-import { ArrowUpRight, ChevronDown, Maximize2, Orbit, Pause, Pencil, Plus, RefreshCw, RotateCcw, Search, Sparkles, Trash2, X } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, Maximize2, Orbit, Pause, Pencil, Phone, Plus, RefreshCw, RotateCcw, Search, Sparkles, Trash2, X } from 'lucide-react';
 import { getBrowserApi } from '@/lib/browser-auth';
 import {
   endpointId, loadFamilyBaseGraph, openLabel, recordFacts, recordHref, relationLabel, toUniverse, universeGroups,
@@ -11,6 +11,7 @@ import {
 } from '@/lib/family-base';
 import { cn } from '@/lib/utils';
 import { FamilyAskDialog, type FamilyAnswer } from './family-ask-dialog';
+import { FamilyCallDialog } from './family-call-dialog';
 import { FamilyEntryDialog } from './family-entry-dialog';
 import { familyError } from './family-session';
 import { Avatar } from './ui/avatar';
@@ -93,7 +94,7 @@ function Universe({ graph: source, focusId, familyId, accessToken, timeZone, ans
   answer?: FamilyAnswer; onAnswer: (answer: FamilyAnswer) => void;
   onAdd: () => void; onEdit: (record: FamilyBaseRecord) => void; onDelete: (record: FamilyBaseRecord) => Promise<string>;
 }) {
-  const [asking, setAsking] = useState(false);
+  const [asking, setAsking] = useState(false), [calling, setCalling] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
@@ -234,6 +235,7 @@ function Universe({ graph: source, focusId, familyId, accessToken, timeZone, ans
         <span className="grid size-8 place-items-center rounded-full bg-accent text-primary"><Orbit aria-hidden="true" className="size-4" /></span>
         <div><h2 className="text-sm font-medium">{source.familyName}</h2><p className="mt-0.5 text-xs text-muted-foreground">{recordCount} {recordCount === 1 ? 'record' : 'records'} <span aria-hidden="true">·</span> {source.links.length} connections</p></div>
         <button type="button" onClick={() => setAsking(true)} className={cn(darkButton, 'ml-2')}><Sparkles aria-hidden="true" className="size-3.5" />Ask</button>
+        <button type="button" onClick={() => setCalling(true)} className={cn(darkButton, 'ml-2')}><Phone aria-hidden="true" className="size-3.5" />Call</button>
       </div>
       <div className="pointer-events-auto flex max-w-full flex-wrap items-center gap-2 rounded-xl border border-border bg-panel/85 p-2 shadow-lg backdrop-blur-md">
         <div className="relative">
@@ -329,6 +331,8 @@ function Universe({ graph: source, focusId, familyId, accessToken, timeZone, ans
       <button type="button" onClick={() => setShowBrowser(current => !current)} aria-expanded={showBrowser} aria-controls="universe-browser" className="min-h-9 shrink-0 rounded-lg px-2 text-xs text-primary underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring">{showBrowser ? 'Hide list' : 'Browse list'}</button>
     </div>
     {showBrowser && <div id="universe-browser" className="absolute inset-x-3 bottom-20 z-30 max-h-[50%] sm:bottom-32 overflow-y-auto rounded-2xl border border-border bg-panel/95 p-4 shadow-xl backdrop-blur-md sm:inset-x-5"><p className="mb-3 text-xs text-muted-foreground">Select any visible record to explore its connections.</p><ul className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">{listedNodes.map(node => <li key={node.id}><button type="button" onClick={() => { selectNode(node); setShowBrowser(false); }} className="flex min-h-10 w-full items-center gap-2 rounded-lg px-2 text-left text-sm text-foreground hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring"><span aria-hidden="true" className="size-2 shrink-0 rounded-full" style={{ backgroundColor: colorFor(node) }} /><span className="min-w-0 grow break-words">{node.name}</span><span className="shrink-0 text-xs text-muted-foreground">{groupLabel(node)}</span></button></li>)}</ul></div>}
+    {calling && <FamilyCallDialog graph={source} familyId={familyId} accessToken={accessToken} onClose={() => setCalling(false)}
+      onSelect={id => { setCalling(false); const node = byId.get(id); if (node) selectNode(node); }} />}
     {asking && <FamilyAskDialog graph={source} familyId={familyId} accessToken={accessToken} last={answer} onAnswer={onAnswer} onClose={() => setAsking(false)}
       onSelect={id => { setAsking(false); const node = byId.get(id); if (node) selectNode(node); }} />}
     <p role="status" aria-live="polite" className="sr-only">{selected ? `Selected ${selected.name}. ${connected.length} connections. Details available.` : `${listedNodes.length} records visible.`}</p>

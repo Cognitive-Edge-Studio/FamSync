@@ -1703,6 +1703,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/families/{familyId}/base/voice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getFamilyVoice"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/base/voice/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Turns voice on or off. Owner only. */
+        put: operations["updateFamilyVoice"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/base/voice/consent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateFamilyVoiceConsent"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/base/voice/turns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["talkToFamilyBase"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3182,6 +3247,33 @@ export interface components {
             /** @description Family Base node ids the answer relies on. */
             nodeIds: string[];
             remaining: number;
+        };
+        FamilyVoiceStatusDto: {
+            /** @description True when this server is set up for voice. */
+            available: boolean;
+            /** @description True when the family owner turned voice on. */
+            enabled: boolean;
+            canManage: boolean;
+            consented: boolean;
+            /** @description Seconds the caller can still use today. */
+            remainingSeconds: number;
+        };
+        FamilyVoiceTurnDto: {
+            /**
+             * Format: binary
+             * @description MP4 or WebM audio up to 2 MB.
+             */
+            file: string;
+            /** @description JSON list of earlier turns in this call: [{you, reply}], at most six. */
+            turns?: string;
+        };
+        FamilyVoiceReplyDto: {
+            heard: string;
+            answer: string;
+            nodeIds: string[];
+            /** @description MP3 as base64, or null when the answer could not be spoken. */
+            audio: string | null;
+            remainingSeconds: number;
         };
     };
     responses: never;
@@ -6750,6 +6842,102 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FamilyAiAnswerDto"];
+                };
+            };
+        };
+    };
+    getFamilyVoice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyVoiceStatusDto"];
+                };
+            };
+        };
+    };
+    updateFamilyVoice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FamilyAiSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyVoiceStatusDto"];
+                };
+            };
+        };
+    };
+    updateFamilyVoiceConsent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FamilyAiConsentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyVoiceStatusDto"];
+                };
+            };
+        };
+    };
+    talkToFamilyBase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["FamilyVoiceTurnDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyVoiceReplyDto"];
                 };
             };
         };

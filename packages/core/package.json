@@ -9,7 +9,8 @@
     "./goals": "./src/goals.ts",
     "./reminders": "./src/reminders.ts",
     "./forms": "./src/forms.ts",
-    "./chat": "./src/chat.ts"
+    "./chat": "./src/chat.ts",
+    "./voice": "./src/voice.ts"
   },
   "dependencies": {
     "@famsync/api-client": "0.1.0"

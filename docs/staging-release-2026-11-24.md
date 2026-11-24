@@ -67,3 +67,11 @@ Website: https://famsync.goppopi.com/sign-in/. Passwords are in `.env.staging-de
 | Settings | Read receipts, online status, quiet hours, theme |
 
 Not testable until set up: email to outside addresses, scheduled reminder delivery, browser push, Android push, Google sign-in and AI questions. All testers share one family, so they see each other's changes. Android needs a separate phone build.
+
+## Migration rehearsal
+
+On 24 November 2026 a throwaway local database was built with the 26 migrations before 30 November (27 tables, as staging is documented to have), and filled with older local data: 78 families, 239 messages and 151 files. The nine new migrations then ran as the non-superuser `postgres` role. All succeeded, each in under two seconds, with no messages lost, and all 20 access tests passed afterwards. They drop no table, column or function. The copy was then deleted. This does not prove the hosted project's own permissions; the script stops at the first failure and keeps earlier migrations.
+
+## Shareable Android APK
+
+After steps 3, 4 and 6 (the app stops at its first screen until `/api/v1/mobile/android/version` returns 200), build the self-contained `preview` APK. Its public staging addresses, permanent package ID `com.goppopi.famsync`, and Firebase client-config path are in `apps/mobile/eas.json`. Use the variables and command in [android-phone-build.md](android-phone-build.md) with `--profile preview`. It installs alongside the development APK (`com.famsync.dev`). The matching `google-services.json` is kept out of Git and must be present in the EAS upload. Firebase server credentials have authenticated successfully; real-phone push acceptance remains pending.
