@@ -37,7 +37,7 @@ export class GuestsService{
  revoke(actor:string,family:string,channel:string,id:string,kind:'invitation'|'grant'){return this.run(actor,async client=>{await client.query('select app.revoke_channel_guest($1,$2,$3,$4)',[family,channel,id,kind]);return{id};},true);}
  accept(actor:string,token:string){return this.run(actor,async client=>{const {rows:[r]}=await client.query<{familyId:string;channelId:string}>('select family_id as "familyId",channel_id as "channelId" from app.accept_channel_guest($1)',[tokenDigest(token)]);if(!r)throw new NotFoundException('This channel invitation is unavailable for your account. Check the invited email, expiry, and current guest policy.');return r;},true);}
  workspaces(actor:string,query:{cursor?:string;limit?:number}):Promise<GuestWorkspacePageDto>{return this.run(actor,async client=>{const limit=query.limit??30;const {rows}=await client.query<GuestWorkspaceDto>(`select c.id,w.family_id as "familyId",w.family_name as "familyName",c.name,c.emoji,c.archived_at is not null as archived,
- (select count(*)::int from app.channel_messages m where m.channel_id=c.id and m.position>p.last_read and m.author_id is distinct from app.actor_id()) as unread
+ (select count(*)::int from app.channel_messages m where m.channel_id=c.id and m.position>p.last_read and m.author_id is distinct from app.actor_id() and m.deleted_at is null) as unread
  from app.guest_workspaces() w join app.channels c on c.id=w.channel_id join app.channel_participants p on p.channel_id=c.id and p.user_id=app.actor_id()
  where ($1::uuid is null or c.id>$1) order by c.id limit $2`,[query.cursor??null,limit+1]);const page=rows.slice(0,limit);return{channels:page,nextCursor:rows.length>limit?page.at(-1)!.id:null};});}
 }

@@ -1,0 +1,19 @@
+{
+  "cli": { "requireCommit": false, "appVersionSource": "local" },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "env": { "FAMSYNC_ANDROID_APPLICATION_ID": "com.famsync.dev" },
+      "distribution": "internal",
+      "credentialsSource": "remote",
+      "node": "24.18.0",
+      "android": { "buildType": "apk" }
+    },
+    "preview": {
+      "distribution": "internal",
+      "credentialsSource": "remote",
+      "node": "24.18.0",
+      "android": { "buildType": "apk" }
+    }
+  }
+}

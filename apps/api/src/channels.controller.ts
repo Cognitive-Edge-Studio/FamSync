@@ -9,7 +9,8 @@ import { ArchiveChannelDto, archiveChannelInput, ChannelDetailDto, ChannelHistor
   ChannelMessageDto, channelMessageInput, ChannelPageDto, channelReactionInput, channelReadInput, CreateChannelDto, createChannelInput,
   PostChannelMessageDto, ReactChannelMessageDto, ReadChannelDto, UpdateChannelDto, updateChannelInput,
   OpenDirectDto,directInput,MuteConversationDto,muteInput,MessageSearchPageDto,messageSearchInput,CreateMessageTaskDto,messageTaskInput,
-  LinkMessageEventDto,messageEventInput,LinkableEventPageDto,eventCandidatesInput,MessageSourcePageDto,workSourceInput,UnlinkSourceDto,unlinkSourceInput } from './channels.dto.js';
+  LinkMessageEventDto,messageEventInput,LinkableEventPageDto,eventCandidatesInput,MessageSourcePageDto,workSourceInput,UnlinkSourceDto,unlinkSourceInput,EditMessageDto,editMessageInput,ForwardMessageDto,forwardMessageInput,PinMessageDto,pinMessageInput,StarMessageDto,starMessageInput,
+  ConversationPreferencesDto,preferencesInput,ChannelAdminDto,channelAdminInput,HandOverChannelDto,handOverInput,LeftChannelDto,starredInput,DeliveredDto,deliveredInput,TypingDto,typingInput,AcknowledgedDto } from './channels.dto.js';
 function parsed<T>(schema:z.ZodType<T>,input:unknown):T {const result=schema.safeParse(input);if(!result.success) throw new BadRequestException('Check the channel and message fields.');return result.data;}
 @Controller('api/v1/families/:familyId/channels')
 @UseGuards(AuthGuard)
@@ -18,7 +19,7 @@ export class ChannelsController {
   constructor(private readonly channels:ChannelsService) {}
   @Get() @Header('Cache-Control','no-store') @ApiOperation({operationId:'listChannels'})
   @ApiQuery({name:'q',required:false,type:String}) @ApiQuery({name:'archived',required:false,enum:['true','false']})
-  @ApiQuery({name:'kind',required:false,enum:['channel','dm']})
+  @ApiQuery({name:'kind',required:false,enum:['channel','dm','all']})
   @ApiQuery({name:'cursor',required:false,type:String}) @ApiQuery({name:'limit',required:false,type:Number})
   @ApiOkResponse({type:ChannelPageDto})
   list(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Query()query:unknown){return this.channels.list(actorId,family,parsed(channelListInput,query));}
@@ -26,6 +27,31 @@ export class ChannelsController {
   create(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Body()body:CreateChannelDto){return this.channels.create(actorId,family,parsed(createChannelInput,body));}
   @Post('direct') @ApiOperation({operationId:'openDirectConversation'}) @ApiCreatedResponse({type:ChannelDetailDto})
   direct(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Body()body:OpenDirectDto){return this.channels.openDirect(actorId,family,parsed(directInput,body).peerId);}
+  @Get('starred-messages') @Header('Cache-Control','no-store') @ApiOperation({operationId:'listStarredMessages'}) @ApiOkResponse({type:MessageSearchPageDto})
+  @ApiQuery({name:'cursor',required:false,type:String}) @ApiQuery({name:'limit',required:false,type:Number})
+  starred(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Query()query:unknown){return this.channels.starred(actorId,family,parsed(starredInput,query));}
+  @Put('delivered') @ApiOperation({operationId:'acknowledgeDelivery'}) @ApiOkResponse({type:AcknowledgedDto})
+  delivered(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Body()body:DeliveredDto){return this.channels.delivered(actorId,family,parsed(deliveredInput,body).items);}
+  @Post(':channelId/typing') @ApiOperation({operationId:'signalTyping'}) @ApiCreatedResponse({type:AcknowledgedDto})
+  typing(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Param('channelId',ParseUUIDPipe)id:string,@Body()body:TypingDto){return this.channels.typing(actorId,family,id,parsed(typingInput,body).active);}
+  @Put(':channelId/preferences') @ApiOperation({operationId:'setConversationPreferences'}) @ApiOkResponse({type:ChannelDetailDto})
+  preferences(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Param('channelId',ParseUUIDPipe)id:string,@Body()body:ConversationPreferencesDto){return this.channels.preferences(actorId,family,id,parsed(preferencesInput,body));}
+  @Put(':channelId/admins/:userId') @ApiOperation({operationId:'setChannelAdmin'}) @ApiOkResponse({type:ChannelDetailDto})
+  admin(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Param('channelId',ParseUUIDPipe)id:string,@Param('userId',ParseUUIDPipe)user:string,@Body()body:ChannelAdminDto){return this.channels.setAdmin(actorId,family,id,user,parsed(channelAdminInput,body));}
+  @Put(':channelId/manager') @ApiOperation({operationId:'handOverChannel'}) @ApiOkResponse({type:ChannelDetailDto})
+  handOver(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Param('channelId',ParseUUIDPipe)id:string,@Body()body:HandOverChannelDto){return this.channels.handOver(actorId,family,id,parsed(handOverInput,body));}
+  @Post(':channelId/leave') @ApiOperation({operationId:'leaveChannel'}) @ApiCreatedResponse({type:LeftChannelDto})
+  leave(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Param('channelId',ParseUUIDPipe)id:string){return this.channels.leave(actorId,family,id);}
+  @Post(':channelId/forward') @ApiOperation({operationId:'forwardMessage'}) @ApiCreatedResponse({type:ChannelMessageDto})
+  forward(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Param('channelId',ParseUUIDPipe)id:string,@Body()body:ForwardMessageDto){return this.channels.forward(actorId,family,id,parsed(forwardMessageInput,body));}
+  @Put(':channelId/messages/:messageId/pin') @ApiOperation({operationId:'pinMessage'}) @ApiOkResponse({type:ChannelMessageDto})
+  pin(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Param('channelId',ParseUUIDPipe)id:string,@Param('messageId',ParseUUIDPipe)message:string,@Body()body:PinMessageDto){return this.channels.pin(actorId,family,id,message,parsed(pinMessageInput,body).pinned);}
+  @Put(':channelId/messages/:messageId/star') @ApiOperation({operationId:'starMessage'}) @ApiOkResponse({type:ChannelMessageDto})
+  star(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Param('channelId',ParseUUIDPipe)id:string,@Param('messageId',ParseUUIDPipe)message:string,@Body()body:StarMessageDto){return this.channels.star(actorId,family,id,message,parsed(starMessageInput,body).starred);}
+  @Put(':channelId/messages/:messageId') @ApiOperation({operationId:'editMessage'}) @ApiOkResponse({type:ChannelMessageDto})
+  edit(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Param('channelId',ParseUUIDPipe)id:string,@Param('messageId',ParseUUIDPipe)message:string,@Body()body:EditMessageDto){return this.channels.edit(actorId,family,id,message,parsed(editMessageInput,body));}
+  @Delete(':channelId/messages/:messageId') @ApiOperation({operationId:'deleteMessage'}) @ApiOkResponse({type:ChannelMessageDto})
+  remove(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Param('channelId',ParseUUIDPipe)id:string,@Param('messageId',ParseUUIDPipe)message:string){return this.channels.remove(actorId,family,id,message);}
   @Get('message-search') @Header('Cache-Control','no-store') @ApiOperation({operationId:'searchConversationMessages'}) @ApiOkResponse({type:MessageSearchPageDto})
   @ApiQuery({name:'q',required:true,type:String}) @ApiQuery({name:'conversationId',required:false,type:String})
   @ApiQuery({name:'cursor',required:false,type:String}) @ApiQuery({name:'limit',required:false,type:Number})
@@ -42,7 +68,7 @@ export class ChannelsController {
   @Put(':channelId/archive') @ApiOperation({operationId:'archiveChannel'}) @ApiOkResponse({type:ChannelDetailDto})
   archive(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Param('channelId',ParseUUIDPipe)id:string,@Body()body:ArchiveChannelDto){return this.channels.change(actorId,family,id,'archive',parsed(archiveChannelInput,body));}
   @Get(':channelId/messages') @Header('Cache-Control','no-store') @ApiOperation({operationId:'getChannelHistory'})
-  @ApiQuery({name:'before',required:false,type:Number}) @ApiQuery({name:'after',required:false,type:Number}) @ApiQuery({name:'limit',required:false,type:Number}) @ApiOkResponse({type:ChannelHistoryDto})
+  @ApiQuery({name:'changedSince',required:false,type:Number}) @ApiQuery({name:'from',required:false,type:Number}) @ApiQuery({name:'before',required:false,type:Number}) @ApiQuery({name:'after',required:false,type:Number}) @ApiQuery({name:'limit',required:false,type:Number}) @ApiOkResponse({type:ChannelHistoryDto})
   history(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Param('channelId',ParseUUIDPipe)id:string,@Query()query:unknown){return this.channels.history(actorId,family,id,parsed(channelHistoryInput,query));}
   @Post(':channelId/messages') @ApiOperation({operationId:'postChannelMessage'}) @ApiCreatedResponse({type:ChannelMessageDto})
   post(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)family:string,@Param('channelId',ParseUUIDPipe)id:string,@Body()body:PostChannelMessageDto){return this.channels.post(actorId,family,id,parsed(channelMessageInput,body));}

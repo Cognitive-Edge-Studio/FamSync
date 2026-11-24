@@ -3,6 +3,8 @@
 import { GoTrueClient, type AuthError } from "@supabase/auth-js";
 import { createFamSyncClient } from "@famsync/api-client";
 import { z } from "zod";
+import { clearChatDrafts } from "./chat-drafts";
+import { forgetPush } from "./push";
 
 let browserAuth: GoTrueClient | undefined;
 
@@ -15,7 +17,8 @@ function browserAuthConfig() {
 }
 
 export function getBrowserAuth() {
-  browserAuth ??= new GoTrueClient({
+  if (browserAuth) return browserAuth;
+  browserAuth = new GoTrueClient({
     ...browserAuthConfig(),
     storageKey: "famsync-session",
     flowType: "pkce",
@@ -23,6 +26,7 @@ export function getBrowserAuth() {
     autoRefreshToken: true,
     detectSessionInUrl: false,
   });
+  browserAuth.onAuthStateChange((event) => { if (event === "SIGNED_OUT") { clearChatDrafts(); void forgetPush(); } });
   return browserAuth;
 }
 
@@ -66,3 +70,11 @@ export function authMessage(error: AuthError) {
 }
 
 export const recoveryMarker = "famsync-recovery-user";
+
+/** Signs out here, first telling the server to stop sending push to this browser. */
+export async function signOutHere() {
+  const auth = getBrowserAuth();
+  const { data: { session } } = await auth.getSession();
+  if (session) await forgetPush(session.access_token);
+  return auth.signOut({ scope: "local" });
+}

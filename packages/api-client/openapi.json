@@ -1,6 +1,28 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/api/v1/mobile/android/version": {
+      "get": {
+        "operationId": "getAndroidVersionPolicy",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AndroidVersionPolicyDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "",
+        "tags": [
+          "MobileVersion"
+        ]
+      }
+    },
     "/api/v1/me/profile/activity": {
       "get": {
         "operationId": "getMyProfileActivity",
@@ -1836,6 +1858,15 @@
             "schema": {
               "type": "number"
             }
+          },
+          {
+            "name": "id",
+            "required": false,
+            "in": "query",
+            "description": "Resolve one notification with current access checks.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2841,7 +2872,8 @@
             "schema": {
               "enum": [
                 "channel",
-                "dm"
+                "dm",
+                "all"
               ],
               "type": "string"
             }
@@ -2964,6 +2996,712 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ChannelDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/channels/starred-messages": {
+      "get": {
+        "operationId": "listStarredMessages",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageSearchPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/channels/delivered": {
+      "put": {
+        "operationId": "acknowledgeDelivery",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveredDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcknowledgedDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/channels/{channelId}/typing": {
+      "post": {
+        "operationId": "signalTyping",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TypingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcknowledgedDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/channels/{channelId}/preferences": {
+      "put": {
+        "operationId": "setConversationPreferences",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConversationPreferencesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/channels/{channelId}/admins/{userId}": {
+      "put": {
+        "operationId": "setChannelAdmin",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelAdminDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/channels/{channelId}/manager": {
+      "put": {
+        "operationId": "handOverChannel",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandOverChannelDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/channels/{channelId}/leave": {
+      "post": {
+        "operationId": "leaveChannel",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeftChannelDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/channels/{channelId}/forward": {
+      "post": {
+        "operationId": "forwardMessage",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForwardMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelMessageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/channels/{channelId}/messages/{messageId}/pin": {
+      "put": {
+        "operationId": "pinMessage",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "messageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PinMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelMessageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/channels/{channelId}/messages/{messageId}/star": {
+      "put": {
+        "operationId": "starMessage",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "messageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StarMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelMessageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/channels/{channelId}/messages/{messageId}": {
+      "put": {
+        "operationId": "editMessage",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "messageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelMessageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Channels"
+        ]
+      },
+      "delete": {
+        "operationId": "deleteMessage",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "messageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelMessageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Channels"
+        ]
+      },
+      "get": {
+        "operationId": "getConversationMessage",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "messageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelMessageDto"
                 }
               }
             }
@@ -3351,6 +4089,22 @@
             "schema": {
               "type": "number"
             }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "changedSince",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
           }
         ],
         "responses": {
@@ -3582,58 +4336,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ChannelDetailDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "",
-        "tags": [
-          "Channels"
-        ]
-      }
-    },
-    "/api/v1/families/{familyId}/channels/{channelId}/messages/{messageId}": {
-      "get": {
-        "operationId": "getConversationMessage",
-        "parameters": [
-          {
-            "name": "familyId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "channelId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "messageId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChannelMessageDto"
                 }
               }
             }
@@ -5149,6 +5851,60 @@
         ]
       }
     },
+    "/api/v1/families/{familyId}/channels/{channelId}/uploads": {
+      "post": {
+        "operationId": "uploadChatFile",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/FileUploadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoredFileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Files"
+        ]
+      }
+    },
     "/api/v1/families/{familyId}/channels/{channelId}/messages/{messageId}/files/{fileId}": {
       "post": {
         "operationId": "attachMessageFile",
@@ -5268,6 +6024,771 @@
           "Files"
         ]
       }
+    },
+    "/api/v1/me/presence": {
+      "put": {
+        "operationId": "setMyPresence",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PresenceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresenceDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "ChatStatus"
+        ]
+      }
+    },
+    "/api/v1/me/chat-privacy": {
+      "get": {
+        "operationId": "getMyChatPrivacy",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatPrivacyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "ChatStatus"
+        ]
+      },
+      "put": {
+        "operationId": "setMyChatPrivacy",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatPrivacyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatPrivacyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "ChatStatus"
+        ]
+      }
+    },
+    "/api/v1/me/push": {
+      "get": {
+        "operationId": "getPushSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushSettingsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Push"
+        ]
+      },
+      "put": {
+        "operationId": "savePushSubscription",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushSubscriptionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushSavedDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Push"
+        ]
+      },
+      "delete": {
+        "operationId": "removePushSubscription",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushEndpointDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushSavedDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Push"
+        ]
+      }
+    },
+    "/api/v1/me/push/android": {
+      "get": {
+        "operationId": "getAndroidPushSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AndroidPushSettingsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "AndroidPush"
+        ]
+      },
+      "put": {
+        "operationId": "saveAndroidPushDevice",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AndroidPushDeviceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AndroidPushSavedDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "AndroidPush"
+        ]
+      },
+      "delete": {
+        "operationId": "removeAndroidPushDevice",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AndroidPushRemoveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AndroidPushSavedDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "AndroidPush"
+        ]
+      }
+    },
+    "/api/v1/push/android/revoke": {
+      "post": {
+        "operationId": "revokeAndroidPushDevice",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AndroidPushRevokeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AndroidPushSavedDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "",
+        "tags": [
+          "AndroidPushRevocation"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/base/graph": {
+      "get": {
+        "operationId": "getFamilyBaseGraph",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyBaseGraphDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Everything the caller can see in Family Base, with its relationships.",
+        "tags": [
+          "FamilyBase"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/base/entries/defaults": {
+      "get": {
+        "operationId": "getFamilyEntryDefaults",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyEntryDefaultsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyBase"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/base/entries/{entryId}": {
+      "get": {
+        "operationId": "getFamilyEntry",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyEntryDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyBase"
+        ]
+      },
+      "put": {
+        "operationId": "updateFamilyEntry",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFamilyEntryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyEntryDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyBase"
+        ]
+      },
+      "delete": {
+        "operationId": "deleteFamilyEntry",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FamilyEntryVersionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyEntryDeletedDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyBase"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/base/entries": {
+      "post": {
+        "operationId": "createFamilyEntry",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFamilyEntryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyEntryDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyBase"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/base/ai": {
+      "get": {
+        "operationId": "getFamilyAi",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyAiStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyAi"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/base/ai/settings": {
+      "put": {
+        "operationId": "updateFamilyAi",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FamilyAiSettingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyAiStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Turns questions on or off. Owner only.",
+        "tags": [
+          "FamilyAi"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/base/ai/consent": {
+      "put": {
+        "operationId": "updateFamilyAiConsent",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FamilyAiConsentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyAiStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyAi"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/base/ai/questions": {
+      "post": {
+        "operationId": "askFamilyBase",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FamilyAiQuestionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyAiAnswerDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyAi"
+        ]
+      }
     }
   },
   "info": {
@@ -5287,6 +6808,25 @@
       }
     },
     "schemas": {
+      "AndroidVersionPolicyDto": {
+        "type": "object",
+        "properties": {
+          "minimumBuild": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 2100000000
+          },
+          "updateUrl": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          }
+        },
+        "required": [
+          "minimumBuild",
+          "updateUrl"
+        ]
+      },
       "ProfileActivityDto": {
         "type": "object",
         "properties": {
@@ -5408,13 +6948,18 @@
               "owner",
               "member"
             ]
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "The family every app opens for this person."
           }
         },
         "required": [
           "name",
           "timeZone",
           "id",
-          "role"
+          "role",
+          "isDefault"
         ]
       },
       "FamilyInputDto": {
@@ -8030,6 +9575,56 @@
           "version"
         ]
       },
+      "LastMessageDto": {
+        "type": "object",
+        "properties": {
+          "attachment": {
+            "type": "string",
+            "enum": [
+              "voice",
+              "photo",
+              "video",
+              "file"
+            ],
+            "nullable": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "body": {
+            "type": "string"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "fileCount": {
+            "type": "number"
+          },
+          "author": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskPersonDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "attachment",
+          "id",
+          "body",
+          "deleted",
+          "fileCount",
+          "author",
+          "createdAt"
+        ]
+      },
       "ChannelDto": {
         "type": "object",
         "properties": {
@@ -8040,6 +9635,24 @@
           "canCreateWork": {
             "type": "boolean"
           },
+          "lastMessage": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LastMessageDto"
+              }
+            ]
+          },
+          "peer": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskPersonDto"
+              }
+            ]
+          },
           "kind": {
             "type": "string",
             "enum": [
@@ -8048,6 +9661,15 @@
             ]
           },
           "muted": {
+            "type": "boolean"
+          },
+          "pinned": {
+            "type": "boolean"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "markedUnread": {
             "type": "boolean"
           },
           "id": {
@@ -8078,6 +9700,9 @@
           "canManage": {
             "type": "boolean"
           },
+          "isManager": {
+            "type": "boolean"
+          },
           "memberCount": {
             "type": "number"
           },
@@ -8090,6 +9715,9 @@
           "readPosition": {
             "type": "number"
           },
+          "deliveredPosition": {
+            "type": "number"
+          },
           "archived": {
             "type": "boolean"
           },
@@ -8100,8 +9728,13 @@
         "required": [
           "imageFileId",
           "canCreateWork",
+          "lastMessage",
+          "peer",
           "kind",
           "muted",
+          "pinned",
+          "hidden",
+          "markedUnread",
           "id",
           "name",
           "emoji",
@@ -8109,10 +9742,12 @@
           "description",
           "manager",
           "canManage",
+          "isManager",
           "memberCount",
           "unread",
           "lastPosition",
           "readPosition",
+          "deliveredPosition",
           "archived",
           "version"
         ]
@@ -8192,13 +9827,82 @@
           },
           "guest": {
             "type": "boolean"
+          },
+          "admin": {
+            "type": "boolean"
+          },
+          "joinedPosition": {
+            "type": "number"
+          },
+          "deliveredPosition": {
+            "type": "number"
+          },
+          "readPosition": {
+            "type": "number",
+            "nullable": true
+          },
+          "online": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "lastSeen": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "required": [
           "userId",
           "name",
           "current",
-          "guest"
+          "guest",
+          "admin",
+          "joinedPosition",
+          "deliveredPosition",
+          "readPosition",
+          "online",
+          "lastSeen"
+        ]
+      },
+      "PinnedMessageDto": {
+        "type": "object",
+        "properties": {
+          "attachment": {
+            "type": "string",
+            "enum": [
+              "voice",
+              "photo",
+              "video",
+              "file"
+            ],
+            "nullable": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "body": {
+            "type": "string"
+          },
+          "fileCount": {
+            "type": "number"
+          },
+          "author": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskPersonDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "attachment",
+          "id",
+          "body",
+          "fileCount",
+          "author"
         ]
       },
       "ChannelDetailDto": {
@@ -8211,6 +9915,24 @@
           "canCreateWork": {
             "type": "boolean"
           },
+          "lastMessage": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LastMessageDto"
+              }
+            ]
+          },
+          "peer": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskPersonDto"
+              }
+            ]
+          },
           "kind": {
             "type": "string",
             "enum": [
@@ -8219,6 +9941,15 @@
             ]
           },
           "muted": {
+            "type": "boolean"
+          },
+          "pinned": {
+            "type": "boolean"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "markedUnread": {
             "type": "boolean"
           },
           "id": {
@@ -8249,6 +9980,9 @@
           "canManage": {
             "type": "boolean"
           },
+          "isManager": {
+            "type": "boolean"
+          },
           "memberCount": {
             "type": "number"
           },
@@ -8259,6 +9993,9 @@
             "type": "number"
           },
           "readPosition": {
+            "type": "number"
+          },
+          "deliveredPosition": {
             "type": "number"
           },
           "archived": {
@@ -8272,13 +10009,24 @@
             "items": {
               "$ref": "#/components/schemas/ChannelPersonDto"
             }
+          },
+          "pins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PinnedMessageDto"
+            }
           }
         },
         "required": [
           "imageFileId",
           "canCreateWork",
+          "lastMessage",
+          "peer",
           "kind",
           "muted",
+          "pinned",
+          "hidden",
+          "markedUnread",
           "id",
           "name",
           "emoji",
@@ -8286,13 +10034,16 @@
           "description",
           "manager",
           "canManage",
+          "isManager",
           "memberCount",
           "unread",
           "lastPosition",
           "readPosition",
+          "deliveredPosition",
           "archived",
           "version",
-          "members"
+          "members",
+          "pins"
         ]
       },
       "OpenDirectDto": {
@@ -8329,6 +10080,10 @@
             "type": "number",
             "nullable": true
           },
+          "voiceSeconds": {
+            "type": "number",
+            "nullable": true
+          },
           "canUnlink": {
             "type": "boolean"
           }
@@ -8339,6 +10094,7 @@
           "fileName",
           "mime",
           "byteSize",
+          "voiceSeconds",
           "canUnlink"
         ]
       },
@@ -8387,12 +10143,28 @@
       "ChannelReplyDto": {
         "type": "object",
         "properties": {
+          "attachment": {
+            "type": "string",
+            "enum": [
+              "voice",
+              "photo",
+              "video",
+              "file"
+            ],
+            "nullable": true
+          },
           "id": {
             "type": "string",
             "format": "uuid"
           },
           "body": {
             "type": "string"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "fileCount": {
+            "type": "number"
           },
           "author": {
             "nullable": true,
@@ -8405,8 +10177,11 @@
           }
         },
         "required": [
+          "attachment",
           "id",
           "body",
+          "deleted",
+          "fileCount",
           "author"
         ]
       },
@@ -8414,14 +10189,13 @@
         "type": "object",
         "properties": {
           "emoji": {
-            "type": "string",
-            "enum": [
-              "👍",
-              "❤️",
-              "🎉",
-              "😂",
-              "🙏"
-            ]
+            "type": "string"
+          },
+          "people": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskPersonDto"
+            }
           },
           "count": {
             "type": "number"
@@ -8432,6 +10206,7 @@
         },
         "required": [
           "emoji",
+          "people",
           "count",
           "active"
         ]
@@ -8466,6 +10241,39 @@
           },
           "position": {
             "type": "number"
+          },
+          "changeSeq": {
+            "type": "number"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "forwarded": {
+            "type": "boolean"
+          },
+          "starred": {
+            "type": "boolean"
+          },
+          "pinned": {
+            "type": "boolean"
+          },
+          "editCount": {
+            "type": "number"
+          },
+          "editedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "editableUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deletableUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           },
           "author": {
             "nullable": true,
@@ -8516,6 +10324,15 @@
           "id",
           "body",
           "position",
+          "changeSeq",
+          "deleted",
+          "forwarded",
+          "starred",
+          "pinned",
+          "editCount",
+          "editedAt",
+          "editableUntil",
+          "deletableUntil",
           "author",
           "createdAt",
           "replyTo",
@@ -8542,6 +10359,298 @@
         "required": [
           "messages",
           "nextCursor"
+        ]
+      },
+      "DeliveredItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "position"
+        ]
+      },
+      "DeliveredDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeliveredItemDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "AcknowledgedDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "TypingDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "active"
+        ]
+      },
+      "ConversationPreferencesDto": {
+        "type": "object",
+        "properties": {
+          "pinned": {
+            "type": "boolean"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "unread": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ChannelAdminDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number"
+          },
+          "admin": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "version",
+          "admin"
+        ]
+      },
+      "HandOverChannelDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "version",
+          "userId"
+        ]
+      },
+      "LeftChannelDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "ForwardMessageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "messageId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "conversationId",
+          "messageId"
+        ]
+      },
+      "ChannelMessageDto": {
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MessageFileDto"
+            }
+          },
+          "mentions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskPersonDto"
+            }
+          },
+          "work": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MessageWorkDto"
+            }
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "body": {
+            "type": "string"
+          },
+          "position": {
+            "type": "number"
+          },
+          "changeSeq": {
+            "type": "number"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "forwarded": {
+            "type": "boolean"
+          },
+          "starred": {
+            "type": "boolean"
+          },
+          "pinned": {
+            "type": "boolean"
+          },
+          "editCount": {
+            "type": "number"
+          },
+          "editedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "editableUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deletableUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "author": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskPersonDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "replyTo": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChannelReplyDto"
+              }
+            ]
+          },
+          "reactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelReactionDto"
+            }
+          }
+        },
+        "required": [
+          "files",
+          "mentions",
+          "work",
+          "id",
+          "body",
+          "position",
+          "changeSeq",
+          "deleted",
+          "forwarded",
+          "starred",
+          "pinned",
+          "editCount",
+          "editedAt",
+          "editableUntil",
+          "deletableUntil",
+          "author",
+          "createdAt",
+          "replyTo",
+          "reactions"
+        ]
+      },
+      "PinMessageDto": {
+        "type": "object",
+        "properties": {
+          "pinned": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "pinned"
+        ]
+      },
+      "StarMessageDto": {
+        "type": "object",
+        "properties": {
+          "starred": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "starred"
+        ]
+      },
+      "EditMessageDto": {
+        "type": "object",
+        "properties": {
+          "editCount": {
+            "type": "number"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "mentionedUserIds": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "editCount",
+          "body"
         ]
       },
       "MessageSourceDto": {
@@ -8651,79 +10760,6 @@
           "archived"
         ]
       },
-      "ChannelMessageDto": {
-        "type": "object",
-        "properties": {
-          "files": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MessageFileDto"
-            }
-          },
-          "mentions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TaskPersonDto"
-            }
-          },
-          "work": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MessageWorkDto"
-            }
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "body": {
-            "type": "string"
-          },
-          "position": {
-            "type": "number"
-          },
-          "author": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TaskPersonDto"
-              }
-            ]
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "replyTo": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ChannelReplyDto"
-              }
-            ]
-          },
-          "reactions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ChannelReactionDto"
-            }
-          }
-        },
-        "required": [
-          "files",
-          "mentions",
-          "work",
-          "id",
-          "body",
-          "position",
-          "author",
-          "createdAt",
-          "replyTo",
-          "reactions"
-        ]
-      },
       "ChannelHistoryDto": {
         "type": "object",
         "properties": {
@@ -8741,6 +10777,13 @@
             "type": "number",
             "nullable": true
           },
+          "nextChange": {
+            "type": "number",
+            "nullable": true
+          },
+          "latestChange": {
+            "type": "number"
+          },
           "latestPosition": {
             "type": "number"
           }
@@ -8749,6 +10792,8 @@
           "messages",
           "nextBefore",
           "nextAfter",
+          "nextChange",
+          "latestChange",
           "latestPosition"
         ]
       },
@@ -8793,13 +10838,7 @@
         "properties": {
           "emoji": {
             "type": "string",
-            "enum": [
-              "👍",
-              "❤️",
-              "🎉",
-              "😂",
-              "🙏"
-            ]
+            "maxLength": 32
           },
           "active": {
             "type": "boolean"
@@ -9380,8 +11419,14 @@
             "enum": [
               "image",
               "text",
+              "audio",
+              "video",
               "none"
             ]
+          },
+          "voiceSeconds": {
+            "type": "number",
+            "nullable": true
           }
         },
         "required": [
@@ -9395,7 +11440,8 @@
           "createdAt",
           "canManage",
           "canDownload",
-          "preview"
+          "preview",
+          "voiceSeconds"
         ]
       },
       "FilePageDto": {
@@ -9463,7 +11509,9 @@
             "type": "string",
             "enum": [
               "image",
-              "text"
+              "text",
+              "audio",
+              "video"
             ]
           },
           "fileName": {
@@ -9510,6 +11558,711 @@
         },
         "required": [
           "id"
+        ]
+      },
+      "PresenceDto": {
+        "type": "object",
+        "properties": {
+          "online": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "online"
+        ]
+      },
+      "ChatPrivacyDto": {
+        "type": "object",
+        "properties": {
+          "shareReceipts": {
+            "type": "boolean"
+          },
+          "sharePresence": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "shareReceipts",
+          "sharePresence"
+        ]
+      },
+      "PushSettingsDto": {
+        "type": "object",
+        "properties": {
+          "publicKey": {
+            "type": "string",
+            "description": "Empty when push is not available on this server."
+          }
+        },
+        "required": [
+          "publicKey"
+        ]
+      },
+      "PushSubscriptionDto": {
+        "type": "object",
+        "properties": {
+          "familyId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "p256dh": {
+            "type": "string"
+          },
+          "auth": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "familyId",
+          "endpoint",
+          "p256dh",
+          "auth"
+        ]
+      },
+      "PushSavedDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ]
+      },
+      "PushEndpointDto": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "endpoint"
+        ]
+      },
+      "AndroidPushSettingsDto": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "available"
+        ]
+      },
+      "AndroidPushDeviceDto": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "familyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "deviceId",
+          "familyId",
+          "token"
+        ]
+      },
+      "AndroidPushSavedDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ]
+      },
+      "AndroidPushRemoveDto": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "deviceId"
+        ]
+      },
+      "AndroidPushRevokeDto": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "deviceId",
+          "token"
+        ]
+      },
+      "FamilyBaseNodeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Graph-unique id: kind and record id, such as task:<uuid>."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "person",
+              "task",
+              "goal",
+              "event",
+              "conversation",
+              "file",
+              "memory",
+              "place",
+              "idea"
+            ]
+          },
+          "recordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "description": "Task status, goal status, conversation kind, file type or member role."
+          },
+          "when": {
+            "type": "string",
+            "nullable": true,
+            "description": "Due date, target date, event start or upload time (ISO date or date-time)."
+          },
+          "progress": {
+            "type": "number",
+            "nullable": true,
+            "description": "Goal completion percentage when measured."
+          },
+          "repeats": {
+            "type": "boolean",
+            "description": "True for a repeating chore or event."
+          },
+          "folderId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid",
+            "description": "Folder that holds a file node."
+          },
+          "note": {
+            "type": "string",
+            "nullable": true,
+            "description": "Note on a memory, place or idea."
+          },
+          "location": {
+            "type": "string",
+            "nullable": true,
+            "description": "Address or description of a place."
+          },
+          "canEdit": {
+            "type": "boolean",
+            "description": "True when the caller wrote this memory, place or idea."
+          },
+          "you": {
+            "type": "boolean",
+            "description": "True for the signed-in member's own person node."
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "recordId",
+          "name",
+          "status",
+          "when",
+          "progress",
+          "repeats",
+          "folderId",
+          "note",
+          "location",
+          "canEdit",
+          "you"
+        ]
+      },
+      "FamilyBaseLinkDto": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string",
+            "enum": [
+              "assigned",
+              "created",
+              "goal-step",
+              "event",
+              "participant",
+              "shared-in",
+              "linked"
+            ]
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "relation"
+        ]
+      },
+      "FamilyBaseGraphDto": {
+        "type": "object",
+        "properties": {
+          "familyName": {
+            "type": "string"
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FamilyBaseNodeDto"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FamilyBaseLinkDto"
+            }
+          },
+          "truncated": {
+            "type": "array",
+            "description": "Kinds where only the most relevant records are shown.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "person",
+                "task",
+                "goal",
+                "event",
+                "conversation",
+                "file",
+                "memory",
+                "place",
+                "idea"
+              ]
+            }
+          }
+        },
+        "required": [
+          "familyName",
+          "nodes",
+          "links",
+          "truncated"
+        ]
+      },
+      "FamilyEntryDefaultsDto": {
+        "type": "object",
+        "properties": {
+          "audience": {
+            "type": "string",
+            "enum": [
+              "family",
+              "selected",
+              "private"
+            ]
+          }
+        },
+        "required": [
+          "audience"
+        ]
+      },
+      "FamilyEntryLinkDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "person",
+              "goal",
+              "event",
+              "entry"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "name"
+        ]
+      },
+      "FamilyEntryDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "memory",
+              "place",
+              "idea"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "happenedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "Memories only."
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Places only; otherwise empty."
+          },
+          "audience": {
+            "type": "string",
+            "enum": [
+              "family",
+              "selected",
+              "private"
+            ]
+          },
+          "selectedMemberIds": {
+            "description": "Returned only to the author.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "number"
+          },
+          "canEdit": {
+            "type": "boolean"
+          },
+          "links": {
+            "description": "Links whose target the caller can see.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FamilyEntryLinkDto"
+            }
+          }
+        },
+        "required": [
+          "kind",
+          "title",
+          "note",
+          "happenedOn",
+          "location",
+          "audience",
+          "selectedMemberIds",
+          "id",
+          "version",
+          "canEdit",
+          "links"
+        ]
+      },
+      "FamilyEntryLinkInputDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "person",
+              "goal",
+              "event",
+              "entry"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ]
+      },
+      "CreateFamilyEntryDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "memory",
+              "place",
+              "idea"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "happenedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "Memories only."
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Places only; otherwise empty."
+          },
+          "audience": {
+            "type": "string",
+            "enum": [
+              "family",
+              "selected",
+              "private"
+            ]
+          },
+          "selectedMemberIds": {
+            "description": "Returned only to the author.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FamilyEntryLinkInputDto"
+            }
+          }
+        },
+        "required": [
+          "kind",
+          "title",
+          "note",
+          "happenedOn",
+          "location",
+          "audience",
+          "selectedMemberIds",
+          "id",
+          "links"
+        ]
+      },
+      "UpdateFamilyEntryDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "memory",
+              "place",
+              "idea"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "happenedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "Memories only."
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Places only; otherwise empty."
+          },
+          "audience": {
+            "type": "string",
+            "enum": [
+              "family",
+              "selected",
+              "private"
+            ]
+          },
+          "selectedMemberIds": {
+            "description": "Returned only to the author.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FamilyEntryLinkInputDto"
+            }
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "kind",
+          "title",
+          "note",
+          "happenedOn",
+          "location",
+          "audience",
+          "selectedMemberIds",
+          "links",
+          "version"
+        ]
+      },
+      "FamilyEntryVersionDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "version"
+        ]
+      },
+      "FamilyEntryDeletedDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "FamilyAiStatusDto": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "description": "True when this server is set up for questions."
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "True when the family owner turned questions on."
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "consented": {
+            "type": "boolean"
+          },
+          "remaining": {
+            "type": "number",
+            "description": "Questions the caller can still ask today."
+          }
+        },
+        "required": [
+          "available",
+          "enabled",
+          "canManage",
+          "consented",
+          "remaining"
+        ]
+      },
+      "FamilyAiSettingsDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ]
+      },
+      "FamilyAiConsentDto": {
+        "type": "object",
+        "properties": {
+          "accepted": {
+            "type": "boolean"
+          },
+          "adult": {
+            "type": "boolean",
+            "description": "The member confirms they are 18 or older. Required to accept."
+          }
+        },
+        "required": [
+          "accepted",
+          "adult"
+        ]
+      },
+      "FamilyAiQuestionDto": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "question"
+        ]
+      },
+      "FamilyAiAnswerDto": {
+        "type": "object",
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "nodeIds": {
+            "description": "Family Base node ids the answer relies on.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "remaining": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "answer",
+          "nodeIds",
+          "remaining"
         ]
       }
     }

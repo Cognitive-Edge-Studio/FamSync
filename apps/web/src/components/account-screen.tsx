@@ -2,10 +2,12 @@
 
 import type { Session } from "@supabase/auth-js";
 import { useEffect, useState } from "react";
-import { getBrowserAuth, recoveryMarker } from "@/lib/browser-auth";
+import { getBrowserAuth, recoveryMarker, signOutHere } from "@/lib/browser-auth";
 import { AccountSecurityForm } from "./account-security-form";
 import { AppShell } from "./app-shell";
 import { NotificationPreferences } from "./notification-preferences";
+import { ChatPrivacy } from "./chat-privacy";
+import { PushPreferences } from "./push-preferences";
 import { PrivacyPreferences } from "./privacy-preferences";
 import { ProfileForm } from "./profile-form";
 import { ProfileActivity } from "./profile-activity";
@@ -50,7 +52,7 @@ export function AccountScreen() {
     setSigningOut(true);
     setError("");
     try {
-      const { error } = await getBrowserAuth().signOut({ scope: "local" });
+      const { error } = await signOutHere();
       if (error) throw error;
       sessionStorage.removeItem(recoveryMarker);
       setSession(null);
@@ -85,10 +87,12 @@ export function AccountScreen() {
               <ProfileForm key={session.user.id} userId={session.user.id} />
               <ProfileActivity key={session.user.id + "-activity"} accessToken={session.access_token} />
             </Tabs.Panel>
-            <Tabs.Panel value="privacy" keepMounted className="outline-none data-[hidden]:hidden">
+            <Tabs.Panel value="privacy" keepMounted className="grid gap-5 outline-none data-[hidden]:hidden">
               <PrivacyPreferences key={session.user.id + "-privacy"} accessToken={session.access_token} />
+              <ChatPrivacy key={session.user.id + "-chat"} accessToken={session.access_token} />
             </Tabs.Panel>
-            <Tabs.Panel value="notifications" keepMounted className="outline-none data-[hidden]:hidden">
+            <Tabs.Panel value="notifications" keepMounted className="grid gap-5 outline-none data-[hidden]:hidden">
+              <PushPreferences key={session.user.id + "-push"} accessToken={session.access_token} userId={session.user.id} />
               <NotificationPreferences key={session.user.id + "-notifications"} accessToken={session.access_token} />
             </Tabs.Panel>
             <Tabs.Panel value="security" keepMounted className="outline-none data-[hidden]:hidden">

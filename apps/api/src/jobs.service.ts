@@ -10,9 +10,14 @@ import type { ChangeNotice } from "./reminder-queue.js";
 import { RemindersService } from "./reminders.service.js";
 import { ChannelRealtimeService } from "./channel-realtime.service.js";
 import {AttachmentStorageService} from './attachment-storage.service.js';
+import { PushService } from './push.service.js';
+import { AndroidPushService } from './android-push.service.js';
+import { PushRetryError } from './push-retry.js';
 
 export const outboxEvent = "famsync/outbox.pending";
 const batchSize = 20;
+const liveKinds = ["conversation.notice", "channel.refresh"];
+const pushKinds = ["push.send"];
 
 type Handler = (client: PoolClient, row: OutboxRow) => Promise<void>;
 
@@ -31,7 +36,10 @@ export class JobsService {
       if(status==='failed')throw new Error('Guest invitation email delivery failed');
     },
     "conversation.notice": async(client,row)=>{await client.query('select app.deliver_conversation_notice($1)',[String(row.payload.messageId)]);},
-    "channel.refresh": (client, row) => this.channelRealtime.publish(client, String(row.payload.channelId)),
+    "push.send": (_client, row) => row.payload.transport === 'android'
+      ? this.androidPush.deliver(String(row.payload.recipientId), String(row.payload.notificationId), String(row.payload.subscriptionId))
+      : this.push.deliver(String(row.payload.recipientId), String(row.payload.notificationId), String(row.payload.subscriptionId), row.attempts),
+    "channel.refresh": (client, row) => this.channelRealtime.publish(client, String(row.payload.channelId), Array.isArray(row.payload.users) ? row.payload.users.map(String) : undefined),
     "invitation.email": (client, row) => this.sendInvitation(client, row),
     "reminders.plan": async (_client, row) => {
       await this.reminders.plan(row.payload.sourceKind as SourceKind, String(row.payload.sourceId), String(row.payload.authorId));
@@ -48,6 +56,8 @@ export class JobsService {
     private readonly reminders: RemindersService,
     private readonly channelRealtime: ChannelRealtimeService,
     private readonly storage:AttachmentStorageService,
+    private readonly push: PushService,
+    private readonly androidPush: AndroidPushService,
   ) {}
 
   // Inngest runs the dispatcher after each commit and every minute as a safety net. A run that fails in
@@ -58,12 +68,12 @@ export class JobsService {
     return [
       this.inngest.createFunction(
         { id: "dispatch-outbox", triggers: [{ event: outboxEvent }, { cron: poll }], retries: 3 },
-        async ({ step }) => step.run("dispatch", () => this.dispatch()),
+        async ({ step }) => step.run("dispatch", () => this.dispatch().finally(() => void this.pushNow())),
       ),
       // Due reminders are checked on the poll schedule (every minute by default). Each one is rechecked against its item before it is sent.
       this.inngest.createFunction(
         { id: "deliver-reminders", triggers: [{ cron: poll }], retries: 3 },
-        async ({ step }) => step.run("deliver", () => this.reminders.deliverDue()),
+        async ({ step }) => step.run("deliver", () => this.reminders.deliverDue().finally(() => void this.pushNow())),
       ),
       // Hourly re-planning keeps a 14-day horizon for repeating events and chores.
       this.inngest.createFunction(
@@ -73,8 +83,49 @@ export class JobsService {
     ];
   }
 
-  // Asks Inngest to dispatch now. If Inngest is unreachable, the cron run picks the work up within a minute.
+  // Chat signals go out from here at once; anything left over is picked up by the scheduled pass.
+  private signalling = false;
+  private signalAgain = false;
+  private async signalNow() {
+    this.signalAgain = true;
+    if (this.signalling || !this.database.configured) return;
+    this.signalling = true;
+    try {
+      while (this.signalAgain) {
+        this.signalAgain = false;
+        // Delivering an alert queues a refresh, so run until nothing is left.
+        while ((await this.dispatch(liveKinds)).processed > 0);
+      }
+    } catch {
+      this.logger.warn("Could not send live updates now. They will run on the next scheduled pass.");
+    } finally {
+      this.signalling = false;
+    }
+    void this.pushNow();
+  }
+
+  // Push goes out in its own lane, so a slow push service never delays live updates.
+  private pushing = false;
+  private async pushNow() {
+    if (this.pushing || !this.database.configured) return;
+    this.pushing = true;
+    try {
+      while ((await this.dispatch(pushKinds)).processed > 0);
+    } catch {
+      this.logger.warn("Could not send push now. It will run on the next scheduled pass.");
+    } finally {
+      this.pushing = false;
+    }
+  }
+
+  // Asks Inngest to dispatch now. If Inngest is unreachable, the cron run picks the work up on its next pass.
+  // Callers do not wait: the work is already saved.
   async notify() {
+    void this.signalNow();
+    void this.signalScheduler();
+  }
+
+  private async signalScheduler() {
     try {
       await this.inngest.send({ name: outboxEvent, data: {} });
     } catch {
@@ -82,12 +133,12 @@ export class JobsService {
     }
   }
 
-  async dispatch() {
+  async dispatch(kinds = Object.keys(this.handlers)) {
     if (!this.database.configured) return { processed: 0, failed: 0 };
     let processed = 0;
     let failed = 0;
     for (;;) {
-      const rows = await this.database.withClient((client) => claimOutbox(client, Object.keys(this.handlers), batchSize));
+      const rows = await this.database.withClient((client) => claimOutbox(client, kinds, batchSize));
       if (!rows.length) break;
       for (const row of rows) {
         const ok = await this.database.withClient((client) => this.process(client, row));
@@ -107,7 +158,7 @@ export class JobsService {
       return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
-      const status = await failOutbox(client, row.id, message);
+      const status = await failOutbox(client, row.id, message, error instanceof PushRetryError ? error.retrySeconds : 0);
       if (status === "dead") this.logger.error("Gave up on " + context + ": " + message);
       else this.logger.warn("Will retry " + context + ": " + message);
       return false;

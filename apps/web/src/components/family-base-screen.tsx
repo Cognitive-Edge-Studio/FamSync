@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 
 const FamilyBaseUniverse = dynamic(() => import("./family-base-universe"), {
   ssr: false,
-  loading: () => <div role="status" className="grid flex-1 place-items-center bg-[#f4f6f3] text-sm text-muted-foreground dark:bg-[#08101e]">Opening your demo universe…</div>,
+  loading: () => <div role="status" className="grid flex-1 place-items-center bg-[#f4f6f3] text-sm text-muted-foreground dark:bg-[#08101e]">Opening your family universe…</div>,
 });
 
 export function FamilyBaseScreen() {
@@ -18,7 +18,7 @@ export function FamilyBaseScreen() {
         <FamilySession>
           {(session) => (
             <ScheduleFamily key={session.user.id} session={session} section="family-base">
-              {(family) => <FamilyBaseUniverse key={family.id} />}
+              {(family) => <FamilyBaseUniverse key={family.id} familyId={family.id} accessToken={session.access_token} timeZone={family.timeZone} />}
             </ScheduleFamily>
           )}
         </FamilySession>

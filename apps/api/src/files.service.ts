@@ -4,7 +4,7 @@ import {DatabaseService} from './database.service.js';import {JobsService} from 
 import {validateStoredFile,type IncomingFile} from './file-validation.js';
 import {folderCreateInput,folderEditInput,folderListInput,fileListInput,type FolderDto,type FolderPageDto,type StoredFileDto,type FilePageDto,type FilePreviewDto} from './files.dto.js';
 const folderFields=`d.id,d.family_id as "familyId",d.channel_id as "channelId",c.name as "channelName",d.name,d.audience,d.selected_member_ids as "selectedMemberIds",d.version,d.archived_at is not null as archived,d.created_at as "createdAt",app.folder_can_manage(d.id) as "canManage",app.folder_can_upload(d.id) as "canUpload",(select count(*)::int from app.stored_files sf where sf.folder_id=d.id and sf.state='ready' and sf.archived_at is null) as "fileCount"`;
-const fileFields=`f.id,f.folder_id as "folderId",f.file_name as "fileName",f.mime,f.byte_size as "byteSize",f.version,f.archived_at is not null as archived,f.created_at as "createdAt",app.file_can_manage(f.id) as "canManage",f.archived_at is null and (d.id is null or d.archived_at is null) as "canDownload",case when f.mime like 'image/%' then 'image' when f.mime like 'text/%' then 'text' else 'none' end as preview`;
+const fileFields=`f.id,f.folder_id as "folderId",f.file_name as "fileName",f.mime,f.byte_size as "byteSize",f.version,f.archived_at is not null as archived,f.created_at as "createdAt",app.file_can_manage(f.id) as "canManage",f.archived_at is null and (d.id is null or d.archived_at is null) as "canDownload",case when f.mime like 'image/%' then 'image' when f.mime like 'text/%' then 'text' when f.mime like 'audio/%' then 'audio' when f.mime like 'video/%' then 'video' else 'none' end as preview,f.voice_seconds as "voiceSeconds"`;
 @Injectable()
 export class FilesService{
  constructor(private readonly database:DatabaseService,private readonly storage:AttachmentStorageService,private readonly jobs:JobsService){}
@@ -49,10 +49,22 @@ export class FilesService{
   }
   return this.getFile(actor,family,input.id);
  }
+ // A file sent from the chat box needs no folder choice; the server picks the conversation's own.
+ async chatUpload(actor:string,family:string,channel:string,id:string,file:IncomingFile,voiceSeconds?:number){
+  const folder=await this.run(actor,async client=>{const{rows:[r]}=await client.query<{id:string;version:number}>('select id,version from app.chat_upload_folder($1,$2,$3)',[family,channel,id]);return r;},true);
+  const saved=await this.upload(actor,family,{folder:folder.id},{id,version:folder.version},file);
+  if(!voiceSeconds)return saved;
+  return this.run(actor,async client=>{await client.query('select app.set_voice_note($1,$2,$3)',[family,id,voiceSeconds]);return this.file(client,family,id);});
+ }
+ async copyToChat(actor:string,family:string,source:string,channel:string,id:string){
+  const grant=await this.readGrant(actor,family,source),buffer=await this.storage.readFile(grant.object_key);
+  const {voiceSeconds}=await this.getFile(actor,family,source);
+  return this.chatUpload(actor,family,channel,id,{buffer,size:buffer.length,originalname:Buffer.from(grant.file_name,'utf8').toString('latin1')},voiceSeconds??undefined);
+ }
  archiveFile(actor:string,family:string,id:string,input:{version:number;archived:boolean}){return this.run(actor,async client=>{await client.query('select app.archive_stored_file($1,$2,$3,$4)',[family,id,input.version,input.archived]);return this.file(client,family,id);},true);}
  private readGrant(actor:string,family:string,id:string){return this.run(actor,async client=>{const{rows:[r]}=await client.query<{object_key:string;file_name:string;mime:string;byte_size:number}>('select * from app.stored_file_grant($1,$2)',[family,id]);if(!r)throw new NotFoundException('File unavailable. It may be archived or access may have ended.');return r;});}
  async download(actor:string,family:string,id:string){const r=await this.readGrant(actor,family,id);return this.storage.openFile(r.object_key,r.file_name);}
- async preview(actor:string,family:string,id:string):Promise<FilePreviewDto>{const r=await this.readGrant(actor,family,id);if(r.mime.startsWith('image/')){const grant=await this.storage.openFile(r.object_key,r.file_name,true);return{kind:'image',fileName:r.file_name,url:grant.url,expiresAt:grant.expiresAt,text:null};}if(r.mime.startsWith('text/')){const bytes=await this.storage.readFile(r.object_key);return{kind:'text',fileName:r.file_name,text:new TextDecoder('utf-8').decode(bytes).slice(0,50000),url:null,expiresAt:null};}throw new BadRequestException('Preview is available for images, text and CSV. Download this file to open it.');}
+ async preview(actor:string,family:string,id:string):Promise<FilePreviewDto>{const r=await this.readGrant(actor,family,id),media=r.mime.split('/')[0];if(media==='image'||media==='audio'||media==='video'){const grant=await this.storage.openFile(r.object_key,r.file_name,true);return{kind:media,fileName:r.file_name,url:grant.url,expiresAt:grant.expiresAt,text:null};}if(r.mime.startsWith('text/')){const bytes=await this.storage.readFile(r.object_key);return{kind:'text',fileName:r.file_name,text:new TextDecoder('utf-8').decode(bytes).slice(0,50000),url:null,expiresAt:null};}throw new BadRequestException('Preview is available for images, recordings, video, text and CSV. Download this file to open it.');}
  async channelImage(actor:string,family:string,channel:string){const id=await this.run(actor,async client=>{const{rows:[c]}=await client.query<{id:string|null}>('select image_file_id as id from app.channels where id=$1 and family_id=$2',[channel,family]);if(!c?.id)throw new NotFoundException('Channel image not found.');return c.id;});return this.preview(actor,family,id);}
  removeImage(actor:string,family:string,channel:string,version:number){return this.run(actor,async client=>{await client.query('select app.remove_channel_image($1,$2,$3)',[family,channel,version]);return{id:channel};},true);}
  link(actor:string,family:string,channel:string,message:string,file:string){return this.run(actor,async client=>{await client.query('select app.link_message_file($1,$2,$3,$4)',[family,channel,message,file]);return{id:file};},true);}

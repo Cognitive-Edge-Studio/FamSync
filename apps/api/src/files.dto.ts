@@ -21,11 +21,13 @@ export class FolderPageDto{@ApiProperty({type:[FolderDto]}) folders!:FolderDto[]
 export class StoredFileDto{
  @ApiProperty() id!:string;@ApiProperty({type:String,nullable:true}) folderId!:string|null;@ApiProperty() fileName!:string;@ApiProperty() mime!:string;@ApiProperty() byteSize!:number;
  @ApiProperty() version!:number;@ApiProperty() archived!:boolean;@ApiProperty() createdAt!:string;@ApiProperty() canManage!:boolean;@ApiProperty() canDownload!:boolean;
- @ApiProperty({enum:['image','text','none']}) preview!:'image'|'text'|'none';
+ @ApiProperty({enum:['image','text','audio','video','none']}) preview!:'image'|'text'|'audio'|'video'|'none';
+ @ApiProperty({type:Number,nullable:true}) voiceSeconds!:number|null;
 }
 export class FilePageDto{@ApiProperty({type:[StoredFileDto]}) files!:StoredFileDto[];@ApiProperty({type:String,nullable:true}) nextCursor!:string|null;}
+export const chatUploadInput=z.object({id:z.uuid(),voiceSeconds:z.coerce.number().int().min(1).max(3600).optional()});
 export class FileUploadDto{@ApiProperty() id!:string;@ApiProperty() version!:number;@ApiProperty({type:'string',format:'binary'}) file!:string;}
 export class FileGrantDto{@ApiProperty() url!:string;@ApiProperty() expiresAt!:string;@ApiProperty() fileName!:string;}
-export class FilePreviewDto{@ApiProperty({enum:['image','text']}) kind!:'image'|'text';@ApiProperty() fileName!:string;@ApiProperty({type:String,nullable:true}) url!:string|null;@ApiProperty({type:String,nullable:true}) text!:string|null;@ApiProperty({type:String,nullable:true}) expiresAt!:string|null;}
+export class FilePreviewDto{@ApiProperty({enum:['image','text','audio','video']}) kind!:'image'|'text'|'audio'|'video';@ApiProperty() fileName!:string;@ApiProperty({type:String,nullable:true}) url!:string|null;@ApiProperty({type:String,nullable:true}) text!:string|null;@ApiProperty({type:String,nullable:true}) expiresAt!:string|null;}
 export class FileMutationDto{@ApiProperty() id!:string;}
 export class FileVersionDto{@ApiProperty() version!:number;}

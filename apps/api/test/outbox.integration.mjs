@@ -41,6 +41,18 @@ after(async () => {
   await Promise.all([admin.end(), ...workers.map((pool) => pool.end())]);
 });
 
+test('provider retry-after prevents an early retry', async () => {
+  const [key] = await insert(1, 'test.retry');
+  const client = await workers[0].connect();
+  try {
+    const [row] = await claimOutbox(client, ['test.retry'], 1);
+    await failOutbox(client, row.id, 'Android push delivery failed', 180);
+    assert.equal((await claimOutbox(client, ['test.retry'], 1)).length, 0);
+    const { rows: [result] } = await admin.query('select available_at > now() + interval \'170 seconds\' as delayed from app.outbox where dedupe_key=$1', [key]);
+    assert.equal(result.delayed, true);
+  } finally { client.release(); await admin.query('delete from app.outbox where dedupe_key=$1', [key]); }
+});
+
 test("two dispatchers running at once process each row exactly once", async () => {
   const keys = await insert(40, "test.noop");
   const seen = [];

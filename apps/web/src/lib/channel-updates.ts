@@ -4,8 +4,9 @@ import { RealtimeClient } from '@supabase/realtime-js';
 import { getBrowserAuth } from './browser-auth';
 
 // Broadcasts carry no content. Fetch authoritative data after any signal or reconnect.
-export function useChannelUpdates(userId:string,channelIds:string[],refresh:()=>void) {
+export function useChannelUpdates(userId:string,channelIds:string[],refresh:()=>void,onTyping?:(channelId:string,userId:string,active:boolean)=>void) {
   const latest=useRef(refresh);latest.current=refresh;
+  const typing=useRef(onTyping);typing.current=onTyping;
   const [state,setState]=useState('Connecting to updates…');
   const key=channelIds.slice().sort().join(',');
   useEffect(()=>{
@@ -26,7 +27,8 @@ export function useChannelUpdates(userId:string,channelIds:string[],refresh:()=>
       void realtime.setAuth().then(()=>{
         if(!active)return;
         for(const id of ids) realtime.channel('famsync:channel:'+id+':'+userId,{config:{private:true}})
-          .on('broadcast',{event:'refresh'},signal).subscribe(status=>{
+          .on('broadcast',{event:'refresh'},signal)
+          .on('broadcast',{event:'typing'},({payload})=>{if(active&&typeof payload?.userId==='string')typing.current?.(id,payload.userId,payload.active===true);}).subscribe(status=>{
             if(!active)return;
             if(status==='SUBSCRIBED'){connected.add(id);signal();}
             else connected.delete(id);

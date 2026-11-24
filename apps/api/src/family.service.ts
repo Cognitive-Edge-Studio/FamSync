@@ -8,7 +8,10 @@ import { invitationToken, tokenDigest } from "./invitation-token.js";
 import { JobsService } from "./jobs.service.js";
 
 const families = `
-  select f.id, f.name, f.time_zone as "timeZone", m.role
+  select f.id, f.name, f.time_zone as "timeZone", m.role,
+    -- The family joined first. Joining or renaming a family never changes it; losing access moves to the next.
+    not exists (select 1 from app.family_memberships earlier where earlier.user_id = app.actor_id()
+      and (earlier.joined_at, earlier.family_id) < (m.joined_at, m.family_id)) as "isDefault"
   from app.families f
   join app.family_memberships m on m.family_id = f.id and m.user_id = app.actor_id()
 `;
@@ -25,6 +28,12 @@ type InvitationAttempt = InvitationDto & { attempt: string };
 
 function digest(token: string) {
   return createHash("sha256").update(token).digest("hex");
+}
+
+function rejectSecondFamily(error: unknown) {
+  if ((error as { code?: string }).code === "FS001") {
+    throw new ConflictException("Your account already belongs to a family. Each account can have one family.");
+  }
 }
 
 @Injectable()
@@ -55,6 +64,7 @@ export class FamilyService {
       });
     } catch (error) {
       if ((error as { code?: string }).code === "22023") throw new BadRequestException("Choose a valid time zone.");
+      rejectSecondFamily(error);
       throw error;
     }
   }
@@ -155,14 +165,19 @@ export class FamilyService {
     });
   }
 
-  accept(actor: string, token: string) {
-    return this.database.withActor(actor, async (client) => {
-      const { rows: [{ id }] } = await client.query<{ id: string | null }>(
-        "select app.accept_family_invitation($1) as id", [digest(token)],
-      );
-      if (!id) throw new NotFoundException("This invitation is unavailable for your account.");
-      return this.find(client, id);
-    });
+  async accept(actor: string, token: string) {
+    try {
+      return await this.database.withActor(actor, async (client) => {
+        const { rows: [{ id }] } = await client.query<{ id: string | null }>(
+          "select app.accept_family_invitation($1) as id", [digest(token)],
+        );
+        if (!id) throw new NotFoundException("This invitation is unavailable for your account.");
+        return this.find(client, id);
+      });
+    } catch (error) {
+      rejectSecondFamily(error);
+      throw error;
+    }
   }
 
   private async find(client: PoolClient, familyId: string) {

@@ -4,7 +4,9 @@ WORKDIR /workspace
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
+COPY apps/mobile/package.json apps/mobile/
 COPY packages/api-client/package.json packages/api-client/
+COPY packages/core/package.json packages/core/
 RUN npm ci --workspace @famsync/api --include-workspace-root=false --ignore-scripts --no-audit --no-fund
 
 COPY apps/api/tsconfig.json apps/api/

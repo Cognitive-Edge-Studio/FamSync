@@ -58,3 +58,15 @@ services:
         sync: false
       - key: RESEND_API_KEY
         sync: false
+      # Browser push stays off until all three are set. Generate keys with: npx web-push generate-vapid-keys
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        sync: false
+      # Family Base questions stay off until both are set. Read docs/family-base-ai.md first.
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: FAMILY_AI_ENABLED
+        value: "false"

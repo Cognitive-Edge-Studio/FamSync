@@ -11,6 +11,7 @@ import { z } from "zod";
 export type AuthenticatedRequest = {
   headers: { authorization?: string };
   actorId: string;
+  sessionId?: string;
 };
 
 @Injectable()
@@ -59,6 +60,8 @@ export class AuthGuard implements CanActivate {
     }
 
     request.actorId = id.data;
+    const sessionId = z.uuid().safeParse(claims.session_id);
+    request.sessionId = sessionId.success ? sessionId.data : undefined;
     return true;
   }
 }

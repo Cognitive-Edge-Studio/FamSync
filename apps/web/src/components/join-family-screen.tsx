@@ -5,8 +5,9 @@ import { ModuleIcon } from "./ui/module-icon";
 import { useEffect, useState } from "react";
 import { getBrowserApi } from "@/lib/browser-auth";
 import { capturePendingInvitation, clearPendingInvitation } from "@/lib/pending-invitation";
+import { OpenInApp } from "./open-in-app";
 import { FormFeedback } from "./account-fields";
-import { FamilyLayout, familyPath, FamilySession } from "./family-session";
+import { familyError, FamilyLayout, familyPath, FamilySession } from "./family-session";
 import { Users } from "lucide-react";
 import { Button, ButtonLink } from "./ui/button";
 
@@ -18,10 +19,14 @@ function AcceptInvitation({ token, accessToken, email }: { token: string; access
     setBusy(true);
     setError("");
     try {
-      const { data, response } = await getBrowserApi(accessToken).POST("/api/v1/invitations/accept", { body: { token } });
+      const { data, error: problem, response } = await getBrowserApi(accessToken).POST("/api/v1/invitations/accept", { body: { token } });
       if (data) {
         clearPendingInvitation();
         window.location.replace(familyPath(data.id));
+        return;
+      }
+      if (response.status === 409) {
+        setError(familyError(problem, "Your account already belongs to a family."));
         return;
       }
       if (response.status === 404) {
@@ -75,9 +80,10 @@ export function JoinFamilyScreen() {
               email={session.user.email} />}
           </FamilySession>
         )}
+        {token && <OpenInApp kind="join" token={token} />}
         {token !== undefined && (
           <a className="inline-block text-sm font-medium underline underline-offset-4" href="/families/"
-            onClick={clearPendingInvitation}>{token ? "Leave invitation" : "Back to families"}</a>
+            onClick={clearPendingInvitation}>{token ? "Leave invitation" : "Back to your family"}</a>
         )}
       </section>
     </FamilyLayout>

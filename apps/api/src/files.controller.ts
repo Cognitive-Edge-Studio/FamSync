@@ -2,7 +2,7 @@ import {BadRequestException,Body,Controller,Delete,Get,Header,Param,ParseUUIDPip
 import {FileInterceptor} from '@nestjs/platform-express';
 import {ApiBearerAuth,ApiBody,ApiConsumes,ApiCreatedResponse,ApiOkResponse,ApiOperation,ApiQuery} from '@nestjs/swagger';import {z} from 'zod';
 import {AuthGuard,type AuthenticatedRequest} from './auth.guard.js';import {FilesService} from './files.service.js';import type {IncomingFile} from './file-validation.js';
-import {CreateFolderDto,EditFolderDto,FileArchiveDto,FileGrantDto,FileMutationDto,FilePageDto,FilePreviewDto,FileUploadDto,FileVersionDto,FolderDto,FolderPageDto,StoredFileDto,fileArchiveInput,fileListInput,fileUploadInput,folderCreateInput,folderEditInput,folderListInput} from './files.dto.js';
+import {CreateFolderDto,EditFolderDto,FileArchiveDto,FileGrantDto,FileMutationDto,FilePageDto,FilePreviewDto,FileUploadDto,FileVersionDto,FolderDto,FolderPageDto,StoredFileDto,fileArchiveInput,fileListInput,chatUploadInput,fileUploadInput,folderCreateInput,folderEditInput,folderListInput} from './files.dto.js';
 const upload=(image=false)=>FileInterceptor('file',{limits:{fileSize:(image?2:5)*1024*1024+1,fields:2,files:1,fieldSize:1000}});
 function parse<T>(schema:z.ZodType<T>,value:unknown){const r=schema.safeParse(value);if(!r.success)throw new BadRequestException('Check the file or folder request details.');return r.data;}
 function required(file?:IncomingFile){if(!file)throw new BadRequestException('Choose a file.');return file;}
@@ -39,6 +39,8 @@ export class FilesController{
  openImage(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)f:string,@Param('channelId',ParseUUIDPipe)c:string){return this.files.channelImage(actorId,f,c);}
  @Delete('channels/:channelId/image') @ApiOperation({operationId:'removeChannelImage'}) @ApiOkResponse({type:FileMutationDto})
  removeImage(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)f:string,@Param('channelId',ParseUUIDPipe)c:string,@Body()b:FileVersionDto){const input=parse(z.strictObject({version:z.int().positive()}),b);return this.files.removeImage(actorId,f,c,input.version);}
+ @Post('channels/:channelId/uploads') @UseInterceptors(upload()) @ApiConsumes('multipart/form-data') @ApiBody({type:FileUploadDto}) @ApiOperation({operationId:'uploadChatFile'}) @ApiCreatedResponse({type:StoredFileDto})
+ chatUpload(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)f:string,@Param('channelId',ParseUUIDPipe)c:string,@Body()b:unknown,@UploadedFile()file?:IncomingFile){const input=parse(chatUploadInput,b);return this.files.chatUpload(actorId,f,c,input.id,required(file),input.voiceSeconds);}
  @Post('channels/:channelId/messages/:messageId/files/:fileId') @ApiOperation({operationId:'attachMessageFile'}) @ApiCreatedResponse({type:FileMutationDto})
  link(@Req(){actorId}:AuthenticatedRequest,@Param('familyId',ParseUUIDPipe)f:string,@Param('channelId',ParseUUIDPipe)c:string,@Param('messageId',ParseUUIDPipe)m:string,@Param('fileId',ParseUUIDPipe)i:string){return this.files.link(actorId,f,c,m,i);}
  @Delete('channels/:channelId/messages/:messageId/files/:linkId') @ApiOperation({operationId:'unlinkMessageFile'}) @ApiOkResponse({type:FileMutationDto})

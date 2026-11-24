@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/api/v1/mobile/android/version": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getAndroidVersionPolicy"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/profile/activity": {
         parameters: {
             query?: never;
@@ -757,6 +773,182 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/families/{familyId}/channels/starred-messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listStarredMessages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/channels/delivered": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["acknowledgeDelivery"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/channels/{channelId}/typing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["signalTyping"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/channels/{channelId}/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["setConversationPreferences"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/channels/{channelId}/admins/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["setChannelAdmin"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/channels/{channelId}/manager": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["handOverChannel"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/channels/{channelId}/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["leaveChannel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/channels/{channelId}/forward": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["forwardMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/channels/{channelId}/messages/{messageId}/pin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["pinMessage"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/channels/{channelId}/messages/{messageId}/star": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["starMessage"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/channels/{channelId}/messages/{messageId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getConversationMessage"];
+        put: operations["editMessage"];
+        post?: never;
+        delete: operations["deleteMessage"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/families/{familyId}/channels/message-search": {
         parameters: {
             query?: never;
@@ -894,22 +1086,6 @@ export interface paths {
         };
         get?: never;
         put: operations["muteConversation"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/families/{familyId}/channels/{channelId}/messages/{messageId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getConversationMessage"];
-        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -1269,6 +1445,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/families/{familyId}/channels/{channelId}/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["uploadChatFile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/families/{familyId}/channels/{channelId}/messages/{messageId}/files/{fileId}": {
         parameters: {
             query?: never;
@@ -1301,10 +1493,225 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/presence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["setMyPresence"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/chat-privacy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getMyChatPrivacy"];
+        put: operations["setMyChatPrivacy"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/push": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getPushSettings"];
+        put: operations["savePushSubscription"];
+        post?: never;
+        delete: operations["removePushSubscription"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/push/android": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getAndroidPushSettings"];
+        put: operations["saveAndroidPushDevice"];
+        post?: never;
+        delete: operations["removeAndroidPushDevice"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/push/android/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["revokeAndroidPushDevice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/base/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Everything the caller can see in Family Base, with its relationships. */
+        get: operations["getFamilyBaseGraph"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/base/entries/defaults": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getFamilyEntryDefaults"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/base/entries/{entryId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getFamilyEntry"];
+        put: operations["updateFamilyEntry"];
+        post?: never;
+        delete: operations["deleteFamilyEntry"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/base/entries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createFamilyEntry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/base/ai": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getFamilyAi"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/base/ai/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Turns questions on or off. Owner only. */
+        put: operations["updateFamilyAi"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/base/ai/consent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateFamilyAiConsent"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/base/ai/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["askFamilyBase"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AndroidVersionPolicyDto: {
+            minimumBuild: number;
+            /** Format: uri */
+            updateUrl: string | null;
+        };
         ProfileActivityDto: {
             activeTasks: number;
             completedTasks: number;
@@ -1339,6 +1746,8 @@ export interface components {
             id: string;
             /** @enum {string} */
             role: "owner" | "member";
+            /** @description The family every app opens for this person. */
+            isDefault: boolean;
         };
         FamilyInputDto: {
             name: string;
@@ -2086,12 +2495,29 @@ export interface components {
             label?: string;
             completed?: boolean;
         };
+        LastMessageDto: {
+            /** @enum {string|null} */
+            attachment: "voice" | "photo" | "video" | "file" | null;
+            /** Format: uuid */
+            id: string;
+            body: string;
+            deleted: boolean;
+            fileCount: number;
+            author: components["schemas"]["TaskPersonDto"] | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
         ChannelDto: {
             imageFileId: string | null;
             canCreateWork: boolean;
+            lastMessage: components["schemas"]["LastMessageDto"] | null;
+            peer: components["schemas"]["TaskPersonDto"] | null;
             /** @enum {string} */
             kind: "channel" | "dm";
             muted: boolean;
+            pinned: boolean;
+            hidden: boolean;
+            markedUnread: boolean;
             /** Format: uuid */
             id: string;
             name: string;
@@ -2100,10 +2526,12 @@ export interface components {
             description: string;
             manager: components["schemas"]["TaskPersonDto"] | null;
             canManage: boolean;
+            isManager: boolean;
             memberCount: number;
             unread: number;
             lastPosition: number;
             readPosition: number;
+            deliveredPosition: number;
             archived: boolean;
             version: number;
         };
@@ -2127,13 +2555,34 @@ export interface components {
             /** @description False when the person is no longer a family member. */
             current: boolean;
             guest: boolean;
+            admin: boolean;
+            joinedPosition: number;
+            deliveredPosition: number;
+            readPosition: number | null;
+            online: boolean | null;
+            /** Format: date-time */
+            lastSeen: string | null;
+        };
+        PinnedMessageDto: {
+            /** @enum {string|null} */
+            attachment: "voice" | "photo" | "video" | "file" | null;
+            /** Format: uuid */
+            id: string;
+            body: string;
+            fileCount: number;
+            author: components["schemas"]["TaskPersonDto"] | null;
         };
         ChannelDetailDto: {
             imageFileId: string | null;
             canCreateWork: boolean;
+            lastMessage: components["schemas"]["LastMessageDto"] | null;
+            peer: components["schemas"]["TaskPersonDto"] | null;
             /** @enum {string} */
             kind: "channel" | "dm";
             muted: boolean;
+            pinned: boolean;
+            hidden: boolean;
+            markedUnread: boolean;
             /** Format: uuid */
             id: string;
             name: string;
@@ -2142,13 +2591,16 @@ export interface components {
             description: string;
             manager: components["schemas"]["TaskPersonDto"] | null;
             canManage: boolean;
+            isManager: boolean;
             memberCount: number;
             unread: number;
             lastPosition: number;
             readPosition: number;
+            deliveredPosition: number;
             archived: boolean;
             version: number;
             members: components["schemas"]["ChannelPersonDto"][];
+            pins: components["schemas"]["PinnedMessageDto"][];
         };
         OpenDirectDto: {
             /** Format: uuid */
@@ -2160,6 +2612,7 @@ export interface components {
             fileName: string | null;
             mime: string | null;
             byteSize: number | null;
+            voiceSeconds: number | null;
             canUnlink: boolean;
         };
         MessageWorkDto: {
@@ -2173,14 +2626,18 @@ export interface components {
             version: number;
         };
         ChannelReplyDto: {
+            /** @enum {string|null} */
+            attachment: "voice" | "photo" | "video" | "file" | null;
             /** Format: uuid */
             id: string;
             body: string;
+            deleted: boolean;
+            fileCount: number;
             author: components["schemas"]["TaskPersonDto"] | null;
         };
         ChannelReactionDto: {
-            /** @enum {string} */
-            emoji: "👍" | "❤️" | "🎉" | "😂" | "🙏";
+            emoji: string;
+            people: components["schemas"]["TaskPersonDto"][];
             count: number;
             active: boolean;
         };
@@ -2192,6 +2649,18 @@ export interface components {
             id: string;
             body: string;
             position: number;
+            changeSeq: number;
+            deleted: boolean;
+            forwarded: boolean;
+            starred: boolean;
+            pinned: boolean;
+            editCount: number;
+            /** Format: date-time */
+            editedAt: string | null;
+            /** Format: date-time */
+            editableUntil: string | null;
+            /** Format: date-time */
+            deletableUntil: string | null;
             author: components["schemas"]["TaskPersonDto"] | null;
             /** Format: date-time */
             createdAt: string;
@@ -2205,6 +2674,83 @@ export interface components {
         MessageSearchPageDto: {
             messages: components["schemas"]["MessageSearchItemDto"][];
             nextCursor: string | null;
+        };
+        DeliveredItemDto: {
+            /** Format: uuid */
+            id: string;
+            position: number;
+        };
+        DeliveredDto: {
+            items: components["schemas"]["DeliveredItemDto"][];
+        };
+        AcknowledgedDto: {
+            ok: boolean;
+        };
+        TypingDto: {
+            active: boolean;
+        };
+        ConversationPreferencesDto: {
+            pinned?: boolean;
+            hidden?: boolean;
+            unread?: boolean;
+        };
+        ChannelAdminDto: {
+            version: number;
+            admin: boolean;
+        };
+        HandOverChannelDto: {
+            version: number;
+            /** Format: uuid */
+            userId: string;
+        };
+        LeftChannelDto: {
+            /** Format: uuid */
+            id: string;
+        };
+        ForwardMessageDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            conversationId: string;
+            /** Format: uuid */
+            messageId: string;
+        };
+        ChannelMessageDto: {
+            files: components["schemas"]["MessageFileDto"][];
+            mentions: components["schemas"]["TaskPersonDto"][];
+            work: components["schemas"]["MessageWorkDto"][];
+            /** Format: uuid */
+            id: string;
+            body: string;
+            position: number;
+            changeSeq: number;
+            deleted: boolean;
+            forwarded: boolean;
+            starred: boolean;
+            pinned: boolean;
+            editCount: number;
+            /** Format: date-time */
+            editedAt: string | null;
+            /** Format: date-time */
+            editableUntil: string | null;
+            /** Format: date-time */
+            deletableUntil: string | null;
+            author: components["schemas"]["TaskPersonDto"] | null;
+            /** Format: date-time */
+            createdAt: string;
+            replyTo: components["schemas"]["ChannelReplyDto"] | null;
+            reactions: components["schemas"]["ChannelReactionDto"][];
+        };
+        PinMessageDto: {
+            pinned: boolean;
+        };
+        StarMessageDto: {
+            starred: boolean;
+        };
+        EditMessageDto: {
+            editCount: number;
+            body: string;
+            mentionedUserIds?: string[];
         };
         MessageSourceDto: {
             available: boolean;
@@ -2231,24 +2777,12 @@ export interface components {
             version: number;
             archived: boolean;
         };
-        ChannelMessageDto: {
-            files: components["schemas"]["MessageFileDto"][];
-            mentions: components["schemas"]["TaskPersonDto"][];
-            work: components["schemas"]["MessageWorkDto"][];
-            /** Format: uuid */
-            id: string;
-            body: string;
-            position: number;
-            author: components["schemas"]["TaskPersonDto"] | null;
-            /** Format: date-time */
-            createdAt: string;
-            replyTo: components["schemas"]["ChannelReplyDto"] | null;
-            reactions: components["schemas"]["ChannelReactionDto"][];
-        };
         ChannelHistoryDto: {
             messages: components["schemas"]["ChannelMessageDto"][];
             nextBefore: number | null;
             nextAfter: number | null;
+            nextChange: number | null;
+            latestChange: number;
             latestPosition: number;
         };
         PostChannelMessageDto: {
@@ -2261,8 +2795,7 @@ export interface components {
             replyToId?: string | null;
         };
         ReactChannelMessageDto: {
-            /** @enum {string} */
-            emoji: "👍" | "❤️" | "🎉" | "😂" | "🙏";
+            emoji: string;
             active: boolean;
         };
         ReadChannelDto: {
@@ -2416,7 +2949,8 @@ export interface components {
             canManage: boolean;
             canDownload: boolean;
             /** @enum {string} */
-            preview: "image" | "text" | "none";
+            preview: "image" | "text" | "audio" | "video" | "none";
+            voiceSeconds: number | null;
         };
         FilePageDto: {
             files: components["schemas"]["StoredFileDto"][];
@@ -2435,7 +2969,7 @@ export interface components {
         };
         FilePreviewDto: {
             /** @enum {string} */
-            kind: "image" | "text";
+            kind: "image" | "text" | "audio" | "video";
             fileName: string;
             url: string | null;
             text: string | null;
@@ -2447,6 +2981,208 @@ export interface components {
         FileMutationDto: {
             id: string;
         };
+        PresenceDto: {
+            online: boolean;
+        };
+        ChatPrivacyDto: {
+            shareReceipts: boolean;
+            sharePresence: boolean;
+        };
+        PushSettingsDto: {
+            /** @description Empty when push is not available on this server. */
+            publicKey: string;
+        };
+        PushSubscriptionDto: {
+            /** Format: uuid */
+            familyId: string | null;
+            endpoint: string;
+            p256dh: string;
+            auth: string;
+        };
+        PushSavedDto: {
+            enabled: boolean;
+        };
+        PushEndpointDto: {
+            endpoint: string;
+        };
+        AndroidPushSettingsDto: {
+            available: boolean;
+        };
+        AndroidPushDeviceDto: {
+            /** Format: uuid */
+            deviceId: string;
+            /** Format: uuid */
+            familyId: string;
+            token: string;
+        };
+        AndroidPushSavedDto: {
+            enabled: boolean;
+        };
+        AndroidPushRemoveDto: {
+            /** Format: uuid */
+            deviceId: string;
+        };
+        AndroidPushRevokeDto: {
+            /** Format: uuid */
+            deviceId: string;
+            token: string;
+        };
+        FamilyBaseNodeDto: {
+            /** @description Graph-unique id: kind and record id, such as task:<uuid>. */
+            id: string;
+            /** @enum {string} */
+            kind: "person" | "task" | "goal" | "event" | "conversation" | "file" | "memory" | "place" | "idea";
+            /** Format: uuid */
+            recordId: string;
+            name: string;
+            /** @description Task status, goal status, conversation kind, file type or member role. */
+            status: string | null;
+            /** @description Due date, target date, event start or upload time (ISO date or date-time). */
+            when: string | null;
+            /** @description Goal completion percentage when measured. */
+            progress: number | null;
+            /** @description True for a repeating chore or event. */
+            repeats: boolean;
+            /**
+             * Format: uuid
+             * @description Folder that holds a file node.
+             */
+            folderId: string | null;
+            /** @description Note on a memory, place or idea. */
+            note: string | null;
+            /** @description Address or description of a place. */
+            location: string | null;
+            /** @description True when the caller wrote this memory, place or idea. */
+            canEdit: boolean;
+            /** @description True for the signed-in member's own person node. */
+            you: boolean;
+        };
+        FamilyBaseLinkDto: {
+            source: string;
+            target: string;
+            /** @enum {string} */
+            relation: "assigned" | "created" | "goal-step" | "event" | "participant" | "shared-in" | "linked";
+        };
+        FamilyBaseGraphDto: {
+            familyName: string;
+            nodes: components["schemas"]["FamilyBaseNodeDto"][];
+            links: components["schemas"]["FamilyBaseLinkDto"][];
+            /** @description Kinds where only the most relevant records are shown. */
+            truncated: ("person" | "task" | "goal" | "event" | "conversation" | "file" | "memory" | "place" | "idea")[];
+        };
+        FamilyEntryDefaultsDto: {
+            /** @enum {string} */
+            audience: "family" | "selected" | "private";
+        };
+        FamilyEntryLinkDto: {
+            /** @enum {string} */
+            kind: "person" | "goal" | "event" | "entry";
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        FamilyEntryDto: {
+            /** @enum {string} */
+            kind: "memory" | "place" | "idea";
+            title: string;
+            note: string;
+            /**
+             * Format: date
+             * @description Memories only.
+             */
+            happenedOn: string | null;
+            /** @description Places only; otherwise empty. */
+            location: string;
+            /** @enum {string} */
+            audience: "family" | "selected" | "private";
+            /** @description Returned only to the author. */
+            selectedMemberIds: string[];
+            /** Format: uuid */
+            id: string;
+            version: number;
+            canEdit: boolean;
+            /** @description Links whose target the caller can see. */
+            links: components["schemas"]["FamilyEntryLinkDto"][];
+        };
+        FamilyEntryLinkInputDto: {
+            /** @enum {string} */
+            kind: "person" | "goal" | "event" | "entry";
+            /** Format: uuid */
+            id: string;
+        };
+        CreateFamilyEntryDto: {
+            /** @enum {string} */
+            kind: "memory" | "place" | "idea";
+            title: string;
+            note: string;
+            /**
+             * Format: date
+             * @description Memories only.
+             */
+            happenedOn: string | null;
+            /** @description Places only; otherwise empty. */
+            location: string;
+            /** @enum {string} */
+            audience: "family" | "selected" | "private";
+            /** @description Returned only to the author. */
+            selectedMemberIds: string[];
+            /** Format: uuid */
+            id: string;
+            links: components["schemas"]["FamilyEntryLinkInputDto"][];
+        };
+        UpdateFamilyEntryDto: {
+            /** @enum {string} */
+            kind: "memory" | "place" | "idea";
+            title: string;
+            note: string;
+            /**
+             * Format: date
+             * @description Memories only.
+             */
+            happenedOn: string | null;
+            /** @description Places only; otherwise empty. */
+            location: string;
+            /** @enum {string} */
+            audience: "family" | "selected" | "private";
+            /** @description Returned only to the author. */
+            selectedMemberIds: string[];
+            links: components["schemas"]["FamilyEntryLinkInputDto"][];
+            version: number;
+        };
+        FamilyEntryVersionDto: {
+            version: number;
+        };
+        FamilyEntryDeletedDto: {
+            /** Format: uuid */
+            id?: string;
+        };
+        FamilyAiStatusDto: {
+            /** @description True when this server is set up for questions. */
+            available: boolean;
+            /** @description True when the family owner turned questions on. */
+            enabled: boolean;
+            canManage: boolean;
+            consented: boolean;
+            /** @description Questions the caller can still ask today. */
+            remaining: number;
+        };
+        FamilyAiSettingsDto: {
+            enabled: boolean;
+        };
+        FamilyAiConsentDto: {
+            accepted: boolean;
+            /** @description The member confirms they are 18 or older. Required to accept. */
+            adult: boolean;
+        };
+        FamilyAiQuestionDto: {
+            question: string;
+        };
+        FamilyAiAnswerDto: {
+            answer: string;
+            /** @description Family Base node ids the answer relies on. */
+            nodeIds: string[];
+            remaining: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -2456,6 +3192,25 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getAndroidVersionPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AndroidVersionPolicyDto"];
+                };
+            };
+        };
+    };
     getMyProfileActivity: {
         parameters: {
             query?: never;
@@ -3616,6 +4371,8 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
+                /** @description Resolve one notification with current access checks. */
+                id?: string;
             };
             header?: never;
             path?: never;
@@ -4114,7 +4871,7 @@ export interface operations {
             query?: {
                 limit?: number;
                 cursor?: string;
-                kind?: "channel" | "dm";
+                kind?: "channel" | "dm" | "all";
                 archived?: "true" | "false";
                 q?: string;
             };
@@ -4182,6 +4939,335 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChannelDetailDto"];
+                };
+            };
+        };
+    };
+    listStarredMessages: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageSearchPageDto"];
+                };
+            };
+        };
+    };
+    acknowledgeDelivery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeliveredDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcknowledgedDto"];
+                };
+            };
+        };
+    };
+    signalTyping: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                channelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TypingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcknowledgedDto"];
+                };
+            };
+        };
+    };
+    setConversationPreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                channelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConversationPreferencesDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelDetailDto"];
+                };
+            };
+        };
+    };
+    setChannelAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                channelId: string;
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChannelAdminDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelDetailDto"];
+                };
+            };
+        };
+    };
+    handOverChannel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                channelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HandOverChannelDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelDetailDto"];
+                };
+            };
+        };
+    };
+    leaveChannel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                channelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeftChannelDto"];
+                };
+            };
+        };
+    };
+    forwardMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                channelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ForwardMessageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelMessageDto"];
+                };
+            };
+        };
+    };
+    pinMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                channelId: string;
+                messageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PinMessageDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelMessageDto"];
+                };
+            };
+        };
+    };
+    starMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                channelId: string;
+                messageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StarMessageDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelMessageDto"];
+                };
+            };
+        };
+    };
+    getConversationMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                channelId: string;
+                messageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelMessageDto"];
+                };
+            };
+        };
+    };
+    editMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                channelId: string;
+                messageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditMessageDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelMessageDto"];
+                };
+            };
+        };
+    };
+    deleteMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                channelId: string;
+                messageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelMessageDto"];
                 };
             };
         };
@@ -4342,6 +5428,8 @@ export interface operations {
                 limit?: number;
                 after?: number;
                 before?: number;
+                from?: number;
+                changedSince?: number;
             };
             header?: never;
             path: {
@@ -4463,29 +5551,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChannelDetailDto"];
-                };
-            };
-        };
-    };
-    getConversationMessage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                familyId: string;
-                channelId: string;
-                messageId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChannelMessageDto"];
                 };
             };
         };
@@ -5160,6 +6225,32 @@ export interface operations {
             };
         };
     };
+    uploadChatFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                channelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["FileUploadDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoredFileDto"];
+                };
+            };
+        };
+    };
     attachMessageFile: {
         parameters: {
             query?: never;
@@ -5204,6 +6295,461 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FileMutationDto"];
+                };
+            };
+        };
+    };
+    setMyPresence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PresenceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresenceDto"];
+                };
+            };
+        };
+    };
+    getMyChatPrivacy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatPrivacyDto"];
+                };
+            };
+        };
+    };
+    setMyChatPrivacy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatPrivacyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatPrivacyDto"];
+                };
+            };
+        };
+    };
+    getPushSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PushSettingsDto"];
+                };
+            };
+        };
+    };
+    savePushSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PushSubscriptionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PushSavedDto"];
+                };
+            };
+        };
+    };
+    removePushSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PushEndpointDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PushSavedDto"];
+                };
+            };
+        };
+    };
+    getAndroidPushSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AndroidPushSettingsDto"];
+                };
+            };
+        };
+    };
+    saveAndroidPushDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AndroidPushDeviceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AndroidPushSavedDto"];
+                };
+            };
+        };
+    };
+    removeAndroidPushDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AndroidPushRemoveDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AndroidPushSavedDto"];
+                };
+            };
+        };
+    };
+    revokeAndroidPushDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AndroidPushRevokeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AndroidPushSavedDto"];
+                };
+            };
+        };
+    };
+    getFamilyBaseGraph: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyBaseGraphDto"];
+                };
+            };
+        };
+    };
+    getFamilyEntryDefaults: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyEntryDefaultsDto"];
+                };
+            };
+        };
+    };
+    getFamilyEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                entryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyEntryDto"];
+                };
+            };
+        };
+    };
+    updateFamilyEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                entryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFamilyEntryDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyEntryDto"];
+                };
+            };
+        };
+    };
+    deleteFamilyEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                entryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FamilyEntryVersionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyEntryDeletedDto"];
+                };
+            };
+        };
+    };
+    createFamilyEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFamilyEntryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyEntryDto"];
+                };
+            };
+        };
+    };
+    getFamilyAi: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyAiStatusDto"];
+                };
+            };
+        };
+    };
+    updateFamilyAi: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FamilyAiSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyAiStatusDto"];
+                };
+            };
+        };
+    };
+    updateFamilyAiConsent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FamilyAiConsentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyAiStatusDto"];
+                };
+            };
+        };
+    };
+    askFamilyBase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FamilyAiQuestionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyAiAnswerDto"];
                 };
             };
         };

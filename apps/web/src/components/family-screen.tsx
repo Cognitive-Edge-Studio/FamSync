@@ -9,7 +9,7 @@ import {defaultFamily} from '@/lib/default-family';
 import { Field, FormFeedback, inputClass } from "./account-fields";
 import { FamilyMembers, FamilySettings } from "./family-management";
 import { familyError, FamilyLayout, familyPath, FamilySession } from "./family-session";
-import { Button, ButtonLink } from "./ui/button";
+import { Button } from "./ui/button";
 import { PageHeader } from "./ui/page-header";
 import {GuestAccessPanel} from './guest-access-panel';
 
@@ -186,7 +186,7 @@ function Workspace({ accessToken, userId }: { accessToken: string; userId: strin
           if (controller.signal.aborted) return;
           if (!families) throw new Error("Families unavailable");
           const wanted = new URL(window.location.href).searchParams.get("family");
-          const chosen = families.find(({ id }) => id === wanted) ?? defaultFamily(families,userId);
+          const chosen = families.find(({ id }) => id === wanted) ?? defaultFamily(families);
           if (!chosen) { window.location.replace("/families/"); return; }
           familyId = chosen.id;
           window.history.replaceState(window.history.state, "", familyPath(familyId));
@@ -227,8 +227,7 @@ function Workspace({ accessToken, userId }: { accessToken: string; userId: strin
   return (
     <div className="grid gap-5">
       <PageHeader className="mb-0" title={family.name}
-        description={<>{family.role === "owner" ? "Owner" : "Member"} <span aria-hidden="true">·</span> {family.timeZone}</>}
-        actions={<ButtonLink href="/families/" variant="outline">All families</ButtonLink>} />
+        description={<>{family.role === "owner" ? "Owner" : "Member"} <span aria-hidden="true">·</span> {family.timeZone}</>} />
       <FamilyMembers family={family} accessToken={accessToken} userId={userId}
         onFamilyChange={({ role }) => setFamily((current) => current && { ...current, role })}
         onMemberRemoved={() => setInvitationRevision((value) => value + 1)} />

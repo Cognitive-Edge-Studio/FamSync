@@ -50,6 +50,10 @@ One family, **The Carter Family** (America/Chicago), with dates relative to the 
 
 Every record is created through the API, so audiences, versions and links follow the normal rules. Signing in as different members shows what each can and cannot see.
 
+## Extra demo content
+
+`scripts/seed-demo-extras.mjs` adds photos, voice, video, reactions, pins, Family Base entries, a guest and a fresh week of plans to the existing family. It only adds. See [the staging release](staging-release-2026-11-24.md). The local guest is `nora@demo.famsync.test`, with the same local password.
+
 ## Reseed
 
 With the local Supabase stack and the API running (point `DEMO_API` at the API port):

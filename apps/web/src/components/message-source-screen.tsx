@@ -3,7 +3,7 @@ import type {Session} from '@supabase/auth-js';
 import {LiveStatus} from './ui/live-status';
 import {useEffect,useState} from 'react';
 import {getBrowserApi} from '@/lib/browser-auth';
-import {channelPath,type ChannelDetail,type ChannelMessage} from '@/lib/channels';
+import {attachmentLabel,channelPath,type ChannelDetail,type ChannelMessage} from '@/lib/channels';
 import {useChannelUpdates} from '@/lib/channel-updates';
 import {AppShell} from './app-shell';
 import {FamilySession} from './family-session';
@@ -32,13 +32,13 @@ function MessageDetails({session,onGuest}:{session:Session;onGuest:(guest:boolea
   {saved&&params&&<article className="grid gap-4 rounded-2xl border border-border bg-panel p-5 sm:p-6">
    <div className="flex items-center gap-3"><Avatar name={saved.message.author?.name??'Former member'} colorKey={saved.message.author?.userId} />
     <p className="text-sm"><span className="font-medium">{saved.message.author?.name??'Former member'}</span>{saved.channel.members.some(m=>m.userId===saved.message.author?.userId&&m.guest)?' · Guest':''} <span className="text-muted-foreground">· {new Date(saved.message.createdAt).toLocaleString()}</span></p></div>
-   {saved.message.replyTo&&<blockquote className="border-l-2 border-border pl-3 text-sm text-muted-foreground">Reply to {saved.message.replyTo.author?.name??'Former member'}: {saved.message.replyTo.body}</blockquote>}
-   <p className="rounded-2xl rounded-tl-md bg-muted px-4 py-3 leading-relaxed wrap-anywhere whitespace-pre-wrap">{saved.message.body}</p>
+   {saved.message.replyTo&&<blockquote className="border-l-2 border-border pl-3 text-sm text-muted-foreground">Reply to {saved.message.replyTo.author?.name??'Former member'}: {saved.message.replyTo.deleted?'Message deleted':saved.message.replyTo.body||attachmentLabel(saved.message.replyTo.attachment,saved.message.replyTo.fileCount)}</blockquote>}
+   <p className="rounded-2xl rounded-tl-md bg-muted px-4 py-3 leading-relaxed wrap-anywhere whitespace-pre-wrap">{saved.message.deleted?'This message was deleted.':saved.message.body||'Attachment'}</p>
    {!!saved.message.mentions.length&&<p className="text-sm wrap-anywhere text-lavender-foreground">Mentions: {saved.message.mentions.map(m=>'@'+m.name).join(', ')}</p>}
    <a className="justify-self-start text-sm font-medium underline underline-offset-4 wrap-anywhere" href={back}>Open {saved.channel.name}</a>
    <LiveStatus state={connection} />
-   <MessageWorkTools session={session} familyId={params.family} channel={saved.channel} message={saved.message} onChanged={()=>setRevision(v=>v+1)} />
-   <MessageFiles session={session} familyId={params.family} channel={saved.channel} message={saved.message} onChanged={()=>setRevision(v=>v+1)}/>
+   {!saved.message.deleted&&<><MessageWorkTools session={session} familyId={params.family} channel={saved.channel} message={saved.message} onChanged={()=>setRevision(v=>v+1)} />
+   <MessageFiles session={session} familyId={params.family} channel={saved.channel} message={saved.message} onChanged={()=>setRevision(v=>v+1)}/></>}
   </article>}
  </>;
 }

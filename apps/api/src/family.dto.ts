@@ -26,6 +26,9 @@ export class FamilyDto extends FamilyInputDto {
 
   @ApiProperty({ enum: ["owner", "member"] })
   role!: "owner" | "member";
+
+  @ApiProperty({ description: "The family every app opens for this person." })
+  isDefault!: boolean;
 }
 
 export class FamilyMemberDto {

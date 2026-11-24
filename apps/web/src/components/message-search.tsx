@@ -2,11 +2,11 @@
 import {useEffect,useState,type FormEvent} from 'react';
 import type {components} from '@famsync/api-client';
 import {getBrowserApi} from '@/lib/browser-auth';
-import {messagePath} from '@/lib/channels';
+import {chatMessagePath} from '@/lib/channels';
 import {Field,FormFeedback,inputClass} from './account-fields';
 import {Button} from './ui/button';
 import {ChevronDown} from 'lucide-react';
-export function MessageSearch({familyId,accessToken,conversationId,compact=false}:{familyId:string;accessToken:string;conversationId?:string;compact?:boolean}){
+export function MessageSearch({familyId,accessToken,conversationId,compact=false,guest=false}:{familyId:string;accessToken:string;conversationId?:string;compact?:boolean;guest?:boolean}){
  const [query,setQuery]=useState(''),[search,setSearch]=useState(''),[cursor,setCursor]=useState<string|null>(null),[next,setNext]=useState<string|null>(null);
  const [rows,setRows]=useState<components['schemas']['MessageSearchItemDto'][]>([]),[error,setError]=useState(''),[loading,setLoading]=useState(false),[revision,setRevision]=useState(0);
  useEffect(()=>{if(!search)return;const c=new AbortController();setLoading(true);setError('');void getBrowserApi(accessToken).GET('/api/v1/families/{familyId}/channels/message-search',{
@@ -20,7 +20,7 @@ export function MessageSearch({familyId,accessToken,conversationId,compact=false
   <FormFeedback error={error} note={loading?'Searching messages…':undefined} />
   {error&&<Button variant="outline" onClick={()=>setRevision(v=>v+1)}>Retry search</Button>}
   {search&&!loading&&!error&&rows.length===0&&<p className="mt-3 text-sm text-muted-foreground">No matching messages.</p>}
-  <ul aria-label="Message search results" className="mt-3 grid gap-2">{rows.map(m=><li key={m.id}><a href={messagePath(familyId,m.conversationId,m.id)} className="block rounded-xl bg-background p-3">
+  <ul aria-label="Message search results" className="mt-3 grid gap-2">{rows.map(m=><li key={m.id}><a href={chatMessagePath(familyId,m.conversationId,m.id,guest?'guest':m.conversationKind)} className="block rounded-xl bg-background p-3">
    <p className="text-xs text-muted-foreground">{m.conversationName} · {m.author?.name??'Former member'}</p><p className="mt-1 wrap-anywhere whitespace-pre-wrap text-sm">{m.body.slice(0,240)}</p></a></li>)}</ul>
   {next&&<Button className="mt-3" variant="outline" disabled={loading} onClick={()=>setCursor(next)}>More message results</Button>}
  </details>;

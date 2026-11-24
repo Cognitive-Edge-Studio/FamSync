@@ -8,3 +8,9 @@ dist/
 coverage/
 .env*
 !.env.example
+output/backups/
+apps/mobile/android/
+apps/mobile/.expo/
+apps/mobile/dist-android/
+**/google-services.json
+**/*service-account*.json

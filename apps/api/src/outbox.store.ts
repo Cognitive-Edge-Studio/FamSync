@@ -39,15 +39,15 @@ export async function completeOutbox(client: PoolClient, id: string) {
 }
 
 // Retries back off from 15 seconds, doubling up to an hour. The last allowed attempt marks the row dead.
-export async function failOutbox(client: PoolClient, id: string, error: string) {
+export async function failOutbox(client: PoolClient, id: string, error: string, retrySeconds = 0) {
   const { rows: [row] } = await client.query<{ status: string }>(`
     update app.outbox set
       status = case when attempts >= $3 then 'dead' else 'pending' end,
-      available_at = now() + least(interval '1 hour', interval '15 seconds' * power(2, greatest(attempts - 1, 0))),
+      available_at = now() + greatest(make_interval(secs => $4), least(interval '1 hour', interval '15 seconds' * power(2, greatest(attempts - 1, 0)))),
       locked_until = null, last_error = left($2, 500),
       finished_at = case when attempts >= $3 then now() end
     where id = $1 and status = 'processing'
     returning status
-  `, [id, error, maxAttempts]);
+  `, [id, error, maxAttempts, retrySeconds]);
   return row?.status;
 }

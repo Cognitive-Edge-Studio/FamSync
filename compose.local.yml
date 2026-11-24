@@ -36,7 +36,7 @@ services:
       GOTRUE_DB_DRIVER: postgres
       GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:famsync-local-auth@database:5432/postgres
       GOTRUE_SITE_URL: http://localhost:3000
-      GOTRUE_URI_ALLOW_LIST: http://localhost:3000/auth/callback/**,http://127.0.0.1:3000/auth/callback/**
+      GOTRUE_URI_ALLOW_LIST: http://localhost:3000/auth/callback/**,http://127.0.0.1:3000/auth/callback/**,http://localhost:8081/auth/callback**,famsync://auth/callback**
       GOTRUE_JWT_SECRET: famsync-local-auth-only-signing-secret-not-for-hosted-use
       GOTRUE_JWT_ISSUER: http://127.0.0.1:55431
       GOTRUE_JWT_AUD: authenticated

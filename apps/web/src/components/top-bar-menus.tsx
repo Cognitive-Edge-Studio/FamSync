@@ -4,7 +4,7 @@ import { Menu } from "@base-ui/react/menu";
 import { LogOut, Plus } from "lucide-react";
 import { ModuleIcon, type ModuleIconName } from "./ui/module-icon";
 import { useEffect, useState } from "react";
-import { getBrowserApi, getBrowserAuth, recoveryMarker } from "@/lib/browser-auth";
+import { getBrowserApi, getBrowserAuth, recoveryMarker, signOutHere } from "@/lib/browser-auth";
 import { currentFamily, type CreateKind } from "@/lib/quick-create";
 import { cn } from "@/lib/utils";
 import { Avatar } from "./ui/avatar";
@@ -76,7 +76,7 @@ export function AccountMenu({ active }: { active: boolean }) {
     setSigningOut(true);
     setError("");
     try {
-      const { error: failure } = await getBrowserAuth().signOut({ scope: "local" });
+      const { error: failure } = await signOutHere();
       if (failure) throw failure;
       sessionStorage.removeItem(recoveryMarker);
       window.location.assign("/sign-in/");
@@ -107,7 +107,7 @@ export function AccountMenu({ active }: { active: boolean }) {
             )}
             <Menu.Separator className="my-1 h-px bg-border" />
             <Menu.LinkItem href="/account/" className={menuItem}><ModuleIcon name="account" className="size-7" />Account</Menu.LinkItem>
-            <Menu.LinkItem href="/families/" className={menuItem}><ModuleIcon name="families" className="size-7" />Families</Menu.LinkItem>
+            <Menu.LinkItem href="/families/" className={menuItem}><ModuleIcon name="families" className="size-7" />Family</Menu.LinkItem>
             <Menu.Separator className="my-1 h-px bg-border" />
             <p className="px-2.5 pt-1 pb-0.5 text-xs font-medium text-muted-foreground">Appearance</p>
             <Menu.RadioGroup value={theme.preference} onValueChange={(value) => saveThemePreference(value as ThemePreference)}>

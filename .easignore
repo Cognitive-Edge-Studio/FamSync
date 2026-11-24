@@ -1,0 +1,34 @@
+# What a cloud Android build must never receive. This replaces .gitignore for EAS, so everything private is named here.
+.env*
+!.env.example
+**/*service-account*.json
+**/*.keystore
+**/*.jks
+**/*.pem
+.claude/
+.playwright-cli/
+output/
+docs/
+supabase/
+scripts/
+compose.local.yml
+render.yaml
+vercel.json
+
+# The app needs only its own code, the shared packages and the workspace manifests.
+apps/api/*
+!apps/api/package.json
+apps/web/*
+!apps/web/package.json
+
+node_modules/
+.next/
+out/
+out-local/
+dist/
+dist-android/
+dist-web/
+.expo/
+/apps/mobile/android/
+*.tsbuildinfo
+coverage/

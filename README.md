@@ -2,7 +2,7 @@
 
 FamSync is a responsive family workspace. The web app builds to static files, and the NestJS API runs as its own service.
 
-**Family Base** is available at `/family-base/` from the Family navigation group. Its browser-only 3D demo shows a fictional universe with orbit/zoom, node selection, search, constellation filters and a browsable node list. It uses local demo data; real-data relationships and AI behavior are reserved for a later product discussion. See the [3D demo slice](docs/family-base-demo-graph.md) and [user flow, Today analytics and Kanban execution plan](docs/ux-dashboard-kanban-family-base-plan.md).
+**Family Base** is available at `/family-base/` from the Family navigation group. Its 3D graph shows the people, tasks, goals, events, conversations and files the signed-in member can see, how they connect, and links to each record. See [Phase 1: real family graph](docs/family-base-real-graph.md). Members can also add memories, places and ideas: see [Phase 2](docs/family-base-entries.md). AI questions are built but not activated: read [Phase 3](docs/family-base-ai.md) first.
 
 Implementation is complete locally through S16. Channels and one-to-one Messages support saved history, replies, reactions, unread state, scoped message search, per-account mute, and explicit participant mentions. DM/mention alerts use the in-app inbox; reading the conversation acknowledges its alerts. Both DM participants must remain current family members.
 

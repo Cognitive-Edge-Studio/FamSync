@@ -11,6 +11,7 @@ import { FormFeedback } from "./account-fields";
 import { familySlotId } from "./app-shell";
 import { currentFamilyKey } from "@/lib/quick-create";
 import {defaultFamily} from '@/lib/default-family';
+import { familyPath } from "./family-session";
 import { Button, ButtonLink } from "./ui/button";
 
 type Family = components["schemas"]["FamilyDto"];
@@ -43,9 +44,9 @@ export function ScheduleFamily({
       try {
         const { data } = await getBrowserApi(session.access_token).GET("/api/v1/families", { signal: controller.signal });
         if (!data) throw new Error("Families unavailable");
-        if (!controller.signal.aborted) {setFamilies(data);setRequested(new URLSearchParams(window.location.search).get('family')??defaultFamily(data,session.user.id)?.id??null);}
+        if (!controller.signal.aborted) {setFamilies(data);setRequested(new URLSearchParams(window.location.search).get('family')??defaultFamily(data)?.id??null);}
       } catch {
-        if (!controller.signal.aborted) setError("We couldn’t load your families.");
+        if (!controller.signal.aborted) setError("We couldn’t load your family.");
       }
     }
     void load();
@@ -65,24 +66,24 @@ export function ScheduleFamily({
       <p className="text-muted-foreground">
         {requested ? "Family workspace not found." : "Create or join a family to see its schedule."}
       </p>
-      <ButtonLink href="/families/" className="h-9 px-4">Your families</ButtonLink>
+      <ButtonLink href="/families/" className="h-9 px-4">Your family</ButtonLink>
     </section>
   );
 
-  const switcher = <FamilySwitcher family={family} />;
+  const familyLink = <FamilyLink family={family} />;
   return (
     <>
-      {slot ? createPortal(switcher, slot) : <div className="mt-4">{switcher}</div>}
+      {slot ? createPortal(familyLink, slot) : <div className="mt-4">{familyLink}</div>}
       {children(family)}
     </>
   );
 }
 
-// Keep one family in the shell. Other workspaces are available on the family page.
-function FamilySwitcher({ family }: { family: Family }) {
+// Names the current family and opens its page. There is no family switching.
+function FamilyLink({ family }: { family: Family }) {
   const icon = <ModuleIcon name="families" className="pointer-events-none size-4 shrink-0 text-muted-foreground" />;
   return (
-    <a href="/families/" className="flex h-9 max-w-[min(16rem,46vw)] min-w-0 items-center gap-2 rounded-lg px-2 text-sm font-medium hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring" title="Manage your family">
+    <a href={familyPath(family.id)} className="flex h-9 max-w-[min(16rem,46vw)] min-w-0 items-center gap-2 rounded-lg px-2 text-sm font-medium hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring" title="Manage your family">
       {icon}<span className="truncate">{family.name}</span>
     </a>
   );

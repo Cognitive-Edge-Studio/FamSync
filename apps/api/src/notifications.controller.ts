@@ -103,12 +103,14 @@ export class NotificationsController {
   @Header("Cache-Control", "no-store")
   @ApiOperation({ operationId: "listNotifications" })
   @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiQuery({ name: "id", required: false, type: String, description: "Resolve one notification with current access checks." })
   @ApiOkResponse({ type: NotificationListDto })
-  list(@Req() { actorId }: AuthenticatedRequest, @Query("limit") limit?: string): Promise<NotificationListDto> {
+  list(@Req() { actorId }: AuthenticatedRequest, @Query("limit") limit?: string, @Query("id") id?: string): Promise<NotificationListDto> {
     const size = limit === undefined ? 50 : Number(limit);
     if (!Number.isInteger(size) || size < 1 || size > 100) throw new BadRequestException("Choose a limit from 1 to 100.");
+    if (id !== undefined && !z.uuid().safeParse(id).success) throw new BadRequestException("Choose a notification.");
     return this.database.withActor(actorId, async (client) => {
-      const rows = await readNotifications(client, { limit: size });
+      const rows = await readNotifications(client, { limit: size, id });
       return {
         items: rows.map((row) => ({
           id: row.id, kind: row.kind, title: row.title, when: notificationWhen(row), summary: notificationText(row).text,

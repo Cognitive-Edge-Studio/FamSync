@@ -7,6 +7,7 @@ import { DatabaseService } from "./database.service.js";
 import { FamilyController } from "./family.controller.js";
 import { FamilyService } from "./family.service.js";
 import { HealthController } from "./health.controller.js";
+import { MobileVersionController } from './mobile-version.controller.js';
 import { GoalsController } from "./goals.controller.js";
 import { GoalsService } from "./goals.service.js";
 import { InngestController } from "./inngest.controller.js";
@@ -28,13 +29,23 @@ import { ChannelRealtimeService } from "./channel-realtime.service.js";
 import {GuestsController} from './guests.controller.js';
 import {GuestsService} from './guests.service.js';
 import {FilesController} from './files.controller.js';
+import {ChatStatusController} from './chat-status.controller.js';
+import {PushController} from './push.controller.js';
+import {PushService} from './push.service.js';
+import { AndroidPushController, AndroidPushRevocationController } from './android-push.controller.js';
+import { AndroidPushService } from './android-push.service.js';
 import {FilesService} from './files.service.js';
+import { FamilyBaseController } from "./family-base.controller.js";
+import { FamilyEntriesService } from "./family-entries.service.js";
+import { FamilyAiController } from "./family-ai.controller.js";
+import { FamilyAiService } from "./family-ai.service.js";
+import { FamilyBaseService } from "./family-base.service.js";
 
 @Module({
-  controllers: [HealthController, ProfileController, StatusController, FamilyController, PrivacyController, CalendarController,
+  controllers: [HealthController, MobileVersionController, ProfileController, StatusController, FamilyController, PrivacyController, CalendarController,
     TasksController, TaskSeriesController, InngestController,
-    NotificationsController, GoalsController, ChannelsController,GuestsController,FilesController],
+    NotificationsController, GoalsController, ChannelsController,GuestsController,FilesController,ChatStatusController,PushController,AndroidPushController,AndroidPushRevocationController,FamilyBaseController,FamilyAiController],
   providers: [AuthGuard, DatabaseService, FamilyService, InvitationMailService, CalendarService, AttachmentStorageService,
-    TasksService, TaskSeriesService, JobsDatabaseService, JobsService, RemindersService, GoalsService, ChannelsService, ChannelRealtimeService,GuestsService,FilesService],
+    TasksService, TaskSeriesService, JobsDatabaseService, JobsService, RemindersService, GoalsService, ChannelsService, ChannelRealtimeService,PushService,AndroidPushService,GuestsService,FilesService,FamilyBaseService,FamilyEntriesService,FamilyAiService],
 })
 export class AppModule {}

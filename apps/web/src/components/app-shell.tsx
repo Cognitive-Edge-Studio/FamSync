@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import { ModuleIcon, type ModuleIconName } from "./ui/module-icon";
 import { useEffect, useState, type ReactNode } from "react";
 import { getBrowserApi, getBrowserAuth } from "@/lib/browser-auth";
+import { refreshPush } from "@/lib/push";
 import { NotificationBell } from "./notification-bell";
 import { AccountMenu, QuickCreate } from "./top-bar-menus";
 import { ThemeMenu } from "./theme-menu";
@@ -32,13 +33,12 @@ const familyNav: NavGroup[] = [
     { page: "goals", href: "/goals/", label: "Goals", icon: "goals" },
   ] },
   { label: "Talk", items: [
-    { page: "channels", href: "/channels/", label: "Channels", icon: "channels" },
-    { page: "messages", href: "/messages/", label: "Messages", icon: "messages" },
+    { page: "messages", href: "/messages/", label: "Chats", icon: "messages" },
     { page: "guests", href: "/guests/", label: "Guest channels", icon: "guests" },
   ] },
   { label: "Family", items: [
     { page: "family-base", href: "/family-base/", label: "Family Base", icon: "home" },
-    { page: "families", href: "/families/", label: "Families", icon: "families" },
+    { page: "families", href: "/families/", label: "Family", icon: "families" },
     { page: "folders", href: "/folders/", label: "Folders", icon: "folders" },
   ] },
 ];
@@ -118,9 +118,35 @@ function useFamilyMember(check: boolean) {
   return member;
 }
 
+// Tells the server this person is using FamSync. The server ignores it when they do not share presence.
+function usePresence(enabled: boolean) {
+  useEffect(() => {
+    if (!enabled) return;
+    const tell = async (online: boolean) => {
+      try {
+        const { data: { session } } = await getBrowserAuth().getSession();
+        if (session) await getBrowserApi(session.access_token).PUT("/api/v1/me/presence", { body: { online }, keepalive: true });
+      } catch {
+        // Presence is a convenience; the next check tries again.
+      }
+    };
+    const check = () => { if (document.visibilityState === "visible") void tell(true); };
+    const changed = () => void tell(document.visibilityState === "visible");
+    check();
+    void getBrowserAuth().getSession().then(({ data: { session } }) => { if (session) void refreshPush(session.access_token, session.user.id); }).catch(() => {});
+    const timer = window.setInterval(check, 60_000);
+    document.addEventListener("visibilitychange", changed);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", changed);
+    };
+  }, [enabled]);
+}
+
 export function AppShell({ activePage, children, guestMode = false, variant = "app", contentLayout = "page" }: AppShellProps) {
   const canvas = contentLayout === "canvas";
   const [menuOpen, setMenuOpen] = useState(false);
+  usePresence(variant === "app");
   const member = useFamilyMember(guestMode && variant === "app");
   const familyView = !guestMode || member;
   const groups = familyView ? familyNav : guestNav;

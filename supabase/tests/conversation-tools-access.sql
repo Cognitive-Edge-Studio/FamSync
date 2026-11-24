@@ -101,6 +101,6 @@ select app.deliver_conversation_notice('c8000000-0000-4000-8000-000000000006');
 reset role;
 select pg_temp.expect((select count(*)=0 from app.channel_signal_recipients(pg_temp.dm())),'no signal recipients after departure');
 select pg_temp.expect(not exists(select 1 from app.conversation_alerts where message_id='c8000000-0000-4000-8000-000000000004'),'late delivery rechecks membership');
-select pg_temp.expect(not exists(select 1 from app.conversation_alerts where message_id='c8000000-0000-4000-8000-000000000005'),'ordinary channel message creates no alert');
+select pg_temp.expect(not exists(select 1 from app.conversation_alerts where message_id='c8000000-0000-4000-8000-000000000005'),'a newer alert replaces an ordinary channel alert');
 select pg_temp.expect((select count(*)=1 from app.conversation_alerts where message_id='c8000000-0000-4000-8000-000000000006' and recipient_id='a8000000-0000-4000-8000-000000000003' and kind='mention'),'channel alerts only the explicit participant mention');
 rollback;

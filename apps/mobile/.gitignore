@@ -1,0 +1,9 @@
+.expo/
+dist/
+dist-android/
+dist-web/
+expo-env.d.ts
+android/
+ios/
+.env
+.env.local
