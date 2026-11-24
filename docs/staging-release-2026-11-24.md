@@ -1,16 +1,16 @@
 # Staging release: 24 November 2026
 
-Prepared, not deployed. General setup is in [deployment.md](deployment.md).
+API and website deployed on 24 November 2026. See [staging-status.md](staging-status.md) for verified release details and the queued standalone Android build. General setup is in [deployment.md](deployment.md).
 
 ## Checked
 
-- 68 API, 78 mobile and 20 database access tests pass; the website production build passes.
+- 73 API and 89 mobile tests pass, mobile type checking passes, and the website production build passes. The hosted voice migration and the new API's schema-readiness permissions were verified.
 - No private passwords or connection strings from the local `.env` files appear in files that would be committed. Keys found in `compose.local.yml`, `supabase/docker/prepare-realtime.sh` and `.env.example` are local development keys. Check again before pushing: the repository is public.
-- Staging still runs the release of 19 November: push, chat privacy, Family Base graph and the Android version check return 404.
+- Staging runs API commit `f509035`; Android version, Family Base graph and voice status endpoints are deployed. Android push configuration is available, with delivery still awaiting phone acceptance. AI and voice remain disabled pending the provider-terms and billing decision.
 
 ## Website
 
-- File: `output/famsync-web-staging-20261124.zip` (295 files, about 51 MB). It includes `.htaccess` and `push-worker.js`, and contains no local addresses.
+- Deployed file: `output/famsync-web-staging-20261124-voice.zip` (296 files, about 51 MB). It includes the new voice UI, `.htaccess` and `push-worker.js`; public page and worker hashes matched the local build.
 - It must go up **after** the database and API, because it calls endpoints staging does not have yet.
 
 ## Order

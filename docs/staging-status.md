@@ -1,6 +1,18 @@
 # FamSync staging deployment
 
-Verified on 19 November 2026 (Asia/Dhaka).
+Latest verification: 24 November 2026 (Asia/Dhaka).
+
+## Current release
+
+- API commit `f50903575863b77bc9831bf6c3f3914f3dc6a314` is live. `/health`, `/api/v1/status`, the Android version endpoint, and authenticated Family Base graph, AI status and voice status checks passed.
+- The hosted voice migration and API execution permissions were verified. Android push reports `available: true` after the approved integration settings were deployed. Real-device delivery remains untested.
+- Hostinger serves `output/famsync-web-staging-20261124-voice.zip` (296 files, 50,614,434 bytes). Homepage, sign-in, Family Base and `push-worker.js` matched the local release files by SHA-256 after deployment. The owner chose to deploy without a new server-side rollback copy; the earlier website ZIP remains available.
+- Gemini and ElevenLabs credentials are installed, but `FAMILY_AI_ENABLED` and `FAMILY_VOICE_ENABLED` remain `false` pending the owner's provider-terms and billing decision. No live generation or full call was performed.
+- Standalone Android build submitted to Expo: [build page](https://expo.dev/accounts/shibly_noman/projects/famsync/builds/c07b45d5-644e-47c2-9b0a-f1796173a56d), package `com.goppopi.famsync`, version `0.1.0`, build `1`. Last checked: queued; no APK artifact yet.
+- Its Expo signing key was downloaded and verified in the Git-ignored `output/backups/android-signing-com.goppopi.famsync` directory. Keep a separate private copy outside this computer. Signing exports are excluded from both Git and EAS uploads.
+- Inngest and Resend setup, Supabase SMTP/redirect/private-Realtime acceptance, AI/voice activation and real-phone acceptance remain outstanding. `ANDROID_UPDATE_URL` is unset until a permanent download page and successful APK can be published.
+
+The notes below describe the earlier 19 November setup and releases.
 
 ## API and database
 

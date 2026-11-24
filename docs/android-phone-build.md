@@ -4,6 +4,8 @@ Prepared on 24 November 2026. **The first developer APK was built that day** in 
 
 ## Where it stands
 
+The self-contained `preview` APK was submitted on 24 November 2026 with package `com.goppopi.famsync`, version `0.1.0`, build `1`: [release build](https://expo.dev/accounts/shibly_noman/projects/famsync/builds/c07b45d5-644e-47c2-9b0a-f1796173a56d). Last checked: queued. Its upload was inspected: matching Firebase client config and shared packages included; private server settings, signing exports and API source excluded. A verified signing-key export is in the Git-ignored `output/backups/android-signing-com.goppopi.famsync` directory. Copy that backup to separate private storage.
+
 | Item | Status |
 |---|---|
 | Android configuration | Checked without generating a native project. One React in the bundle; the duplicate-React warning from `expo-doctor` is the known, accepted one |

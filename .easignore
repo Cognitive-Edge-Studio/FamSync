@@ -2,6 +2,7 @@
 .env*
 !.env.example
 **/*service-account*.json
+**/credentials.json
 **/*.keystore
 **/*.jks
 **/*.pem

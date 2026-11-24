@@ -17,3 +17,6 @@ apps/mobile/.expo/
 apps/mobile/dist-android/
 **/google-services.json
 **/*service-account*.json
+**/credentials.json
+**/*.keystore
+**/*.jks
