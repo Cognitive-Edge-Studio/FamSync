@@ -2,6 +2,27 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { buildFamilyAiContext, familyAiSchema } from "../dist/family-ai-context.js";
 import { askGemini, GeminiError } from "../dist/gemini-client.js";
+import { provider } from "../dist/family-ai.service.js";
+
+test("configured AI defaults on while missing credentials and explicit off stay unavailable", () => {
+  const saved = { GEMINI_API_KEY: process.env.GEMINI_API_KEY, FAMILY_AI_ENABLED: process.env.FAMILY_AI_ENABLED };
+  try {
+    process.env.GEMINI_API_KEY = "test-key";
+    delete process.env.FAMILY_AI_ENABLED;
+    assert.ok(provider());
+    process.env.FAMILY_AI_ENABLED = "false";
+    assert.equal(provider(), null);
+    process.env.FAMILY_AI_ENABLED = "yes";
+    assert.equal(provider(), null);
+    delete process.env.FAMILY_AI_ENABLED;
+    delete process.env.GEMINI_API_KEY;
+    assert.equal(provider(), null);
+  } finally {
+    for (const [key, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+  }
+});
 
 const node = (id, kind, name, rest) => ({ id, kind, recordId: id.split(":")[1], name, status: null, when: null, progress: null, repeats: false,
   folderId: null, note: null, location: null, canEdit: false, you: false, ...rest });

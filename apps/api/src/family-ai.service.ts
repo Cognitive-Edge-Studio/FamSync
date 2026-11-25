@@ -13,10 +13,10 @@ const noticeVersion = 1;
 const limits = { member: 20, family: 60 };
 type StatusRow = { enabled: boolean; canManage: boolean; consented: boolean; memberUsed: number; familyUsed: number; timeZone: string };
 
-/** FAMILY_AI_ENABLED is the operator's confirmation in docs/family-base-ai.md; a key alone does not switch questions on. */
+/** Configured AI is on by default. An explicit false remains the operator's kill switch. */
 export function provider() {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
-  if (!apiKey || process.env.FAMILY_AI_ENABLED !== "true") return null;
+  if (!apiKey || (process.env.FAMILY_AI_ENABLED ?? "true") !== "true") return null;
   return {
     apiKey, model: process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash",
     baseUrl: process.env.GEMINI_BASE_URL?.trim() || "https://generativelanguage.googleapis.com",

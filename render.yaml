@@ -65,8 +65,14 @@ services:
         sync: false
       - key: VAPID_SUBJECT
         sync: false
-      # Family Base questions stay off until both are set. Read docs/family-base-ai.md first.
+      # Configured AI and voice default on. Per-member adult consent is still required.
       - key: GEMINI_API_KEY
         sync: false
       - key: FAMILY_AI_ENABLED
-        value: "false"
+        value: "true"
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_VOICE_ID
+        sync: false
+      - key: FAMILY_VOICE_ENABLED
+        value: "true"

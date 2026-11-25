@@ -24,6 +24,7 @@ grant execute on function pg_temp.expect(boolean,text), pg_temp.act(integer), pg
 set local role famsync_api;
 
 select pg_temp.act(2);
+select pg_temp.expect((select enabled and not consented and not can_manage from app.family_ai_status('f8000000-0000-4000-8000-000000000001',1)), 'default on does not grant consent');
 select pg_temp.reject('select pg_temp.claim(2,3)', '42501');
 select pg_temp.reject($q$select app.set_family_ai('f8000000-0000-4000-8000-000000000001', true)$q$, '42501');
 select pg_temp.act(3);
@@ -54,6 +55,7 @@ select pg_temp.reject('select pg_temp.claim(2,3)', '42501');
 select pg_temp.reject('select * from app.family_ai_usage', '42501');
 select pg_temp.reject('select * from app.family_ai_consents', '42501');
 select app.set_family_ai('f8000000-0000-4000-8000-000000000001', false);
+select pg_temp.expect((select not enabled from app.family_ai_status('f8000000-0000-4000-8000-000000000001',1)), 'explicit family opt-out overrides default');
 select pg_temp.act(2);
 select pg_temp.reject('select pg_temp.claim(9,9)', '42501');
 reset role;

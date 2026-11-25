@@ -6,10 +6,10 @@ export class VoiceError extends Error {
 }
 export type VoiceSettings = { apiKey: string; baseUrl: string; voiceId: string; listenModel: string; speakModel: string };
 
-/** FAMILY_VOICE_ENABLED is the operator's confirmation in docs/family-base-voice.md; a key alone does not switch voice on. */
+/** Configured voice is on by default. An explicit false remains the operator's kill switch. */
 export function voiceSettings(env: Record<string, string | undefined>): VoiceSettings | null {
   const apiKey = env.ELEVENLABS_API_KEY?.trim(), voiceId = env.ELEVENLABS_VOICE_ID?.trim();
-  if (!apiKey || !voiceId || !/^[A-Za-z0-9]{10,40}$/.test(voiceId) || env.FAMILY_VOICE_ENABLED !== "true") return null;
+  if (!apiKey || !voiceId || !/^[A-Za-z0-9]{10,40}$/.test(voiceId) || (env.FAMILY_VOICE_ENABLED ?? "true") !== "true") return null;
   return {
     apiKey, voiceId, baseUrl: env.ELEVENLABS_BASE_URL?.trim() || "https://api.elevenlabs.io",
     listenModel: env.ELEVENLABS_LISTEN_MODEL?.trim() || "scribe_v3", speakModel: env.ELEVENLABS_SPEAK_MODEL?.trim() || "eleven_flash_v2_5",

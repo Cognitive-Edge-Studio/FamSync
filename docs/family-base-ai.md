@@ -1,6 +1,6 @@
 # Family Base — Phase 3: questions answered by AI
 
-Implemented locally on 23 November 2026 for Google Gemini. Not deployed, not activated, and never run against the real service.
+Implemented for Google Gemini. The default-on release adds migration `20261208000000_enable_family_ai_by_default.sql`; provider generation still needs live acceptance testing.
 
 ## Decide before activating
 
@@ -9,13 +9,13 @@ Implemented locally on 23 November 2026 for Google Gemini. Not deployed, not act
 
 ## Activate
 
-Apply migration `20261201000000_add_family_ai.sql`, deploy the API, then the web app. Set on the API server only:
+Apply migrations `20261201000000_add_family_ai.sql` and `20261208000000_enable_family_ai_by_default.sql`, then deploy the API. Set on the API server only:
 
 - `GEMINI_API_KEY`: a key from a billed project.
-- `FAMILY_AI_ENABLED=true`: your confirmation of both points above. The key alone does nothing.
+- `FAMILY_AI_ENABLED` (optional): configured AI defaults on. Set `false` to disable it server-wide. Provider requirements above still apply.
 - `GEMINI_MODEL` (optional): defaults to `gemini-3.8-flash`.
 
-Then each family owner turns questions on in Family Base, and each adult accepts the notice.
+With `20261208000000_enable_family_ai_by_default.sql` applied, questions and voice are on for every family unless its owner turns them off. Each adult still accepts the notice.
 
 ## How it works
 

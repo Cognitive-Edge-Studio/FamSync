@@ -24,6 +24,7 @@ grant execute on all functions in schema pg_temp to famsync_api;
 set local role famsync_api;
 
 select pg_temp.act(2);
+select pg_temp.expect((select enabled and not consented and not can_manage from app.family_voice_status(pg_temp.f(),1)), 'default on does not grant voice consent');
 select pg_temp.reject('select pg_temp.claim(120,180)', '42501');
 select pg_temp.reject('select app.set_family_voice(pg_temp.f(), true)', '42501');
 select pg_temp.act(3);
@@ -58,6 +59,7 @@ select pg_temp.reject('select * from app.family_voice_usage', '42501');
 select pg_temp.reject('select * from app.family_voice_consents', '42501');
 select pg_temp.reject('select * from app.family_voice_settings', '42501');
 select app.set_family_voice(pg_temp.f(), false);
+select pg_temp.expect((select not enabled from app.family_voice_status(pg_temp.f(),1)), 'explicit voice opt-out overrides default');
 select pg_temp.act(2);
 select pg_temp.reject('select pg_temp.claim(900,900)', '42501');
 reset role;

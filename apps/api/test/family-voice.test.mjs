@@ -9,8 +9,10 @@ const settings = voiceSettings(env);
 const kind = (expected) => (error) => error instanceof VoiceError && error.kind === expected;
 const reply = (body, status = 200) => async () => new Response(typeof body === "string" ? body : JSON.stringify(body), { status });
 
-test("voice needs a key, a voice and the operator's confirmation", () => {
+test("configured voice defaults on and respects an explicit operator off switch", () => {
   assert.ok(settings);
+  assert.ok(voiceSettings({ ...env, FAMILY_VOICE_ENABLED: undefined }));
+  assert.equal(voiceSettings({ ...env, FAMILY_VOICE_ENABLED: "false" }), null);
   for (const missing of ["ELEVENLABS_API_KEY", "ELEVENLABS_VOICE_ID", "FAMILY_VOICE_ENABLED"]) assert.equal(voiceSettings({ ...env, [missing]: "" }), null);
   assert.equal(voiceSettings({ ...env, FAMILY_VOICE_ENABLED: "yes" }), null);
   assert.equal(voiceSettings({ ...env, ELEVENLABS_VOICE_ID: "../other/path" }), null);

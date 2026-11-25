@@ -1,6 +1,6 @@
 # Family Base voice
 
-Built locally on 24 November 2026; not deployed. ElevenLabs was checked once with a made-up sentence and no family data; Gemini has not been. Adults only, read only, off by default. Replaces the plan in [family-base-voice-plan.md](family-base-voice-plan.md), which proposed a different design.
+Implemented on 24 November 2026. ElevenLabs was checked once with a made-up sentence and no family data; Gemini has not been. Adults only and read only. The default-on release enables configured voice unless its owner opts out, while retaining each member's consent. Replaces the plan in [family-base-voice-plan.md](family-base-voice-plan.md), which proposed a different design.
 
 ## What it does
 
@@ -25,6 +25,8 @@ Protections: owner switch, separate 18+ notice and consent, 15 minutes a person 
 ## Activate
 
 Apply `20261207000000_add_family_voice.sql` **before** deploying the API; readiness checks for it. Then the web app and a new Android build. On the API only: `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `FAMILY_VOICE_ENABLED=true`, plus `GEMINI_API_KEY` and `FAMILY_AI_ENABLED=true`. Set a monthly spending limit in ElevenLabs and Google. Optional: `ELEVENLABS_LISTEN_MODEL` (`scribe_v3`), `ELEVENLABS_SPEAK_MODEL` (`eleven_flash_v2_5`).
+
+Apply `20261208000000_enable_family_ai_by_default.sql` for family defaults. Configured AI and voice now default on even when their server flags are omitted; explicitly setting either flag to `false` disables that feature. Existing owner opt-outs and individual consent remain unchanged. This change needs no new website or Android bundle.
 
 Check the keys first: `node --env-file=.env.voice-test.local scripts/check-voice.mjs`.
 
