@@ -4,7 +4,7 @@ import {DatabaseService} from './database.service.js';import {JobsService} from 
 import {validateStoredFile,type IncomingFile} from './file-validation.js';
 import {folderCreateInput,folderEditInput,folderListInput,fileListInput,type FolderDto,type FolderPageDto,type StoredFileDto,type FilePageDto,type FilePreviewDto} from './files.dto.js';
 const folderFields=`d.id,d.family_id as "familyId",d.channel_id as "channelId",c.name as "channelName",d.name,d.audience,d.selected_member_ids as "selectedMemberIds",d.version,d.archived_at is not null as archived,d.created_at as "createdAt",app.folder_can_manage(d.id) as "canManage",app.folder_can_upload(d.id) as "canUpload",(select count(*)::int from app.stored_files sf where sf.folder_id=d.id and sf.state='ready' and sf.archived_at is null) as "fileCount"`;
-const fileFields=`f.id,f.folder_id as "folderId",f.file_name as "fileName",f.mime,f.byte_size as "byteSize",f.version,f.archived_at is not null as archived,f.created_at as "createdAt",app.file_can_manage(f.id) as "canManage",f.archived_at is null and (d.id is null or d.archived_at is null) as "canDownload",case when f.mime like 'image/%' then 'image' when f.mime like 'text/%' then 'text' when f.mime like 'audio/%' then 'audio' when f.mime like 'video/%' then 'video' else 'none' end as preview,f.voice_seconds as "voiceSeconds"`;
+const fileFields=`f.id,f.sticker,f.folder_id as "folderId",f.file_name as "fileName",f.mime,f.byte_size as "byteSize",f.version,f.archived_at is not null as archived,f.created_at as "createdAt",app.file_can_manage(f.id) as "canManage",f.archived_at is null and (d.id is null or d.archived_at is null) as "canDownload",case when f.mime like 'image/%' then 'image' when f.mime like 'text/%' then 'text' when f.mime like 'audio/%' then 'audio' when f.mime like 'video/%' then 'video' else 'none' end as preview,f.voice_seconds as "voiceSeconds"`;
 @Injectable()
 export class FilesService{
  constructor(private readonly database:DatabaseService,private readonly storage:AttachmentStorageService,private readonly jobs:JobsService){}
@@ -58,8 +58,10 @@ export class FilesService{
  }
  async copyToChat(actor:string,family:string,source:string,channel:string,id:string){
   const grant=await this.readGrant(actor,family,source),buffer=await this.storage.readFile(grant.object_key);
-  const {voiceSeconds}=await this.getFile(actor,family,source);
-  return this.chatUpload(actor,family,channel,id,{buffer,size:buffer.length,originalname:Buffer.from(grant.file_name,'utf8').toString('latin1')},voiceSeconds??undefined);
+  const {voiceSeconds,sticker}=await this.getFile(actor,family,source);
+  const saved=await this.chatUpload(actor,family,channel,id,{buffer,size:buffer.length,originalname:Buffer.from(grant.file_name,'utf8').toString('latin1')},voiceSeconds??undefined);
+  if(sticker)await this.database.withActor(actor,client=>client.query('select app.mark_avatar_sticker_file($1,$2)',[family,saved.id]));
+  return {...saved,sticker:!!sticker};
  }
  archiveFile(actor:string,family:string,id:string,input:{version:number;archived:boolean}){return this.run(actor,async client=>{await client.query('select app.archive_stored_file($1,$2,$3,$4)',[family,id,input.version,input.archived]);return this.file(client,family,id);},true);}
  private readGrant(actor:string,family:string,id:string){return this.run(actor,async client=>{const{rows:[r]}=await client.query<{object_key:string;file_name:string;mime:string;byte_size:number}>('select * from app.stored_file_grant($1,$2)',[family,id]);if(!r)throw new NotFoundException('File unavailable. It may be archived or access may have ended.');return r;});}

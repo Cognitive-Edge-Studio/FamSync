@@ -12,7 +12,7 @@
     "userInterfaceStyle": "automatic",
     "icon": "./assets/launcher.png",
     "android": {
-      "versionCode": 1,
+      "versionCode": 3,
       "allowBackup": false,
       "adaptiveIcon": {
         "backgroundColor": "#eef3ec",

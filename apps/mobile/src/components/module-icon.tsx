@@ -11,6 +11,7 @@ const assets = {
   guests: require('../../assets/icons/3d/guests.webp'), account: require('../../assets/icons/3d/account.webp'),
   notifications: require('../../assets/icons/3d/notifications.webp'), home: require('../../assets/icons/3d/home.webp'),
   schedule: require('../../assets/icons/3d/schedule.webp'), overdue: require('../../assets/icons/3d/overdue.webp'),
+  helper: require('../../assets/icons/3d/helper.webp'),
 } satisfies Record<ModuleIconName, number>;
 
 /** Bundled, untinted decorative artwork. The surrounding control supplies its accessible label. */

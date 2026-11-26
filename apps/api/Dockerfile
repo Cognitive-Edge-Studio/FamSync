@@ -20,6 +20,7 @@ ENV NODE_ENV=production HOST=0.0.0.0 PORT=4000 NODE_EXTRA_CA_CERTS=/app/certs/su
 COPY --from=build /workspace/node_modules ./node_modules
 COPY --from=build /workspace/apps/api/dist ./dist
 COPY apps/api/certs ./certs
+COPY apps/api/assets ./assets
 COPY apps/api/package.json ./
 USER node
 EXPOSE 4000

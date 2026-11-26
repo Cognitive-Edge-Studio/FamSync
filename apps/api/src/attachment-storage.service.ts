@@ -12,6 +12,8 @@ export class AttachmentStorageService {
   private readonly storage?: StorageClient;
   private ready?: Promise<void>;
 
+  get configured() { return this.storage !== undefined; }
+
   constructor() {
     const url = process.env.SUPABASE_STORAGE_URL;
     const key = process.env.SUPABASE_STORAGE_KEY;
@@ -71,6 +73,13 @@ export class AttachmentStorageService {
     const url = new URL(data.signedUrl);
     url.searchParams.set("download", fileName);
     return { url: url.href };
+  }
+
+  async readOptionalFile(key:string) {
+    const bucket=await this.bucket(),{data,error}=await bucket.download(key);
+    if(data) return Buffer.from(await data.arrayBuffer());
+    if(error instanceof StorageApiError && ['404','400'].includes(error.statusCode) && /not found|does not exist/i.test(error.message)) return null;
+    throw new ServiceUnavailableException('We couldn’t read avatar storage. Try again.');
   }
 
   async uploadFile(key:string,bytes:Buffer,mime:string,hash:string){

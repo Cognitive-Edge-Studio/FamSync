@@ -48,6 +48,6 @@ test("the server's default family opens, and no family is a state of its own", (
 });
 
 test("testers see only built modules", () => {
-  assert.deepEqual(shownModules(false).map((module) => module.key), ["today", "tasks", "calendar", "chats", "goals", "files", "family", "guests", "notifications", 'family-base']);
+  assert.deepEqual(shownModules(false).map((module) => module.key), ["today", "tasks", "calendar", "chats", "helper", "goals", "files", "family", "guests", "notifications", 'family-base']);
   assert.equal(shownModules(true).length, modules.length);
 });

@@ -2,6 +2,8 @@
 
 Latest verification: 24 November 2026 (Asia/Dhaka).
 
+Release-source discovery on 26 November: the existing repository is `https://github.com/Cognitive-Edge-Studio/FamSync.git`, with separate Git metadata at `C:/shibly/FamSync/output/release-source.git`. GitHub `main` was verified at `37933f2` (25 November, configured AI/voice defaults enabled); this does not establish the live Render commit or environment. The 24 November runtime observations below are historical. See the [current release checklist](staging-release-2026-11-26.md) for pending helper/avatar/sticker changes.
+
 ## Current release
 
 - API commit `f50903575863b77bc9831bf6c3f3914f3dc6a314` is live. `/health`, `/api/v1/status`, the Android version endpoint, and authenticated Family Base graph, AI status and voice status checks passed.

@@ -38,10 +38,27 @@ export function receiptOf(channel: ChannelDetail, message: ChannelMessage): Rece
   return people.every((member) => member.deliveredPosition >= message.position) ? "delivered" : "sent";
 }
 
+/**
+ * When the helper stops collecting answers, in the family's time zone so it matches what the helper said.
+ * Viewers elsewhere also see the zone, such as "Fri 9:00 PM CST".
+ */
+export function collectionDeadline(collection: { closesAt: string; timeZone: string }, viewerZone = Intl.DateTimeFormat().resolvedOptions().timeZone) {
+  const zone = collection.timeZone.replace(/^(?:posix|right)\//, "");
+  const options: Intl.DateTimeFormatOptions = { weekday: "short", hour: "numeric", minute: "2-digit" };
+  try {
+    return new Intl.DateTimeFormat("en-US", { ...options, timeZone: zone, ...(zone !== viewerZone ? { timeZoneName: "short" } : {}) }).format(new Date(collection.closesAt));
+  } catch {
+    return new Intl.DateTimeFormat("en-US", options).format(new Date(collection.closesAt));
+  }
+}
+
+/** The family's AI helper writes messages without an author; this is the name they are shown under. */
+export const helperName = (channel: Pick<Channel, "helper">) => channel.helper?.name ?? "Family Helper";
+
 export function previewText(channel: Channel, userId: string) {
   const last = channel.lastMessage;
   if (!last) return channel.topic || (channel.kind === "dm" ? "No messages yet" : channel.memberCount + (channel.memberCount === 1 ? " member" : " members"));
-  const author = last.author?.userId === userId ? "You: " : channel.kind === "dm" ? "" : (last.author?.name ?? "Former member") + ": ";
+  const author = last.fromHelper ? helperName(channel) + ": " : last.author?.userId === userId ? "You: " : channel.kind === "dm" ? "" : (last.author?.name ?? "Former member") + ": ";
   return author + (last.deleted ? "Message deleted" : last.body.replace(/\s+/g, " ") || (last.fileCount ? attachmentLabel(last.attachment, last.fileCount) : "Attachment removed"));
 }
 

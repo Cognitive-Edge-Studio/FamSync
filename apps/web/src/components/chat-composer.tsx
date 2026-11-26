@@ -3,10 +3,11 @@
 import { Popover } from "@base-ui/react/popover";
 import { Menu } from "@base-ui/react/menu";
 import { AtSign, Check, FolderOpen, Paperclip, Send, Smile, Upload } from "lucide-react";
-import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent, type RefObject } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent, type RefObject, type ReactNode } from "react";
 import type { ChannelDetail } from "@/lib/channels";
 import { cn } from "@/lib/utils";
 import { Avatar } from "./ui/avatar";
+import { HelperAvatar } from './ui/helper-avatar';
 import { Button } from "./ui/button";
 import { chatFileTypes } from "@/lib/chat-upload";
 import { EmojiGrid } from "./emoji-grid";
@@ -18,10 +19,17 @@ export type Draft = { body: string; mentions: string[] };
 /** A draft placed in the box from outside: the saved one, or a refused message being edited. */
 export type Seed = Draft & { key: number };
 
-export function ChatComposer({ textarea, seed, members, userId, replying, editing, attached, uploading, canAttach, onAttach, onFiles, onVoice, onChange, onSend }: {
+type Member = ChannelDetail["members"][number];
+/** The family's AI helper can be mentioned like a member. It has no account, so it adds text but no mention id. */
+type Option = { kind: "member"; member: Member } | { kind: "helper"; name: string; emoji: string };
+
+export function ChatComposer({ textarea, seed, members, helper, userId, replying, editing, attached, uploading, canAttach, onAttach, onFiles, onVoice, onChange, onSend, stickers }: {
   textarea: RefObject<HTMLTextAreaElement | null>; seed: Seed; members: ChannelDetail["members"]; userId: string;
+  /** Set while the Family Helper is in this conversation. */
+  helper?: { name: string; emoji: string } | null;
   replying: boolean; editing: boolean; attached: number; uploading: boolean; canAttach: boolean; onAttach: () => void; onFiles: (files: File[]) => void; onVoice: () => void;
   onChange: (draft: Draft) => void; onSend: (draft: Draft) => void;
+  stickers?:ReactNode;
 }) {
   const [body, setBody] = useState(seed.body), [mentions, setMentions] = useState(seed.mentions);
   const [query, setQuery] = useState<{ start: number; end: number; text: string } | null>(null), [active, setActive] = useState(0);
@@ -44,7 +52,11 @@ export function ChatComposer({ textarea, seed, members, userId, replying, editin
   }, [body, textarea]);
 
   const people = members.filter((member) => member.userId !== userId);
-  const options = query ? people.filter((member) => member.name.toLowerCase().includes(query.text.toLowerCase())).slice(0, 6) : [];
+  const wanted = query?.text.toLowerCase() ?? "";
+  const options: Option[] = query ? [
+    ...(helper && helper.name.toLowerCase().includes(wanted) ? [{ kind: "helper" as const, ...helper }] : []),
+    ...people.filter((member) => member.name.toLowerCase().includes(wanted)).map((member) => ({ kind: "member" as const, member })),
+  ].slice(0, 6) : [];
   const selected = Math.min(active, Math.max(options.length - 1, 0));
   const ready = (!!body.trim() || attached > 0) && !uploading;
 
@@ -67,13 +79,13 @@ export function ChatComposer({ textarea, seed, members, userId, replying, editin
     change(value);
     return { value, position: start + text.length };
   }
-  function pick(member: ChannelDetail["members"][number]) {
+  function pick(option: Option) {
     if (!query) return;
-    const text = "@" + member.name + " ";
+    const text = "@" + (option.kind === "helper" ? option.name : option.member.name) + " ";
     const value = body.slice(0, query.start) + text + body.slice(query.end);
     if (value.length > 4000) return;
     caret.current = query.start + text.length;
-    change(value, mentions.includes(member.userId) ? mentions : [...mentions, member.userId]);
+    change(value, option.kind === "helper" || mentions.includes(option.member.userId) ? mentions : [...mentions, option.member.userId]);
     setQuery(null);
     textarea.current?.focus();
   }
@@ -109,11 +121,16 @@ export function ChatComposer({ textarea, seed, members, userId, replying, editin
       <div className="relative flex items-end gap-1 rounded-xl border border-border bg-panel p-1.5 focus-within:ring-3 focus-within:ring-ring/30">
         {query && options.length > 0 && (
           <ul id={listId} role="listbox" aria-label="Mention a member" className={cn(floatingPanel, "absolute bottom-full left-0 z-20 mb-2 w-64 max-w-full")}>
-            {options.map((member, index) => (
-              <li key={member.userId} id={listId + index} role="option" aria-selected={index === selected}
+            {options.map((option, index) => (
+              <li key={option.kind === "helper" ? "helper" : option.member.userId} id={listId + index} role="option" aria-selected={index === selected}
                 className="flex h-9 cursor-default items-center gap-2 rounded-lg px-2 text-sm aria-selected:bg-accent"
-                onMouseEnter={() => setActive(index)} onMouseDown={(event) => { event.preventDefault(); pick(member); }}>
-                <Avatar name={member.name} colorKey={member.userId} size="sm" /><span className="truncate">{member.name}{member.guest ? " · Guest" : ""}</span>
+                onMouseEnter={() => setActive(index)} onMouseDown={(event) => { event.preventDefault(); pick(option); }}>
+                {option.kind === "helper" ? <>
+                  <HelperAvatar emoji={option.emoji} className="size-6 rounded-full text-xs" />
+                  <span className="truncate">{option.name}</span><span className="ml-auto rounded-full bg-sage px-1.5 text-[0.625rem] font-medium text-sage-foreground">AI helper</span>
+                </> : <>
+                  <Avatar name={option.member.name} colorKey={option.member.userId} size="sm" /><span className="truncate">{option.member.name}{option.member.guest ? " · Guest" : ""}</span>
+                </>}
               </li>
             ))}
           </ul>
@@ -128,6 +145,7 @@ export function ChatComposer({ textarea, seed, members, userId, replying, editin
             </Menu.Popup></Menu.Positioner></Menu.Portal>
           </Menu.Root>
         </>}
+        {!editing&&stickers}
         <Popover.Root open={emojiOpen} onOpenChange={setEmojiOpen}>
           <Popover.Trigger render={<Button type="button" variant="ghost" size="icon" className="shrink-0" aria-label="Add emoji" title="Add emoji" />}><Smile aria-hidden="true" /></Popover.Trigger>
           <Popover.Portal><Popover.Positioner side="top" align="start" sideOffset={8} collisionPadding={12} className="z-50">
@@ -137,7 +155,7 @@ export function ChatComposer({ textarea, seed, members, userId, replying, editin
             </Popover.Popup>
           </Popover.Positioner></Popover.Portal>
         </Popover.Root>
-        {people.length > 0 && <Button type="button" variant="ghost" size="icon" className="shrink-0 max-sm:hidden" aria-label="Mention a member" title="Mention a member"
+        {(people.length > 0 || !!helper) && <Button type="button" variant="ghost" size="icon" className="shrink-0 max-sm:hidden" aria-label="Mention a member" title="Mention a member"
           onClick={() => {
             const position = textarea.current?.selectionStart ?? body.length;
             const added = insert(position > 0 && !/\s/.test(body[position - 1]) ? " @" : "@");

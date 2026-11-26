@@ -11,30 +11,32 @@ import {createHash} from 'node:crypto';
 import {FilesService} from './files.service.js';
 import {JobsDatabaseService} from './jobs-database.service.js';
 import {ChannelRealtimeService} from './channel-realtime.service.js';
+import {FamilyHelperService} from './family-helper.service.js';
 
 type Context = { names: Map<string,string>; guests:Set<string>; member:boolean };
-type LastRow = {id:string;body:string;deleted:boolean;fileCount:number;attachment:AttachmentKind|null;authorId:string|null;createdAt:string};
+type LastRow = {id:string;body:string;deleted:boolean;fileCount:number;attachment:AttachmentKind|null;authorId:string|null;fromHelper:boolean;createdAt:string};
 type ChannelRow = Omit<ChannelDto,'manager'|'isManager'|'lastMessage'|'peer'> & { managerId: string | null; last: LastRow|null; activity: string; pairLow:string|null;pairHigh:string|null };
 type ReactionRow = {emoji:string;count:number;active:boolean;userIds:string[]};
 type MessageRow = Omit<ChannelMessageDto,'author'|'replyTo'|'createdAt'|'mentions'|'reactions'|'editedAt'|'editableUntil'|'deletableUntil'> & { reactions:ReactionRow[];editedAt:Date|null;editableUntil:Date|null;deletableUntil:Date|null;parentDeleted:boolean;parentFiles:number;parentAttachment:AttachmentKind|null; mentionedIds:string[];authorId: string | null; createdAt: Date;
-  parentId: string | null; parentBody: string | null; parentAuthorId: string | null };
+  parentId: string | null; parentFromHelper: boolean; parentBody: string | null; parentAuthorId: string | null };
 const attachmentOf=(alias:string)=>`(select case when f.voice_seconds is not null then 'voice' when f.mime like 'image/%' then 'photo' when f.mime like 'video/%' then 'video' else 'file' end
   from app.message_file_links l left join app.stored_files f on f.id=l.file_id where l.message_id=${alias}.id order by l.id limit 1)`;
-const channelFields = `c.id,c.name,c.emoji,c.topic,c.description,c.manager_id as "managerId",c.version,c.kind,c.image_file_id as "imageFileId",p.muted,p.pinned_at is not null as pinned,p.hidden_at is not null as hidden,p.marked_unread as "markedUnread",app.is_channel_admin(c.id,$2::uuid) as "canManage",c.pair_low as "pairLow",c.pair_high as "pairHigh",
+const channelFields = `c.id,c.name,c.emoji,c.helper_enabled as "helperEnabled",(select jsonb_build_object('name',h.name,'emoji',h.emoji) from app.family_helpers h where h.family_id=c.family_id) as helper,
+ (select jsonb_build_object('question',q.question,'closesAt',q.closes_at,'timeZone',f.time_zone) from app.helper_collections q join app.families f on f.id=q.family_id where q.channel_id=c.id and q.status in ('open','closing')) as collection,c.topic,c.description,c.manager_id as "managerId",c.version,c.kind,c.image_file_id as "imageFileId",p.muted,p.pinned_at is not null as pinned,p.hidden_at is not null as hidden,p.marked_unread as "markedUnread",app.is_channel_admin(c.id,$2::uuid) as "canManage",c.pair_low as "pairLow",c.pair_high as "pairHigh",
  c.archived_at is not null as archived,c.last_position as "lastPosition",p.last_read as "readPosition",p.delivered_position as "deliveredPosition",
  coalesce(lm.created_at,c.created_at)::text as activity,
- case when lm.id is not null then jsonb_build_object('id',lm.id,'body',left(lm.body,160),'deleted',lm.deleted_at is not null,'fileCount',(select count(*) from app.message_file_links l where l.message_id=lm.id),'attachment',${attachmentOf('lm')},'authorId',lm.author_id,'createdAt',lm.created_at) end as last,
+ case when lm.id is not null then jsonb_build_object('id',lm.id,'body',left(lm.body,160),'deleted',lm.deleted_at is not null,'fileCount',(select count(*) from app.message_file_links l where l.message_id=lm.id),'attachment',${attachmentOf('lm')},'authorId',lm.author_id,'fromHelper',lm.from_helper,'createdAt',lm.created_at) end as last,
  (select count(*)::int from app.channel_participants cp where cp.channel_id=c.id) as "memberCount",
  (select count(*)::int from app.channel_messages m where m.channel_id=c.id and m.position>p.last_read and m.author_id is distinct from $2::uuid and m.deleted_at is null) as unread`;
 const channelSource = `app.channels c join app.channel_participants p on p.channel_id=c.id and p.user_id=$2
  left join app.channel_messages lm on lm.channel_id=c.id and lm.position=c.last_position`;
-const messageFields = `m.id,m.body,m.position,m.change_seq as "changeSeq",m.deleted_at is not null as deleted,m.forwarded,m.edited_at as "editedAt",m.edit_count as "editCount",
+const messageFields = `m.id,m.body,m.from_helper as "fromHelper",m.position,m.change_seq as "changeSeq",m.deleted_at is not null as deleted,m.forwarded,m.edited_at as "editedAt",m.edit_count as "editCount",
  exists(select 1 from app.message_stars s where s.message_id=m.id and s.user_id=$2::uuid) as starred,exists(select 1 from app.message_pins pin where pin.message_id=m.id) as pinned,
  case when m.author_id=$2::uuid and m.deleted_at is null then m.created_at+interval '15 minutes' end as "editableUntil",
  case when m.author_id=$2::uuid and m.deleted_at is null then m.created_at+interval '48 hours' end as "deletableUntil",
  parent.deleted_at is not null as "parentDeleted",(select count(*)::int from app.message_file_links l where l.message_id=parent.id) as "parentFiles",${attachmentOf('parent')} as "parentAttachment",m.author_id as "authorId",m.created_at as "createdAt",m.mentioned_user_ids as "mentionedIds",
- parent.id as "parentId",left(parent.body,180) as "parentBody",parent.author_id as "parentAuthorId",
- coalesce((select jsonb_agg(jsonb_build_object('id',l.id,'fileId',f.id,'fileName',f.file_name,'mime',f.mime,'byteSize',f.byte_size,'voiceSeconds',f.voice_seconds,'canUnlink',coalesce(l.author_id=$2::uuid,false) or exists(select 1 from app.channels ch where ch.id=m.channel_id and ch.manager_id=$2::uuid)))
+ parent.id as "parentId",coalesce(parent.from_helper,false) as "parentFromHelper",left(parent.body,180) as "parentBody",parent.author_id as "parentAuthorId",
+ coalesce((select jsonb_agg(jsonb_build_object('id',l.id,'fileId',f.id,'fileName',f.file_name,'mime',f.mime,'byteSize',f.byte_size,'sticker',coalesce(f.sticker,false),'voiceSeconds',f.voice_seconds,'canUnlink',coalesce(l.author_id=$2::uuid,false) or exists(select 1 from app.channels ch where ch.id=m.channel_id and ch.manager_id=$2::uuid)))
   from app.message_file_links l left join (app.stored_files f join app.folders fd on fd.id=f.folder_id and fd.archived_at is null) on f.id=l.file_id and f.state='ready' and f.archived_at is null where l.message_id=m.id),'[]'::jsonb) as files,
  coalesce((select jsonb_agg(w) from (
   select refs.id,'task'::text as kind,t.id as "targetId",t.title,
@@ -52,20 +54,20 @@ function toChannel(row: ChannelRow, actor: string, context: Context): ChannelDto
   const { managerId, last,activity,pairLow,pairHigh, ...rest } = row;
   const peer=row.kind==='dm'?person(pairLow===actor?pairHigh:pairLow,context.names):null;
   return { ...rest,peer,name:row.kind==='dm'?(peer?.name??'Former member'):row.name,
-    lastMessage:last?{id:last.id,body:last.body,deleted:last.deleted,fileCount:last.fileCount,attachment:last.attachment,author:person(last.authorId,context.names),createdAt:new Date(last.createdAt).toISOString()}:null,
+    lastMessage:last?{id:last.id,body:last.body,fromHelper:last.fromHelper===true,deleted:last.deleted,fileCount:last.fileCount,attachment:last.attachment,author:person(last.authorId,context.names),createdAt:new Date(last.createdAt).toISOString()}:null,
     manager: person(managerId,context.names), canCreateWork:context.member,isManager:context.member&&row.kind==='channel'&&managerId===actor };
 }
 function toMessage(row: MessageRow, context: Context): ChannelMessageDto {
-  const { authorId,parentId,parentBody,parentAuthorId,parentDeleted,parentFiles,parentAttachment,createdAt,editedAt,editableUntil,deletableUntil,mentionedIds,reactions,...rest }=row;
+  const { authorId,parentId,parentFromHelper,parentBody,parentAuthorId,parentDeleted,parentFiles,parentAttachment,createdAt,editedAt,editableUntil,deletableUntil,mentionedIds,reactions,...rest }=row;
   return { ...rest,work:rest.deleted?[]:rest.work,editedAt:editedAt?.toISOString()??null,editableUntil:editableUntil?.toISOString()??null,deletableUntil:deletableUntil?.toISOString()??null,
     reactions:reactions.map(({userIds,...reaction})=>({...reaction,people:userIds.map(id=>person(id,context.names)!)})),mentions:mentionedIds.map(id=>person(id,context.names)!),author:person(authorId,context.names),createdAt:createdAt.toISOString(),
-    replyTo:parentId ? {id:parentId,body:parentBody!,deleted:parentDeleted,fileCount:parentFiles,attachment:parentAttachment,author:person(parentAuthorId,context.names)} : null };
+    replyTo:parentId ? {id:parentId,fromHelper:parentFromHelper,body:parentBody!,deleted:parentDeleted,fileCount:parentFiles,attachment:parentAttachment,author:person(parentAuthorId,context.names)} : null };
 }
 
 @Injectable()
 export class ChannelsService {
   constructor(private readonly database: DatabaseService,private readonly jobs: JobsService,private readonly tasks:TasksService,private readonly files:FilesService,
-    private readonly jobsDatabase:JobsDatabaseService,private readonly realtime:ChannelRealtimeService) {}
+    private readonly jobsDatabase:JobsDatabaseService,private readonly realtime:ChannelRealtimeService,private readonly helper:FamilyHelperService) {}
   private readonly typed=new Map<string,number>();
   private async run<T>(actor:string,family:string,work:(client:PoolClient,context:Context)=>Promise<T>,write=false) {
     try {
@@ -149,11 +151,14 @@ export class ChannelsService {
         nextAfter:forward&&rows.length>limit?page.at(-1)!.position:null};
     });
   }
-  post(actor:string,family:string,id:string,input:ChannelMessageInput) {
-    return this.run(actor,family,async(client,context)=>{
+  async post(actor:string,family:string,id:string,input:ChannelMessageInput) {
+    const sent=await this.run(actor,family,async(client,context)=>{
       await client.query('select app.post_message_with_files($1,$2,$3,$4,$5,$6,$7)',[family,id,input.id,input.body,input.replyToId??null,input.mentionedUserIds??[],input.fileIds??[]]);
       return this.message(client,actor,id,input.id,context);
     },true);
+    // The Family Helper replies in the background when spoken to; the sender never waits for it.
+    void this.helper.onMessage(actor,family,id,sent.id,sent.body);
+    return sent;
   }
   react(actor:string,family:string,id:string,message:string,input:{emoji:string;active:boolean}) {
     return this.run(actor,family,async(client,context)=>{

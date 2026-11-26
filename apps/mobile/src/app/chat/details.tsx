@@ -5,7 +5,7 @@ import { useCallback, useRef, useState } from "react";
 import { View } from "react-native";
 import { ErrorText, Sheet } from "@/components/form";
 import { ChannelIcon } from "@/components/channel-icon";
-import { Avatar } from "@/components/message";
+import { Avatar, HelperAvatar } from "@/components/message";
 import { PickFiles } from "@/components/pick-files";
 import { Badge, confirm, MenuItem, Page, queryState, WithScope } from "@/components/screen";
 import { Button, Card, Text } from "@/components/ui";
@@ -57,6 +57,15 @@ function Body({ family, id }: { family: Scope; id: string }) {
       refresh();
     } catch (problem) { pictureId.current = ""; setError(problem instanceof Error ? problem.message : "We couldn’t save the picture."); } finally { setPicture(undefined); query.refresh(); }
   }
+  async function toggleHelper() {
+    const helper = channel!.helper!, enabled = !channel!.helperEnabled;
+    setNote("");
+    const result = await save(() => getApi(access_token).PUT("/api/v1/families/{familyId}/helper/channels/{channelId}", { params: { path }, body: { enabled } }), "We couldn’t change this. Try again.");
+    if (!result.ok) return;
+    query.replace((old) => ({ ...old, helperEnabled: result.data.helperEnabled }));
+    setNote(enabled ? helper.name + " joined. Say “@" + helper.name + "” in the chat to ask for help." : helper.name + " left this chat.");
+    refresh();
+  }
   const admin = channel.canManage && channel.kind === "channel";
   return (
     <Page query={query}>
@@ -66,6 +75,9 @@ function Body({ family, id }: { family: Scope; id: string }) {
       <Card style={{ padding: 8 }}>
         <MenuItem icon="search-outline" title="Search this conversation" onPress={() => router.push({ pathname: "/chat/search", params: { id, ...scopeParams(family) } })} />
         <MenuItem icon="folder-outline" title="Folders and files" onPress={() => router.push({ pathname: "/files", params: { channel: id, ...scopeParams(family) } })} />
+        {channel.canCreateWork && !channel.archived && (channel.helper
+          ? <MenuItem icon="sparkles-outline" title={(channel.helperEnabled ? "Remove " : "Add ") + channel.helper.name + (channel.helperEnabled ? " from this chat" : " to this chat")} disabled={busy} onPress={() => void toggleHelper()} />
+          : <MenuItem icon="sparkles-outline" title="Adopt a family member" onPress={() => router.push("/helper")} />)}
         <MenuItem icon={channel.muted ? "notifications-outline" : "notifications-off-outline"} title={channel.muted ? "Unmute" : "Mute"} disabled={busy} onPress={() => void change((api) => api.PUT("/api/v1/families/{familyId}/channels/{channelId}/mute", { params: { path }, body: { muted: !channel.muted } }), channel.muted ? "Conversation unmuted." : "Conversation muted.")} />
         {admin && <MenuItem icon="pencil-outline" title="Edit channel" onPress={() => router.push({ pathname: "/chat/form", params: { id } })} />}
         {admin && !channel.archived && <MenuItem icon="image-outline" title={channel.imageFileId ? "Change picture" : "Add picture"} disabled={busy || picture !== undefined} onPress={() => setPicking(true)} />}
@@ -81,6 +93,10 @@ function Body({ family, id }: { family: Scope; id: string }) {
           <View style={{ alignSelf: "center" }}>{member.guest ? <Badge tone="peach">Guest</Badge> : member.userId === channel.manager?.userId ? <Badge tone="lavender">Manager</Badge> : member.admin ? <Badge>Admin</Badge> : null}</View>
           {admin && !member.guest && member.userId !== channel.manager?.userId && <Button variant="outline" title="Role" disabled={busy} onPress={() => setRole(member)} />}
         </View>)}
+        {channel.helperEnabled && channel.helper && <View style={{ flexDirection: "row", gap: 12, alignItems: "center", minHeight: 48 }}>
+          <HelperAvatar emoji={channel.helper.emoji} /><View style={{ flex: 1 }}><Text>{channel.helper.name}</Text><Text muted size={13}>{"Family Helper · say @" + channel.helper.name}</Text></View>
+          <Badge>AI helper</Badge>
+        </View>}
         {admin && <Text muted size={13}>To add or remove family members, edit the channel.</Text>}
       </Card>
       {picking && <PickFiles photosOnly title="Channel picture" limit={1} note="Up to 2 MB after resizing." onClose={() => setPicking(false)} onError={setError} onPicked={(files) => { setPicking(false); if (files[0]) void sendPicture(files[0]); }} />}

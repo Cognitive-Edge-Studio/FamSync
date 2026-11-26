@@ -12,6 +12,7 @@ import { MessageFiles } from "./conversation-files";
 import { MessageText, showsMention } from "./message-text";
 import { MessageWorkTools } from "./message-work-tools";
 import { Avatar } from "./ui/avatar";
+import { HelperAvatar } from './ui/helper-avatar';
 import { EmojiGrid } from "./emoji-grid";
 import { Button } from "./ui/button";
 import { floatingPanel, menuItem } from "./ui/floating";
@@ -86,16 +87,21 @@ function MessageMenu({ mine, channel, message, tools, actions }: { mine: boolean
 }
 
 const MessageRow = memo(function MessageRow({ session, familyId, channel, message, grouped, guestAuthor, busy, tools, highlighted, receipt, actions }: RowProps) {
-  const mine = message.author?.userId === session.user.id, author = message.author?.name ?? "Former member";
+  const mine = !message.fromHelper && message.author?.userId === session.user.id;
+  const author = message.fromHelper ? channel.helper?.name ?? "Family Helper" : message.author?.name ?? "Former member";
   const [picking, setPicking] = useState(false);
-  const hidden = message.mentions.filter((person) => !showsMention(message.body, person.name));
+  // The helper's reply mentions the member who asked, so that mention is shown as a chip only when it isn't in the text.
+  const hidden = message.fromHelper ? [] : message.mentions.filter((person) => !showsMention(message.body, person.name));
   return (
     <li id={"message-" + message.id} data-message-id={message.id} tabIndex={-1}
       className={cn("group/message flex min-w-0 gap-2.5 rounded-xl outline-none transition-colors duration-500", mine && "flex-row-reverse", grouped ? "mt-1" : "mt-4", highlighted && "bg-lavender/60")}>
-      {!mine && (grouped ? <span className="w-8 shrink-0" aria-hidden="true" /> : <Avatar name={author} colorKey={message.author?.userId} className="mt-5" />)}
+      {!mine && (grouped ? <span className="w-8 shrink-0" aria-hidden="true" />
+        : message.fromHelper ? <HelperAvatar emoji={channel.helper?.emoji} className="mt-5 size-8 rounded-full text-base" />
+        : <Avatar name={author} colorKey={message.author?.userId} className="mt-5" />)}
       <div className={cn("relative grid min-w-0 max-w-[min(36rem,85%)] gap-1", mine ? "justify-items-end" : "justify-items-start")}>
         <div className={cn("flex flex-wrap items-baseline gap-x-2 text-xs", mine && "flex-row-reverse", grouped && "sr-only")}>
           <span className="font-medium wrap-anywhere">{mine ? "You" : author}{guestAuthor ? " · Guest" : ""}</span>
+          {message.fromHelper && <span className="rounded-full bg-sage px-1.5 py-px text-[0.625rem] font-medium text-sage-foreground">AI helper</span>}
           <time dateTime={message.createdAt} className="text-muted-foreground">{clock(message.createdAt)}</time>
         </div>
         {message.deleted ? <p className="flex items-center gap-1.5 rounded-2xl border border-dashed border-border px-3.5 py-2 text-sm text-muted-foreground italic"><Ban aria-hidden="true" className="size-3.5 shrink-0" />{mine ? "You deleted this message" : "This message was deleted"}</p>
@@ -104,7 +110,7 @@ const MessageRow = memo(function MessageRow({ session, familyId, channel, messag
           {message.forwarded && <p className="mb-1 flex items-center gap-1 text-xs italic opacity-80"><Forward aria-hidden="true" className="size-3" />Forwarded</p>}
           {message.replyTo && (
             <button type="button" className={quote(mine)} onClick={() => actions.jump(message.replyTo!.id)} aria-label={"Show the original message from " + (message.replyTo.author?.name ?? "Former member")}>
-              <span className="font-semibold">{message.replyTo.author?.userId === session.user.id ? "You" : message.replyTo.author?.name ?? "Former member"}</span>
+              <span className="font-semibold">{message.replyTo.fromHelper ? channel.helper?.name ?? "Family Helper" : message.replyTo.author?.userId === session.user.id ? "You" : message.replyTo.author?.name ?? "Former member"}</span>
               <span className="mt-0.5 line-clamp-3 wrap-anywhere whitespace-pre-wrap">{replyText(message.replyTo)}</span>
             </button>
           )}

@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { View } from "react-native";
 import { ErrorText, Field } from "@/components/form";
 import { Avatar } from "@/components/message";
+import { AvatarEditor } from '@/components/avatar-editor';
 import { FormPage, LinkRow, queryState } from "@/components/screen";
 import { Card, Text } from "@/components/ui";
 import { getApi, required } from "@/lib/api";
@@ -39,6 +40,7 @@ function Body({ profile }: { profile: Profile }) {
         <LinkRow icon="notifications-outline" title="Notification settings" onPress={() => router.push("/account/notifications")} />
         <LinkRow icon="lock-closed-outline" title="Sign-in and security" onPress={() => router.push("/account/security")} />
       </Card>
+      <AvatarEditor />
       <Field label="First name" value={draft.firstName} maxLength={80} autoComplete="given-name" onChangeText={(firstName) => set({ firstName })} />
       <Field label="Last name" value={draft.lastName} maxLength={80} autoComplete="family-name" onChangeText={(lastName) => set({ lastName })} />
       <Field label="Bio" value={draft.bio} maxLength={500} multiline onChangeText={(bio) => set({ bio })} />

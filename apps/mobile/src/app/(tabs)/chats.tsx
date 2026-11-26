@@ -6,8 +6,8 @@ import { View } from "react-native";
 import { ErrorText, Field, Row, Sheet } from "@/components/form";
 import { ChannelIcon } from "@/components/channel-icon";
 import { MotionPressable } from '@/components/motion';
-import { Avatar } from "@/components/message";
-import { AddButton, Chips, MenuItem, Page, queryState, WithFamily } from "@/components/screen";
+import { Avatar, HelperAvatar } from "@/components/message";
+import { AddButton, Badge, Chips, MenuItem, Page, queryState, WithFamily } from "@/components/screen";
 import { Button, Card, Icon, Loading, Text } from "@/components/ui";
 import { getApi, required } from "@/lib/api";
 import { useChats } from "@/lib/chat";
@@ -38,6 +38,7 @@ function ChatList({ family, onLost }: { family: Family; onLost: () => void }) {
       <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}><Button variant="outline" title="Search messages" onPress={() => router.push("/chat/search")} /><Button variant="outline" title="Starred" onPress={() => router.push("/chat/starred")} /></View>
       <ErrorText>{error}</ErrorText>
       {filter === "archived" ? <Archived family={family} search={wanted} me={user.id} onMenu={setMenu} /> : state ?? <Card style={{ padding: 8, gap: 0 }}>
+        {filter === "all" && !wanted && <HelperRow helper={chats.channels?.find((channel) => channel.helper)?.helper ?? null} />}
         {shown.length === 0 && <Text muted style={{ padding: 12 }}>{wanted ? "No chats match." : "No chats yet. Start a direct message or create a channel."}</Text>}
         {shown.map((channel) => <ChatRow key={channel.id} familyId={family.id} channel={channel} me={user.id} busy={busy} onMenu={() => setMenu(channel)} />)}
       </Card>}
@@ -67,6 +68,23 @@ function ChatRow({ familyId, channel, me, onMenu, busy }: { familyId: string; ch
           {channel.unread > 0 ? <View style={{ minWidth: 22, height: 22, borderRadius: 11, paddingHorizontal: 6, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center" }}><Text size={13} weight="600" style={{ color: colors.onPrimary }}>{channel.unread}</Text></View> : channel.markedUnread && <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: colors.primary }} />}
         </View>
       </View>
+    </MotionPressable>
+  );
+}
+
+/** The family's AI helper sits pinned above the chats, like a contact you can always message. */
+function HelperRow({ helper }: { helper: Channel["helper"] }) {
+  const { colors } = useTheme(), title = helper ? helper.name : "Adopt a family member";
+  const note = helper ? "Your Family Helper · catch up, shopping list, reminders" : "An AI member of your family that lives in FamSync";
+  return (
+    <MotionPressable accessibilityRole="button" accessibilityLabel={title + ", " + note} onPress={() => router.push("/helper")}
+      style={({ pressed }) => ({ flexDirection: "row", gap: 12, alignItems: "center", padding: 8, borderRadius: 12, minHeight: 68, backgroundColor: pressed ? colors.accent : "transparent" })}>
+      {helper ? <HelperAvatar emoji={helper.emoji} size={48} /> : <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.sage, alignItems: "center", justifyContent: "center" }}><Icon name="sparkles-outline" size={36} /></View>}
+      <View style={{ flex: 1, gap: 2 }}>
+        <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}><Text weight="600" numberOfLines={1} style={{ flexShrink: 1 }}>{title}</Text><Badge tone="sage">AI</Badge></View>
+        <Text size={13} muted numberOfLines={1}>{note}</Text>
+      </View>
+      <Icon name="pin" size={14} color={colors.mutedForeground} />
     </MotionPressable>
   );
 }

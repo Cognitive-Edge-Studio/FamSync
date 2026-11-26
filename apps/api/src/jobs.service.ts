@@ -60,6 +60,33 @@ export class JobsService {
     private readonly androidPush: AndroidPushService,
   ) {}
 
+  /**
+   * Lets a feature service handle its own job kind without the two services depending on each other.
+   * `immediate` kinds also run right after `notify()` in their own lane, like push, instead of waiting for the scheduler.
+   */
+  register(kind: string, handler: Handler, options: { immediate?: boolean } = {}) {
+    this.handlers[kind] = handler;
+    if (options.immediate) this.immediateKinds.push(kind);
+  }
+  private readonly immediateKinds: string[] = [];
+  private runningImmediate = false;
+  private runImmediateAgain = false;
+  private async runImmediate() {
+    this.runImmediateAgain = true;
+    if (this.runningImmediate || !this.immediateKinds.length || !this.database.configured) return;
+    this.runningImmediate = true;
+    try {
+      while (this.runImmediateAgain) {
+        this.runImmediateAgain = false;
+        while ((await this.dispatch(this.immediateKinds)).processed > 0);
+      }
+    } catch {
+      this.logger.warn("Could not run queued work now. It will run on the next scheduled pass.");
+    } finally {
+      this.runningImmediate = false;
+    }
+  }
+
   // Inngest runs the dispatcher after each commit and every minute as a safety net. A run that fails in
   // transport is retried. Dispatching is safe to repeat because claims and the outbox carry the state.
   functions() {
@@ -122,6 +149,7 @@ export class JobsService {
   // Callers do not wait: the work is already saved.
   async notify() {
     void this.signalNow();
+    void this.runImmediate();
     void this.signalScheduler();
   }
 

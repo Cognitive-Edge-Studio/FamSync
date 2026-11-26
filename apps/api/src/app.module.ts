@@ -1,4 +1,8 @@
 import { Module } from "@nestjs/common";
+import { AvatarsController } from './avatars.controller.js';
+import { AvatarsService } from './avatars.service.js';
+import { StickersController } from './stickers.controller.js';
+import { StickersService } from './stickers.service.js';
 import { AuthGuard } from "./auth.guard.js";
 import { AttachmentStorageService } from "./attachment-storage.service.js";
 import { CalendarController } from "./calendar.controller.js";
@@ -42,12 +46,14 @@ import { FamilyVoiceController } from "./family-voice.controller.js";
 import { FamilyVoiceService } from "./family-voice.service.js";
 import { FamilyAiService } from "./family-ai.service.js";
 import { FamilyBaseService } from "./family-base.service.js";
+import { FamilyHelperController } from "./family-helper.controller.js";
+import { FamilyHelperService } from "./family-helper.service.js";
 
 @Module({
-  controllers: [HealthController, MobileVersionController, ProfileController, StatusController, FamilyController, PrivacyController, CalendarController,
+  controllers: [StickersController, AvatarsController, HealthController, MobileVersionController, ProfileController, StatusController, FamilyController, PrivacyController, CalendarController,
     TasksController, TaskSeriesController, InngestController,
-    NotificationsController, GoalsController, ChannelsController,GuestsController,FilesController,ChatStatusController,PushController,AndroidPushController,AndroidPushRevocationController,FamilyBaseController,FamilyAiController,FamilyVoiceController],
-  providers: [AuthGuard, DatabaseService, FamilyService, InvitationMailService, CalendarService, AttachmentStorageService,
-    TasksService, TaskSeriesService, JobsDatabaseService, JobsService, RemindersService, GoalsService, ChannelsService, ChannelRealtimeService,PushService,AndroidPushService,GuestsService,FilesService,FamilyBaseService,FamilyEntriesService,FamilyAiService,FamilyVoiceService],
+    NotificationsController, GoalsController, ChannelsController,GuestsController,FilesController,ChatStatusController,PushController,AndroidPushController,AndroidPushRevocationController,FamilyBaseController,FamilyAiController,FamilyVoiceController,FamilyHelperController],
+  providers: [StickersService, AvatarsService, AuthGuard, DatabaseService, FamilyService, InvitationMailService, CalendarService, AttachmentStorageService,
+    TasksService, TaskSeriesService, JobsDatabaseService, JobsService, RemindersService, GoalsService, ChannelsService, ChannelRealtimeService,PushService,AndroidPushService,GuestsService,FilesService,FamilyBaseService,FamilyEntriesService,FamilyAiService,FamilyVoiceService,FamilyHelperService],
 })
 export class AppModule {}

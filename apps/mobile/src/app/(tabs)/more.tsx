@@ -11,9 +11,9 @@ import { useNotices } from "@/lib/notices";
 import { useSession, useSignedIn } from "@/lib/session";
 import { themeChoices, useTheme } from "@/lib/theme";
 
-const paths = { goals: "/goals", files: "/files", family: "/family", guests: "/guests", notifications: "/notifications", 'family-base': '/family-base' } as const;
+const paths = { helper: "/helper", goals: "/goals", files: "/files", family: "/family", guests: "/guests", notifications: "/notifications", 'family-base': '/family-base' } as const;
 const labels = { light: "Light", dark: "Dark", system: "Device" };
-const descriptions: Record<string, string> = { goals: 'Make progress together', files: 'Everything you’ve shared', family: 'Your people and settings', guests: 'Your invited spaces', notifications: 'Catch up on updates', 'family-base': 'Memories, places and ideas' };
+const descriptions: Record<string, string> = { helper: 'Your family’s AI helper', goals: 'Make progress together', files: 'Everything you’ve shared', family: 'Your people and settings', guests: 'Your invited spaces', notifications: 'Catch up on updates', 'family-base': 'Memories, places and ideas' };
 
 export default function More() {
   const { colors, choice, choose } = useTheme(), { signOut } = useSession(), session = useSignedIn(), { state } = useFamilyState();

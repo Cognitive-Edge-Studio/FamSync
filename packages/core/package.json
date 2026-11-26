@@ -10,7 +10,8 @@
     "./reminders": "./src/reminders.ts",
     "./forms": "./src/forms.ts",
     "./chat": "./src/chat.ts",
-    "./voice": "./src/voice.ts"
+    "./voice": "./src/voice.ts",
+    "./avatars": "./src/avatars.ts"
   },
   "dependencies": {
     "@famsync/api-client": "0.1.0"

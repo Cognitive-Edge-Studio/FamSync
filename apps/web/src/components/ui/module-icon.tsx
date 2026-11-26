@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 
-export type ModuleIconName = 'today' | 'calendar' | 'tasks' | 'goals' | 'channels' | 'messages' | 'families' | 'folders' | 'guests' | 'account' | 'notifications' | 'home' | 'schedule' | 'overdue';
+export type ModuleIconName = 'today' | 'calendar' | 'tasks' | 'goals' | 'channels' | 'messages' | 'families' | 'folders' | 'guests' | 'account' | 'notifications' | 'home' | 'schedule' | 'overdue' | 'helper';
 
 /** Decorative artwork: the surrounding link, heading or button supplies the accessible name. */
 export function ModuleIcon({ name, className }: { name: ModuleIconName; className?: string }) {

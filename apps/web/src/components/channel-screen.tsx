@@ -1,6 +1,7 @@
 "use client";
 import { ModuleIcon } from "./ui/module-icon";
 import { LiveStatus } from './ui/live-status';
+import { collectionDeadline } from '@famsync/core/chat';
 import { Menu } from '@base-ui/react/menu';
 import { floatingPanel, menuItem } from './ui/floating';
 
@@ -11,6 +12,7 @@ import { readDraft, removeDraft, saveDraft, type DraftFile, type DraftReply, typ
 import { VoiceRecorder, type Recording } from './voice-recorder';
 import { attachmentLabel } from '@/lib/channels';
 import { ChatComposer, type Draft, type Seed } from './chat-composer';
+import { AvatarStickers } from './avatar-stickers';
 import { ChatFeed, dayLabel, receiptPeople, replyText, unreadDividerId, type FeedActions } from './chat-feed';
 import { ConfirmDialog, ForwardDialog, MessageInfoDialog } from './chat-dialogs';
 import { fileProblem, uploadChatFile } from '@/lib/chat-upload';
@@ -24,6 +26,7 @@ import { FormFeedback } from './account-fields';
 import { cn } from '@/lib/utils';
 import { ConversationList, workspaceFrame } from './channels-screen';
 import { Avatar } from './ui/avatar';
+import { HelperAvatar } from './ui/helper-avatar';
 import { Badge } from './ui/badge';
 import { EmptyState } from './ui/empty-state';
 import { Button } from './ui/button';
@@ -315,6 +318,12 @@ function Conversation({session,familyId,channelId,guest=false}:{session:Session;
     const item:Outgoing={id:crypto.randomUUID(),body:'',reply,mentions:[],files:[{id:stored.id,fileName:'Voice message'}],createdAt:new Date().toISOString(),state:'sending'};
     setReply(null);setRecording(false);updateQueue(items=>[...items,item]);void flush();
   }
+  function sendSticker(file:{id:string;fileName:string}) {
+    if(!mounted.current||!access.current)return;
+    nearBottom.current=true;setAtBottom(true);setUnreadAfter(null);setNote('');setError('');
+    const item:Outgoing={id:crypto.randomUUID(),body:'',reply,mentions:[],files:[file],createdAt:new Date().toISOString(),state:'sending'};
+    setReply(null);updateQueue(items=>[...items,item]);void flush();
+  }
   function send(next:Draft) {
     if(editTarget){void saveEdit(next);return;}
     signalTyping(false);
@@ -404,6 +413,11 @@ function Conversation({session,familyId,channelId,guest=false}:{session:Session;
     }catch{setError('We couldn’t change this channel. Refresh and try again.');}finally{setBusy(false);}
   }
   function jump(){nearBottom.current=true;setAtBottom(true);if(feed.current)feed.current.scrollTop=feed.current.scrollHeight;void markRead(messages.at(-1)?.position??0);}
+  async function toggleHelper(){if(!channel?.helper||busy)return;const name=channel.helper.name;setBusy(true);setError('');try{
+    const {data,error}=await getBrowserApi(session.access_token).PUT('/api/v1/families/{familyId}/helper/channels/{channelId}',{params:{path},body:{enabled:!channel.helperEnabled}});
+    if(data){setChannel(current=>current&&{...current,helperEnabled:data.helperEnabled});setNote(data.helperEnabled?name+' joined. Say "@'+name+'" to ask for help here.':name+' left this conversation.');}
+    else setError(familyError(error,'We couldn’t change this. Try again.'));
+  }catch{setError('We couldn’t change this. Try again.');}finally{setBusy(false);}}
   async function mute(){if(!channel||busy)return;setBusy(true);setError('');try{
     const {data,error}=await getBrowserApi(session.access_token).PUT('/api/v1/families/{familyId}/channels/{channelId}/mute',{params:{path},body:{muted:!channel.muted}});
     if(data){setChannel(data);setNote(data.muted?'Conversation muted. New message and mention alerts are paused.':'Conversation unmuted.');}else setError(familyError(error,'We couldn’t change mute. Try again.'));
@@ -411,8 +425,9 @@ function Conversation({session,familyId,channelId,guest=false}:{session:Session;
   const back=channel&&!channel.canCreateWork?'/guests/':'/messages/?'+new URLSearchParams({family:familyId});
   const backLabel=channel&&!channel.canCreateWork?'All guest channels':'All chats';
   const guestIds=useMemo(()=>new Set(channel?.members.filter(m=>m.guest).map(m=>m.userId)??[]),[channel]);
-  const typists=channel?.members.filter(m=>m.userId in typing).map(m=>m.name)??[];
-  const typingLabel=typists.length===0?'':typists.length===1?(channel?.kind==='dm'?'typing…':typists[0]+' is typing…'):typists.length===2?typists.join(' and ')+' are typing…':'Several people are typing…';
+  // The Family Helper types as "helper", since it has no account of its own.
+  const typists=[...('helper' in typing&&channel?.helper?[channel.helper.name]:[]),...(channel?.members.filter(m=>m.userId in typing).map(m=>m.name)??[])];
+  const typingLabel=typists.length===0?'':typists.length===1?(channel?.kind==='dm'&&!('helper' in typing)?'typing…':typists[0]+' is typing…'):typists.length===2?typists.join(' and ')+' are typing…':'Several people are typing…';
   const showList=!guest&&!!channel;
   const directPeer=channel?.kind==='dm'?channel.members.find(member=>member.userId!==session.user.id):undefined;
   return <>
@@ -431,10 +446,15 @@ function Conversation({session,familyId,channelId,guest=false}:{session:Session;
             {directPeer?<Avatar name={directPeer.name} colorKey={directPeer.userId} className="size-12" />:<ChannelAvatar familyId={familyId} channelId={channel.id} imageFileId={channel.imageFileId} emoji={channel.emoji} accessToken={session.access_token}/>}
             <div className="min-w-0">
               <h1 id="conversation-title" className="truncate text-base font-semibold">{channel.name}</h1>
-              <p className="truncate text-xs text-muted-foreground">{typingLabel?<span className="font-medium text-foreground">{typingLabel}</span>:channel.kind==='dm'?(directPeer?.online?'Online':directPeer?.lastSeen?seenLabel(directPeer.lastSeen):'Direct conversation'):channel.topic||channel.memberCount+(channel.memberCount===1?' member':' members')}{channel.muted?' · Muted':''}{channel.archived?' · Archived':''}</p>
+              <p className="truncate text-xs text-muted-foreground">{typingLabel?<span className="font-medium text-foreground">{typingLabel}</span>:channel.kind==='dm'?(directPeer?.online?'Online':directPeer?.lastSeen?seenLabel(directPeer.lastSeen):'Direct conversation'):channel.topic||channel.memberCount+(channel.memberCount===1?' member':' members')}{channel.muted?' · Muted':''}{channel.archived?' · Archived':''}{channel.helperEnabled&&channel.helper&&!typingLabel?' · '+channel.helper.emoji+' '+channel.helper.name+' is here':''}</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
+            {channel.canCreateWork&&(channel.helper
+              ?<Button variant={channel.helperEnabled?'secondary':'ghost'} size="icon" disabled={busy||channel.archived} aria-pressed={channel.helperEnabled}
+                aria-label={channel.helperEnabled?'Remove '+channel.helper.name+' from this conversation':'Add '+channel.helper.name+' to this conversation'}
+                title={channel.helperEnabled?'Remove '+channel.helper.name:'Add '+channel.helper.name} onClick={()=>void toggleHelper()}><HelperAvatar emoji={channel.helper.emoji} className="size-6 rounded-full text-sm ring-0" /></Button>
+              :<a href="/helper/" aria-label="Add a Family Helper" title="Add a Family Helper" className="inline-flex size-9 items-center justify-center rounded-lg hover:bg-muted"><ModuleIcon name="helper" className="size-6" /></a>)}
             <a href={foldersPath(familyId,channel.id,!channel.canCreateWork)} aria-label="Open conversation files" title="Conversation files" className="inline-flex size-9 items-center justify-center rounded-lg hover:bg-muted"><ModuleIcon name="folders" className="size-4" /></a>
             <Button variant="ghost" size="icon" disabled={busy} aria-label={channel.muted?'Unmute conversation':'Mute conversation'} title={channel.muted?'Unmute conversation':'Mute conversation'} onClick={()=>void mute()}>{channel.muted?<BellOff aria-hidden="true" />:<ModuleIcon name="notifications" />}</Button>
             {channel.canManage&&<Menu.Root>
@@ -449,6 +469,11 @@ function Conversation({session,familyId,channelId,guest=false}:{session:Session;
           </div>
         </header>
         {(error||note)&&<div className="border-b border-border px-4 py-2"><FormFeedback error={error} note={note} /></div>}
+        {channel.collection&&<div role="status" className="flex items-start gap-2.5 border-b border-border bg-sage/50 px-4 py-2 text-sm">
+          <ModuleIcon name="helper" className="mt-0.5 size-5" />
+          <p className="min-w-0"><span className="font-medium">{(channel.helper?.name??'The helper')+' is collecting answers until '+collectionDeadline(channel.collection)}</span>
+            <span className="text-muted-foreground">{' · “'+channel.collection.question+'” Just reply here.'}</span></p>
+        </div>}
         {channel.archived&&<p className="border-b border-border bg-muted px-4 py-2 text-sm text-muted-foreground">Archived channel. History is available; restore it to post or react.</p>}
         {channel.pins.length>0&&<ul aria-label="Pinned messages" className="grid grid-cols-1 border-b border-border">{channel.pins.map(pin=><li key={pin.id}><button type="button" className="flex w-full min-w-0 items-center gap-2 px-4 py-1.5 text-left text-xs hover:bg-accent" onClick={()=>void jumpTo(pin.id)}>
           <Pin aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" /><span className="shrink-0 font-medium">{pin.author?.userId===session.user.id?'You':pin.author?.name??'Former member'}</span><span className="truncate text-muted-foreground">{pin.body||attachmentLabel(pin.attachment,pin.fileCount)}</span></button></li>)}</ul>}
@@ -472,7 +497,7 @@ function Conversation({session,familyId,channelId,guest=false}:{session:Session;
             <Button variant="ghost" className="h-7 shrink-0 px-2 text-xs" disabled={busy} onClick={endEdit}>Cancel edit</Button></div>}
           {reply&&!editTarget&&<div className="flex min-w-0 items-start justify-between gap-2 rounded-xl border-l-2 border-lavender-foreground bg-muted p-2.5"><div className="min-w-0 text-xs"><p className="font-semibold">Replying to {reply.author}</p><p className="mt-0.5 truncate">{reply.body}</p></div>
             <Button variant="ghost" className="h-7 shrink-0 px-2 text-xs" onClick={()=>setReply(null)}>Cancel reply</Button></div>}
-          {recording?<VoiceRecorder onSend={sendVoice} onClose={()=>setRecording(false)} />:<ChatComposer textarea={composer} seed={seed} members={channel.members} userId={session.user.id} replying={!!reply} editing={!!editTarget} attached={editTarget?editTarget.files.length:selectedFiles.length} uploading={!editTarget&&uploads.length>0} canAttach={selectedFiles.length+uploads.length<5}
+          {recording?<VoiceRecorder onSend={sendVoice} onClose={()=>setRecording(false)} />:<ChatComposer stickers={<AvatarStickers accessToken={session.access_token} familyId={familyId} channelId={channelId} onPrepared={sendSticker}/>} textarea={composer} seed={seed} members={channel.members} helper={channel.helperEnabled?channel.helper:null} userId={session.user.id} replying={!!reply} editing={!!editTarget} attached={editTarget?editTarget.files.length:selectedFiles.length} uploading={!editTarget&&uploads.length>0} canAttach={selectedFiles.length+uploads.length<5}
             onAttach={()=>setPickingFiles(true)} onFiles={addFiles} onVoice={()=>{const empty={body:'',mentions:[]};draft.current=empty;setSeed(old=>({...empty,key:old.key+1}));setRecording(true);}} onChange={next=>{draft.current=next;if(!editTarget)signalTyping(!!next.body.trim());if(!editTarget)saveDraft(session.user.id,channelId,next);}} onSend={send} />}
         </div>}
       </article>

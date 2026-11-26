@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { z } from "zod";
 import { TaskPersonDto } from "./tasks.dto.js";
+import { FamilyHelperDto } from "./family-helper.dto.js";
 import { CreateTaskDto, createTaskInput } from './tasks.dto.js';
 
 const text = (max: number) => z.string().trim().max(max).refine((value) => !value.includes('\0'));
@@ -45,7 +46,14 @@ export type ChannelMessageInput = z.infer<typeof channelMessageInput>;
 
 export const attachmentKinds = ['voice','photo','video','file'] as const;
 export type AttachmentKind = typeof attachmentKinds[number];
+export class HelperCollectionDto {
+  @ApiProperty() question!: string;
+  @ApiProperty({ format: 'date-time' }) closesAt!: string;
+  @ApiProperty({ description: "The family's time zone, so the deadline reads the same for everyone and matches what the helper said." }) timeZone!: string;
+}
+
 export class LastMessageDto {
+  @ApiProperty() fromHelper!: boolean;
   @ApiProperty({ enum: attachmentKinds, nullable: true }) attachment!: AttachmentKind | null;
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty() body!: string;
@@ -65,6 +73,9 @@ export class CreateChannelDto extends ChannelFieldsDto { @ApiProperty({ format: 
 export class UpdateChannelDto extends ChannelFieldsDto { @ApiProperty() version!: number; }
 export class ArchiveChannelDto { @ApiProperty() version!: number; @ApiProperty() archived!: boolean; }
 export class ChannelDto {
+  @ApiProperty({description:'True when the Family Helper is in this conversation.'}) helperEnabled!:boolean;
+  @ApiProperty({type:FamilyHelperDto,nullable:true,description:'The family\'s helper, if one was added. Null for guests.'}) helper!:FamilyHelperDto|null;
+  @ApiProperty({type:HelperCollectionDto,nullable:true,description:'Set while the helper is collecting everyone\'s answers here.'}) collection!:HelperCollectionDto|null;
   @ApiProperty({type:String,nullable:true}) imageFileId!:string|null;
   @ApiProperty() canCreateWork!:boolean;
   @ApiProperty({type:LastMessageDto,nullable:true}) lastMessage!:LastMessageDto|null;
@@ -118,6 +129,7 @@ export class ChannelReactionDto {
   @ApiProperty() active!: boolean;
 }
 export class ChannelReplyDto {
+  @ApiProperty() fromHelper!: boolean;
   @ApiProperty({ enum: attachmentKinds, nullable: true }) attachment!: AttachmentKind | null;
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty() body!: string;
@@ -135,10 +147,12 @@ export class MessageWorkDto {
   @ApiProperty() version!:number;
 }
 export class MessageFileDto{
+  @ApiPropertyOptional() sticker?:boolean;
   @ApiProperty() id!:string;@ApiProperty({type:String,nullable:true}) fileId!:string|null;@ApiProperty({type:String,nullable:true}) fileName!:string|null;
   @ApiProperty({type:String,nullable:true}) mime!:string|null;@ApiProperty({type:Number,nullable:true}) byteSize!:number|null;@ApiProperty({type:Number,nullable:true}) voiceSeconds!:number|null;@ApiProperty() canUnlink!:boolean;
 }
 export class ChannelMessageDto {
+  @ApiProperty({description:'True when the Family Helper wrote this message. Its author is then null.'}) fromHelper!:boolean;
   @ApiProperty({type:[MessageFileDto]}) files!:MessageFileDto[];
   @ApiProperty({type:[TaskPersonDto]}) mentions!:TaskPersonDto[];
   @ApiProperty({type:[MessageWorkDto]}) work!:MessageWorkDto[];

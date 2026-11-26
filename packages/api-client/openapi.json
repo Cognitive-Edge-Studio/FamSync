@@ -1,6 +1,320 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/api/v1/me/avatar/stickers": {
+      "get": {
+        "operationId": "getMyAvatarStickers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarStickersDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Stickers"
+        ]
+      },
+      "post": {
+        "operationId": "createMyAvatarStickers",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStickersDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarStickersDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Stickers"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/channels/{channelId}/stickers": {
+      "post": {
+        "operationId": "prepareAvatarSticker",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrepareStickerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoredFileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Stickers"
+        ]
+      }
+    },
+    "/api/v1/me/avatar": {
+      "get": {
+        "operationId": "getMyAvatarStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Avatars"
+        ]
+      },
+      "delete": {
+        "operationId": "resetMyAvatar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarSavedDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Avatars"
+        ]
+      }
+    },
+    "/api/v1/me/avatar/generations": {
+      "post": {
+        "operationId": "createMyAvatar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AvatarUploadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarGenerationDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Avatars"
+        ]
+      }
+    },
+    "/api/v1/me/avatar/generations/{id}": {
+      "get": {
+        "operationId": "getMyAvatarGeneration",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarGenerationDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Avatars"
+        ]
+      }
+    },
+    "/api/v1/me/avatar/generations/{id}/accept": {
+      "post": {
+        "operationId": "acceptMyAvatar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarSavedDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Avatars"
+        ]
+      }
+    },
+    "/api/v1/avatars/resolve": {
+      "post": {
+        "operationId": "resolveAvatars",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvatarResolveInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarResolveDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Avatars"
+        ]
+      }
+    },
     "/api/v1/mobile/android/version": {
       "get": {
         "operationId": "getAndroidVersionPolicy",
@@ -6963,6 +7277,546 @@
           "FamilyVoice"
         ]
       }
+    },
+    "/api/v1/families/{familyId}/helper": {
+      "get": {
+        "operationId": "getFamilyHelper",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyHelperStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyHelper"
+        ]
+      },
+      "put": {
+        "operationId": "saveFamilyHelper",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveFamilyHelperDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyHelperStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Adds the Family Helper, or renames it.",
+        "tags": [
+          "FamilyHelper"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/helper/ask": {
+      "post": {
+        "operationId": "askFamilyHelper",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FamilyHelperAskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyHelperAnswerDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyHelper"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/helper/channels/{channelId}": {
+      "put": {
+        "operationId": "setFamilyHelperInChannel",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FamilyHelperChannelDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyHelperChannelStateDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Adds the helper to a conversation or removes it.",
+        "tags": [
+          "FamilyHelper"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/helper/list": {
+      "get": {
+        "operationId": "listFamilyHelperItems",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FamilyHelperListItemDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyHelper"
+        ]
+      },
+      "post": {
+        "operationId": "addFamilyHelperItem",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddFamilyHelperListItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FamilyHelperListItemDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyHelper"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/helper/list/done": {
+      "delete": {
+        "operationId": "clearDoneFamilyHelperItems",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FamilyHelperListItemDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyHelper"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/helper/list/{itemId}": {
+      "put": {
+        "operationId": "setFamilyHelperItem",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetFamilyHelperListItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FamilyHelperListItemDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyHelper"
+        ]
+      },
+      "delete": {
+        "operationId": "removeFamilyHelperItem",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FamilyHelperListItemDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyHelper"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/helper/memory": {
+      "get": {
+        "operationId": "listFamilyHelperMemory",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FamilyHelperFactDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyHelper"
+        ]
+      },
+      "post": {
+        "operationId": "addFamilyHelperFact",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddFamilyHelperFactDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FamilyHelperFactDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyHelper"
+        ]
+      }
+    },
+    "/api/v1/families/{familyId}/helper/memory/{factId}": {
+      "delete": {
+        "operationId": "forgetFamilyHelperFact",
+        "parameters": [
+          {
+            "name": "familyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "factId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FamilyHelperFactDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "FamilyHelper"
+        ]
+      }
     }
   },
   "info": {
@@ -6982,6 +7836,341 @@
       }
     },
     "schemas": {
+      "StickerPackDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "error"
+        ]
+      },
+      "AvatarStickerDto": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string",
+            "enum": [
+              "wave",
+              "laugh",
+              "love",
+              "thumbs-up",
+              "celebrate",
+              "surprised"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "expression",
+          "label",
+          "url",
+          "expiresAt"
+        ]
+      },
+      "AvatarStickersDto": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "hasAvatar": {
+            "type": "boolean"
+          },
+          "pack": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/StickerPackDto"
+              }
+            ]
+          },
+          "stickers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvatarStickerDto"
+            }
+          }
+        },
+        "required": [
+          "available",
+          "hasAvatar",
+          "pack",
+          "stickers"
+        ]
+      },
+      "CreateStickersDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "PrepareStickerDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "packId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expression": {
+            "type": "string",
+            "enum": [
+              "wave",
+              "laugh",
+              "love",
+              "thumbs-up",
+              "celebrate",
+              "surprised"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "packId",
+          "expression"
+        ]
+      },
+      "StoredFileDto": {
+        "type": "object",
+        "properties": {
+          "sticker": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "folderId": {
+            "type": "string",
+            "nullable": true
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "mime": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "number"
+          },
+          "version": {
+            "type": "number"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "canDownload": {
+            "type": "boolean"
+          },
+          "preview": {
+            "type": "string",
+            "enum": [
+              "image",
+              "text",
+              "audio",
+              "video",
+              "none"
+            ]
+          },
+          "voiceSeconds": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "folderId",
+          "fileName",
+          "mime",
+          "byteSize",
+          "version",
+          "archived",
+          "createdAt",
+          "canManage",
+          "canDownload",
+          "preview",
+          "voiceSeconds"
+        ]
+      },
+      "AvatarStatusDto": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "hasAvatar": {
+            "type": "boolean"
+          },
+          "latestId": {
+            "type": "string",
+            "nullable": true
+          },
+          "dailyLimit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "available",
+          "hasAvatar",
+          "latestId",
+          "dailyLimit"
+        ]
+      },
+      "AvatarUploadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "consent": {
+            "type": "string",
+            "enum": [
+              "true"
+            ]
+          },
+          "file": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        "required": [
+          "id",
+          "consent",
+          "file"
+        ]
+      },
+      "AvatarGenerationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "uploading",
+              "queued",
+              "working",
+              "ready",
+              "failed",
+              "expired"
+            ]
+          },
+          "previewUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "previewUrl",
+          "error",
+          "expiresAt"
+        ]
+      },
+      "AvatarSavedDto": {
+        "type": "object",
+        "properties": {
+          "saved": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "saved"
+        ]
+      },
+      "AvatarResolveInputDto": {
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "userIds"
+        ]
+      },
+      "AvatarUrlDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "url",
+          "expiresAt"
+        ]
+      },
+      "AvatarResolveDto": {
+        "type": "object",
+        "properties": {
+          "avatars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvatarUrlDto"
+            }
+          }
+        },
+        "required": [
+          "avatars"
+        ]
+      },
       "AndroidVersionPolicyDto": {
         "type": "object",
         "properties": {
@@ -9749,9 +10938,48 @@
           "version"
         ]
       },
+      "FamilyHelperDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "emoji": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "emoji"
+        ]
+      },
+      "HelperCollectionDto": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "closesAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timeZone": {
+            "type": "string",
+            "description": "The family's time zone, so the deadline reads the same for everyone and matches what the helper said."
+          }
+        },
+        "required": [
+          "question",
+          "closesAt",
+          "timeZone"
+        ]
+      },
       "LastMessageDto": {
         "type": "object",
         "properties": {
+          "fromHelper": {
+            "type": "boolean"
+          },
           "attachment": {
             "type": "string",
             "enum": [
@@ -9790,6 +11018,7 @@
           }
         },
         "required": [
+          "fromHelper",
           "attachment",
           "id",
           "body",
@@ -9802,6 +11031,30 @@
       "ChannelDto": {
         "type": "object",
         "properties": {
+          "helperEnabled": {
+            "type": "boolean",
+            "description": "True when the Family Helper is in this conversation."
+          },
+          "helper": {
+            "nullable": true,
+            "description": "The family's helper, if one was added. Null for guests.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FamilyHelperDto"
+              }
+            ]
+          },
+          "collection": {
+            "nullable": true,
+            "description": "Set while the helper is collecting everyone's answers here.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HelperCollectionDto"
+              }
+            ]
+          },
           "imageFileId": {
             "type": "string",
             "nullable": true
@@ -9900,6 +11153,9 @@
           }
         },
         "required": [
+          "helperEnabled",
+          "helper",
+          "collection",
           "imageFileId",
           "canCreateWork",
           "lastMessage",
@@ -10082,6 +11338,30 @@
       "ChannelDetailDto": {
         "type": "object",
         "properties": {
+          "helperEnabled": {
+            "type": "boolean",
+            "description": "True when the Family Helper is in this conversation."
+          },
+          "helper": {
+            "nullable": true,
+            "description": "The family's helper, if one was added. Null for guests.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FamilyHelperDto"
+              }
+            ]
+          },
+          "collection": {
+            "nullable": true,
+            "description": "Set while the helper is collecting everyone's answers here.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HelperCollectionDto"
+              }
+            ]
+          },
           "imageFileId": {
             "type": "string",
             "nullable": true
@@ -10192,6 +11472,9 @@
           }
         },
         "required": [
+          "helperEnabled",
+          "helper",
+          "collection",
           "imageFileId",
           "canCreateWork",
           "lastMessage",
@@ -10235,6 +11518,9 @@
       "MessageFileDto": {
         "type": "object",
         "properties": {
+          "sticker": {
+            "type": "boolean"
+          },
           "id": {
             "type": "string"
           },
@@ -10317,6 +11603,9 @@
       "ChannelReplyDto": {
         "type": "object",
         "properties": {
+          "fromHelper": {
+            "type": "boolean"
+          },
           "attachment": {
             "type": "string",
             "enum": [
@@ -10351,6 +11640,7 @@
           }
         },
         "required": [
+          "fromHelper",
           "attachment",
           "id",
           "body",
@@ -10388,6 +11678,10 @@
       "MessageSearchItemDto": {
         "type": "object",
         "properties": {
+          "fromHelper": {
+            "type": "boolean",
+            "description": "True when the Family Helper wrote this message. Its author is then null."
+          },
           "files": {
             "type": "array",
             "items": {
@@ -10492,6 +11786,7 @@
           }
         },
         "required": [
+          "fromHelper",
           "files",
           "mentions",
           "work",
@@ -10670,6 +11965,10 @@
       "ChannelMessageDto": {
         "type": "object",
         "properties": {
+          "fromHelper": {
+            "type": "boolean",
+            "description": "True when the Family Helper wrote this message. Its author is then null."
+          },
           "files": {
             "type": "array",
             "items": {
@@ -10761,6 +12060,7 @@
           }
         },
         "required": [
+          "fromHelper",
           "files",
           "mentions",
           "work",
@@ -11552,70 +12852,6 @@
         "required": [
           "version",
           "archived"
-        ]
-      },
-      "StoredFileDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "folderId": {
-            "type": "string",
-            "nullable": true
-          },
-          "fileName": {
-            "type": "string"
-          },
-          "mime": {
-            "type": "string"
-          },
-          "byteSize": {
-            "type": "number"
-          },
-          "version": {
-            "type": "number"
-          },
-          "archived": {
-            "type": "boolean"
-          },
-          "createdAt": {
-            "type": "string"
-          },
-          "canManage": {
-            "type": "boolean"
-          },
-          "canDownload": {
-            "type": "boolean"
-          },
-          "preview": {
-            "type": "string",
-            "enum": [
-              "image",
-              "text",
-              "audio",
-              "video",
-              "none"
-            ]
-          },
-          "voiceSeconds": {
-            "type": "number",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "folderId",
-          "fileName",
-          "mime",
-          "byteSize",
-          "version",
-          "archived",
-          "createdAt",
-          "canManage",
-          "canDownload",
-          "preview",
-          "voiceSeconds"
         ]
       },
       "FilePageDto": {
@@ -12516,6 +13752,247 @@
           "nodeIds",
           "audio",
           "remainingSeconds"
+        ]
+      },
+      "FamilyHelperStatusDto": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "description": "True when this server is set up for AI."
+          },
+          "helper": {
+            "nullable": true,
+            "description": "Null until someone adds a Family Helper.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FamilyHelperDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "available",
+          "helper"
+        ]
+      },
+      "SaveFamilyHelperDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "emoji": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16
+          }
+        },
+        "required": [
+          "name",
+          "emoji"
+        ]
+      },
+      "FamilyHelperTurnDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "model"
+            ]
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "text"
+        ]
+      },
+      "FamilyHelperAskDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "history": {
+            "description": "Earlier turns of this conversation, oldest first.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FamilyHelperTurnDto"
+            }
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "FamilyHelperAnswerDto": {
+        "type": "object",
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "actions": {
+            "description": "Names of the actions the helper took, such as add_to_shopping_list.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "suggestions": {
+            "description": "Up to three short replies the member can tap next.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "answer",
+          "actions",
+          "suggestions"
+        ]
+      },
+      "FamilyHelperChannelDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ]
+      },
+      "FamilyHelperChannelStateDto": {
+        "type": "object",
+        "properties": {
+          "helperEnabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "helperEnabled"
+        ]
+      },
+      "FamilyHelperListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "requestedBy": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskPersonDto"
+              }
+            ]
+          },
+          "addedByHelper": {
+            "type": "boolean"
+          },
+          "done": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "requestedBy",
+          "addedByHelper",
+          "done",
+          "createdAt"
+        ]
+      },
+      "AddFamilyHelperListItemDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "SetFamilyHelperListItemDto": {
+        "type": "object",
+        "properties": {
+          "done": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "done"
+        ]
+      },
+      "FamilyHelperFactDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fact": {
+            "type": "string"
+          },
+          "about": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskPersonDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "fact",
+          "about",
+          "createdAt"
+        ]
+      },
+      "AddFamilyHelperFactDto": {
+        "type": "object",
+        "properties": {
+          "fact": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "aboutUserId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true,
+            "description": "The member the fact is about, if any."
+          }
+        },
+        "required": [
+          "fact"
         ]
       }
     }

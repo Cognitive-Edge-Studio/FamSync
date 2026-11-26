@@ -1,4 +1,5 @@
-import { attachmentLabel, attachmentOf, feedRows, replyText, seenText, typingLabel, type ChannelMessage, type DraftFile, type DraftReply, type FeedRow, type Outgoing } from "@famsync/core/chat";
+import { AvatarStickers } from '@/components/avatar-stickers';
+import { attachmentLabel, attachmentOf, collectionDeadline, feedRows, helperName, replyText, seenText, typingLabel, type ChannelMessage, type DraftFile, type DraftReply, type FeedRow, type Outgoing } from "@famsync/core/chat";
 import * as Clipboard from "expo-clipboard";
 import { randomUUID } from "expo-crypto";
 import { router, Stack, useLocalSearchParams } from "expo-router";
@@ -101,6 +102,11 @@ function Conversation({ family, id, wanted }: { family: Scope; id: string; wante
     setEditing(undefined);
     setSeed((old) => ({ ...back, key: old.key + 1 }));
   }
+  function sendSticker(file:{id:string;fileName:string}) {
+    if(!mounted.current)return;signalTyping(false);setError('');chat.clearUnread();
+    void outbox.send({id:randomUUID(),body:'',reply,mentions:[],files:[file]});setReply(null);
+    list.current?.scrollToOffset({offset:0,animated:true});
+  }
   async function send(next: Draft) {
     setNote("");
     if (editing) {
@@ -194,14 +200,20 @@ function Conversation({ family, id, wanted }: { family: Scope; id: string; wante
   const state = queryState(query, { loading: "Loading conversation…", failed: "The conversation couldn’t load", lost: "Conversation not found" });
   if (state || !channel) return <><Stack.Screen options={{ title: "Chat", headerTitle: "Chat" }} />{state}</>;
   const peer = channel.kind === "dm" ? channel.members.find((member) => member.userId !== user.id) : undefined;
-  const typists = channel.members.filter((member) => member.userId in chat.typing).map((member) => member.name), typingText = typingLabel(typists, channel.kind === "dm");
-  const subtitle = typingText || (channel.kind === "dm" ? (peer?.online ? "Online" : peer?.lastSeen ? seenText(peer.lastSeen) : "Direct conversation") : channel.topic || channel.memberCount + (channel.memberCount === 1 ? " member" : " members"));
-  const replyTo = (message: ChannelMessage) => { setSheet(undefined); setReply({ id: message.id, body: replyText({ body: message.body.slice(0, 180), deleted: false, fileCount: message.files.length, attachment: attachmentOf(message.files) }), author: message.author?.userId === user.id ? "You" : message.author?.name ?? "Former member" }); };
+  // The Family Helper types as "helper", since it has no account of its own.
+  const typists = [...("helper" in chat.typing && channel.helper ? [channel.helper.name] : []), ...channel.members.filter((member) => member.userId in chat.typing).map((member) => member.name)];
+  const typingText = typingLabel(typists, channel.kind === "dm" && !("helper" in chat.typing));
+  const subtitle = typingText || (channel.helperEnabled && channel.helper ? channel.helper.emoji + " " + channel.helper.name + " is here" : channel.kind === "dm" ? (peer?.online ? "Online" : peer?.lastSeen ? seenText(peer.lastSeen) : "Direct conversation") : channel.topic || channel.memberCount + (channel.memberCount === 1 ? " member" : " members"));
+  const replyTo = (message: ChannelMessage) => { setSheet(undefined); setReply({ id: message.id, body: replyText({ body: message.body.slice(0, 180), deleted: false, fileCount: message.files.length, attachment: attachmentOf(message.files) }), author: message.fromHelper ? helperName(channel) : message.author?.userId === user.id ? "You" : message.author?.name ?? "Former member" }); };
   const current = sheet && "message" in sheet ? messages.find((message) => message.id === sheet.message.id) ?? sheet.message : undefined;
   return (
     <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={insets.top + 56} style={{ flex: 1, backgroundColor: colors.canvas }}>
       <Stack.Screen options={{ headerTitle: () => <Pressable accessibilityRole="button" accessibilityLabel={channel.name + ", " + subtitle + (channel.muted ? ", muted" : "") + ", details"} onPress={() => router.push({ pathname: "/chat/details", params: { id, ...scopeParams(family) } })} style={{ maxWidth: 260, minHeight: 48, justifyContent: "center" }}><Text size={17} weight="600" numberOfLines={1}>{channel.name}</Text><Text size={13} muted={!typingText} numberOfLines={1} accessibilityLiveRegion={typingText ? "polite" : "none"}>{subtitle + (channel.muted ? " · Muted" : "") + (channel.archived ? " · Archived" : "")}</Text></Pressable> }} />
       {channel.pins.map((pin) => <Pressable key={pin.id} accessibilityRole="button" accessibilityLabel={"Pinned: " + (pin.body || attachmentLabel(pin.attachment, pin.fileCount))} onPress={() => void jump(pin.id)} style={{ minHeight: 44, flexDirection: "row", gap: 8, alignItems: "center", paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.panel }}><Icon name="pin" size={14} color={colors.mutedForeground} /><Text size={13} numberOfLines={1} style={{ flex: 1 }}>{(pin.author?.userId === user.id ? "You" : pin.author?.name ?? "Former member") + ": " + (pin.body || attachmentLabel(pin.attachment, pin.fileCount))}</Text></Pressable>)}
+      {channel.collection && <View accessibilityRole="summary" accessibilityLiveRegion="polite" style={{ flexDirection: "row", gap: 10, alignItems: "flex-start", paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.sage }}>
+        <Icon name="sparkles-outline" size={22} />
+        <Text size={13} style={{ flex: 1, color: colors.onSage }}><Text size={13} weight="600" style={{ color: colors.onSage }}>{helperName(channel) + " is collecting answers until " + collectionDeadline(channel.collection)}</Text>{" · “" + channel.collection.question + "” Just reply here."}</Text>
+      </View>}
       {chat.error && <View style={{ padding: 12 }}><StaleNotice query={query} /></View>}
       {(error || note) ? <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}><ErrorText>{error}</ErrorText>{note && !error ? <Text muted accessibilityLiveRegion="polite">{note}</Text> : null}</View> : null}
       <FlatList ref={list} inverted data={items} keyExtractor={(item) => item.key} extraData={highlighted} contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 10 }} keyboardDismissMode="interactive" keyboardShouldPersistTaps="handled" maintainVisibleContentPosition={{ minIndexForVisible: 0, autoscrollToTopThreshold: 80 }} initialNumToRender={20}
@@ -216,7 +228,7 @@ function Conversation({ family, id, wanted }: { family: Scope; id: string; wante
       {!atBottom && <View style={{ position: "absolute", right: 16, bottom: 90 + insets.bottom }}><Pressable accessibilityRole="button" accessibilityLabel="Jump to latest messages" onPress={() => list.current?.scrollToOffset({ offset: 0, animated: true })} style={{ width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center", backgroundColor: colors.panel, borderWidth: 1, borderColor: colors.border, elevation: 3 }}><Icon name="chevron-down" size={24} color={colors.foreground} /></Pressable></View>}
       <View style={{ paddingBottom: insets.bottom, backgroundColor: colors.panel }}>
         {channel.archived ? <Text muted style={{ padding: 16 }}>Archived channel. History is available; an admin can restore it.</Text>
-          : <Composer seed={seed} members={channel.members} me={user.id} reply={reply} editing={editing ? { body: editing.body, files: editing.files.length } : null} files={files} uploads={uploads} busy={!!editing && busy}
+          : <Composer stickers={<AvatarStickers familyId={family.id} channelId={id} onPrepared={sendSticker}/>} seed={seed} members={channel.members} helper={channel.helperEnabled ? channel.helper : null} me={user.id} reply={reply} editing={editing ? { body: editing.body, files: editing.files.length } : null} files={files} uploads={uploads} busy={!!editing && busy}
               onChange={(next) => { draft.current = next; if (!editing) { signalTyping(!!next.body.trim()); keep({ ...next, reply, files }); } }} onSend={(next) => void send(next)} onVoice={() => { signalTyping(false); setSheet({ kind: 'voice' }); }} onAttach={() => setSheet({ kind: "attach" })} onCancelReply={() => setReply(null)} onCancelEdit={endEdit} onRemoveFile={removeFile}
               onRetryUpload={(uploadId) => { const entry = running.current.get(uploadId); if (!entry) return; entry.stop = undefined; setUploads((old) => old.map((item) => item.id === uploadId ? { ...item, error: undefined, percent: 0 } : item)); void runUploads(); }}
               onCancelUpload={(uploadId) => { running.current.get(uploadId)?.stop?.abort(); running.current.delete(uploadId); setUploads((old) => old.filter((item) => item.id !== uploadId)); }} />}

@@ -21,7 +21,7 @@ export function ScheduleFamily({
   session, section, children,
 }: {
   session: Session;
-  section: "today" | "calendar" | "tasks" | "goals" | "channels" | "messages" | "family-base" | 'folders';
+  section: "today" | "calendar" | "tasks" | "goals" | "channels" | "messages" | "family-base" | 'folders' | 'helper';
   children: (family: Family) => ReactNode;
 }) {
   const [families, setFamilies] = useState<Family[]>();

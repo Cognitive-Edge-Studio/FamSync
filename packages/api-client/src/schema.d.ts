@@ -4,6 +4,118 @@
  */
 
 export interface paths {
+    "/api/v1/me/avatar/stickers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getMyAvatarStickers"];
+        put?: never;
+        post: operations["createMyAvatarStickers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/channels/{channelId}/stickers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["prepareAvatarSticker"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getMyAvatarStatus"];
+        put?: never;
+        post?: never;
+        delete: operations["resetMyAvatar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/avatar/generations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createMyAvatar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/avatar/generations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getMyAvatarGeneration"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/avatar/generations/{id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["acceptMyAvatar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/avatars/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["resolveAvatars"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/mobile/android/version": {
         parameters: {
             query?: never;
@@ -1768,10 +1880,222 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/families/{familyId}/helper": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getFamilyHelper"];
+        /** Adds the Family Helper, or renames it. */
+        put: operations["saveFamilyHelper"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/helper/ask": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["askFamilyHelper"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/helper/channels/{channelId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Adds the helper to a conversation or removes it. */
+        put: operations["setFamilyHelperInChannel"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/helper/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listFamilyHelperItems"];
+        put?: never;
+        post: operations["addFamilyHelperItem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/helper/list/done": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["clearDoneFamilyHelperItems"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/helper/list/{itemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["setFamilyHelperItem"];
+        post?: never;
+        delete: operations["removeFamilyHelperItem"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/helper/memory": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listFamilyHelperMemory"];
+        put?: never;
+        post: operations["addFamilyHelperFact"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/families/{familyId}/helper/memory/{factId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["forgetFamilyHelperFact"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        StickerPackDto: {
+            id: string;
+            status: string;
+            error: string | null;
+        };
+        AvatarStickerDto: {
+            /** @enum {string} */
+            expression: "wave" | "laugh" | "love" | "thumbs-up" | "celebrate" | "surprised";
+            label: string;
+            url: string;
+            expiresAt: string;
+        };
+        AvatarStickersDto: {
+            available: boolean;
+            hasAvatar: boolean;
+            pack: components["schemas"]["StickerPackDto"] | null;
+            stickers: components["schemas"]["AvatarStickerDto"][];
+        };
+        CreateStickersDto: {
+            /** Format: uuid */
+            id: string;
+        };
+        PrepareStickerDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            packId: string;
+            /** @enum {string} */
+            expression: "wave" | "laugh" | "love" | "thumbs-up" | "celebrate" | "surprised";
+        };
+        StoredFileDto: {
+            sticker?: boolean;
+            id: string;
+            folderId: string | null;
+            fileName: string;
+            mime: string;
+            byteSize: number;
+            version: number;
+            archived: boolean;
+            createdAt: string;
+            canManage: boolean;
+            canDownload: boolean;
+            /** @enum {string} */
+            preview: "image" | "text" | "audio" | "video" | "none";
+            voiceSeconds: number | null;
+        };
+        AvatarStatusDto: {
+            available: boolean;
+            hasAvatar: boolean;
+            latestId: string | null;
+            dailyLimit: number;
+        };
+        AvatarUploadDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            consent: "true";
+            /** Format: binary */
+            file: string;
+        };
+        AvatarGenerationDto: {
+            id: string;
+            /** @enum {string} */
+            status: "uploading" | "queued" | "working" | "ready" | "failed" | "expired";
+            previewUrl: string | null;
+            error: string | null;
+            expiresAt: string;
+        };
+        AvatarSavedDto: {
+            saved: boolean;
+        };
+        AvatarResolveInputDto: {
+            userIds: string[];
+        };
+        AvatarUrlDto: {
+            userId: string;
+            url: string;
+            expiresAt: string;
+        };
+        AvatarResolveDto: {
+            avatars: components["schemas"]["AvatarUrlDto"][];
+        };
         AndroidVersionPolicyDto: {
             minimumBuild: number;
             /** Format: uri */
@@ -2560,7 +2884,19 @@ export interface components {
             label?: string;
             completed?: boolean;
         };
+        FamilyHelperDto: {
+            name: string;
+            emoji: string;
+        };
+        HelperCollectionDto: {
+            question: string;
+            /** Format: date-time */
+            closesAt: string;
+            /** @description The family's time zone, so the deadline reads the same for everyone and matches what the helper said. */
+            timeZone: string;
+        };
         LastMessageDto: {
+            fromHelper: boolean;
             /** @enum {string|null} */
             attachment: "voice" | "photo" | "video" | "file" | null;
             /** Format: uuid */
@@ -2573,6 +2909,12 @@ export interface components {
             createdAt: string;
         };
         ChannelDto: {
+            /** @description True when the Family Helper is in this conversation. */
+            helperEnabled: boolean;
+            /** @description The family's helper, if one was added. Null for guests. */
+            helper: components["schemas"]["FamilyHelperDto"] | null;
+            /** @description Set while the helper is collecting everyone's answers here. */
+            collection: components["schemas"]["HelperCollectionDto"] | null;
             imageFileId: string | null;
             canCreateWork: boolean;
             lastMessage: components["schemas"]["LastMessageDto"] | null;
@@ -2638,6 +2980,12 @@ export interface components {
             author: components["schemas"]["TaskPersonDto"] | null;
         };
         ChannelDetailDto: {
+            /** @description True when the Family Helper is in this conversation. */
+            helperEnabled: boolean;
+            /** @description The family's helper, if one was added. Null for guests. */
+            helper: components["schemas"]["FamilyHelperDto"] | null;
+            /** @description Set while the helper is collecting everyone's answers here. */
+            collection: components["schemas"]["HelperCollectionDto"] | null;
             imageFileId: string | null;
             canCreateWork: boolean;
             lastMessage: components["schemas"]["LastMessageDto"] | null;
@@ -2672,6 +3020,7 @@ export interface components {
             peerId: string;
         };
         MessageFileDto: {
+            sticker?: boolean;
             id: string;
             fileId: string | null;
             fileName: string | null;
@@ -2691,6 +3040,7 @@ export interface components {
             version: number;
         };
         ChannelReplyDto: {
+            fromHelper: boolean;
             /** @enum {string|null} */
             attachment: "voice" | "photo" | "video" | "file" | null;
             /** Format: uuid */
@@ -2707,6 +3057,8 @@ export interface components {
             active: boolean;
         };
         MessageSearchItemDto: {
+            /** @description True when the Family Helper wrote this message. Its author is then null. */
+            fromHelper: boolean;
             files: components["schemas"]["MessageFileDto"][];
             mentions: components["schemas"]["TaskPersonDto"][];
             work: components["schemas"]["MessageWorkDto"][];
@@ -2781,6 +3133,8 @@ export interface components {
             messageId: string;
         };
         ChannelMessageDto: {
+            /** @description True when the Family Helper wrote this message. Its author is then null. */
+            fromHelper: boolean;
             files: components["schemas"]["MessageFileDto"][];
             mentions: components["schemas"]["TaskPersonDto"][];
             work: components["schemas"]["MessageWorkDto"][];
@@ -3001,21 +3355,6 @@ export interface components {
         FileArchiveDto: {
             version: number;
             archived: boolean;
-        };
-        StoredFileDto: {
-            id: string;
-            folderId: string | null;
-            fileName: string;
-            mime: string;
-            byteSize: number;
-            version: number;
-            archived: boolean;
-            createdAt: string;
-            canManage: boolean;
-            canDownload: boolean;
-            /** @enum {string} */
-            preview: "image" | "text" | "audio" | "video" | "none";
-            voiceSeconds: number | null;
         };
         FilePageDto: {
             files: components["schemas"]["StoredFileDto"][];
@@ -3275,6 +3614,69 @@ export interface components {
             audio: string | null;
             remainingSeconds: number;
         };
+        FamilyHelperStatusDto: {
+            /** @description True when this server is set up for AI. */
+            available: boolean;
+            /** @description Null until someone adds a Family Helper. */
+            helper: components["schemas"]["FamilyHelperDto"] | null;
+        };
+        SaveFamilyHelperDto: {
+            name: string;
+            emoji: string;
+        };
+        FamilyHelperTurnDto: {
+            /** @enum {string} */
+            role: "user" | "model";
+            text: string;
+        };
+        FamilyHelperAskDto: {
+            message: string;
+            /** @description Earlier turns of this conversation, oldest first. */
+            history?: components["schemas"]["FamilyHelperTurnDto"][];
+        };
+        FamilyHelperAnswerDto: {
+            answer: string;
+            /** @description Names of the actions the helper took, such as add_to_shopping_list. */
+            actions: string[];
+            /** @description Up to three short replies the member can tap next. */
+            suggestions: string[];
+        };
+        FamilyHelperChannelDto: {
+            enabled: boolean;
+        };
+        FamilyHelperChannelStateDto: {
+            helperEnabled: boolean;
+        };
+        FamilyHelperListItemDto: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            requestedBy: components["schemas"]["TaskPersonDto"] | null;
+            addedByHelper: boolean;
+            done: boolean;
+            createdAt: string;
+        };
+        AddFamilyHelperListItemDto: {
+            title: string;
+        };
+        SetFamilyHelperListItemDto: {
+            done: boolean;
+        };
+        FamilyHelperFactDto: {
+            /** Format: uuid */
+            id: string;
+            fact: string;
+            about: components["schemas"]["TaskPersonDto"] | null;
+            createdAt: string;
+        };
+        AddFamilyHelperFactDto: {
+            fact: string;
+            /**
+             * Format: uuid
+             * @description The member the fact is about, if any.
+             */
+            aboutUserId?: Record<string, never> | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -3284,6 +3686,200 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getMyAvatarStickers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvatarStickersDto"];
+                };
+            };
+        };
+    };
+    createMyAvatarStickers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateStickersDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvatarStickersDto"];
+                };
+            };
+        };
+    };
+    prepareAvatarSticker: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                channelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrepareStickerDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoredFileDto"];
+                };
+            };
+        };
+    };
+    getMyAvatarStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvatarStatusDto"];
+                };
+            };
+        };
+    };
+    resetMyAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvatarSavedDto"];
+                };
+            };
+        };
+    };
+    createMyAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["AvatarUploadDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvatarGenerationDto"];
+                };
+            };
+        };
+    };
+    getMyAvatarGeneration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvatarGenerationDto"];
+                };
+            };
+        };
+    };
+    acceptMyAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvatarSavedDto"];
+                };
+            };
+        };
+    };
+    resolveAvatars: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AvatarResolveInputDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvatarResolveDto"];
+                };
+            };
+        };
+    };
     getAndroidVersionPolicy: {
         parameters: {
             query?: never;
@@ -6938,6 +7534,286 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FamilyVoiceReplyDto"];
+                };
+            };
+        };
+    };
+    getFamilyHelper: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyHelperStatusDto"];
+                };
+            };
+        };
+    };
+    saveFamilyHelper: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveFamilyHelperDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyHelperStatusDto"];
+                };
+            };
+        };
+    };
+    askFamilyHelper: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FamilyHelperAskDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyHelperAnswerDto"];
+                };
+            };
+        };
+    };
+    setFamilyHelperInChannel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                channelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FamilyHelperChannelDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyHelperChannelStateDto"];
+                };
+            };
+        };
+    };
+    listFamilyHelperItems: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyHelperListItemDto"][];
+                };
+            };
+        };
+    };
+    addFamilyHelperItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddFamilyHelperListItemDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyHelperListItemDto"][];
+                };
+            };
+        };
+    };
+    clearDoneFamilyHelperItems: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyHelperListItemDto"][];
+                };
+            };
+        };
+    };
+    setFamilyHelperItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetFamilyHelperListItemDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyHelperListItemDto"][];
+                };
+            };
+        };
+    };
+    removeFamilyHelperItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyHelperListItemDto"][];
+                };
+            };
+        };
+    };
+    listFamilyHelperMemory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyHelperFactDto"][];
+                };
+            };
+        };
+    };
+    addFamilyHelperFact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddFamilyHelperFactDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyHelperFactDto"][];
+                };
+            };
+        };
+    };
+    forgetFamilyHelperFact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                factId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyHelperFactDto"][];
                 };
             };
         };

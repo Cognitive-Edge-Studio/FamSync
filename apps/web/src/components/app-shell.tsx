@@ -11,7 +11,7 @@ import { AccountMenu, QuickCreate } from "./top-bar-menus";
 import { ThemeMenu } from "./theme-menu";
 import { FadeIn, MotionProvider } from "./ui/motion";
 
-type Page = "home" | "today" | "calendar" | "tasks" | "goals" | "channels" | "messages" | "family-base" | "families" | "account" | "notifications" | "guests" | "folders";
+type Page = "home" | "today" | "calendar" | "tasks" | "goals" | "channels" | "messages" | "family-base" | "families" | "account" | "notifications" | "guests" | "folders" | "helper";
 
 type AppShellProps = {
   activePage: Page;
@@ -33,6 +33,7 @@ const familyNav: NavGroup[] = [
     { page: "goals", href: "/goals/", label: "Goals", icon: "goals" },
   ] },
   { label: "Talk", items: [
+    { page: "helper", href: "/helper/", label: "Adopt a family member", icon: "helper" },
     { page: "messages", href: "/messages/", label: "Chats", icon: "messages" },
     { page: "guests", href: "/guests/", label: "Guest channels", icon: "guests" },
   ] },
@@ -65,7 +66,7 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
     <a href={item.href} aria-current={active ? "page" : undefined}
       className="flex h-10 items-center gap-3 rounded-lg px-3 text-sm text-foreground/80 transition-colors hover:bg-panel hover:text-foreground aria-[current=page]:bg-primary aria-[current=page]:font-medium aria-[current=page]:text-primary-foreground">
       <ModuleIcon name={item.icon} />
-      <span className="truncate">{item.label}</span>
+      <span className={item.page === "helper" ? "min-w-0 whitespace-normal leading-tight" : "truncate"}>{item.label}</span>
     </a>
   );
 }

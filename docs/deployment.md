@@ -18,7 +18,19 @@ Values written as `<LIKE-THIS>` come from the step that creates them. Keep every
 
 ## Before you start
 
-1. Put the project on GitHub. Render deploys from a repository, and this folder isn't one yet.
+The existing FamSync staging deployment uses `https://github.com/Cognitive-Edge-Studio/FamSync`, with Git metadata kept separately at `output/release-source.git`. The workspace root has no `.git` entry, so plain `git status` there reports that it is not a repository. Inspect the existing release history with:
+
+```powershell
+git --git-dir=C:/shibly/FamSync/output/release-source.git remote -v
+git --no-optional-locks --git-dir=C:/shibly/FamSync/output/release-source.git --work-tree=C:/shibly/FamSync status --short
+git --git-dir=C:/shibly/FamSync/output/release-source.git ls-remote --heads origin
+```
+
+Reuse this repository and its history for staging updates. Confirm the current remote branch and Render's configured branch before preparing a release: the local `main` reference can lag behind GitHub. The separate Git directory lives under ignored `output/`; keep its recovery information in the release notes. Current release instructions: [26 November checklist](staging-release-2026-11-26.md).
+
+For a **new deployment only**:
+
+1. Put the project on GitHub so Render can deploy from it.
 2. Create accounts: Supabase, Render, Inngest and Resend. Note your Hostinger site address (`https://<SITE>`), for example `https://lightblue-xyz-123456.hostingersite.com`.
 
 ## 1. Supabase (database, sign-in, storage, live updates)

@@ -19,6 +19,7 @@ export class FolderDto extends FolderFieldsDto{
 }
 export class FolderPageDto{@ApiProperty({type:[FolderDto]}) folders!:FolderDto[];@ApiProperty({type:String,nullable:true}) nextCursor!:string|null;@ApiProperty() canCreate!:boolean;@ApiProperty({type:Number,nullable:true}) channelVersion!:number|null;@ApiProperty({type:String,nullable:true}) channelName!:string|null;}
 export class StoredFileDto{
+ @ApiPropertyOptional() sticker?:boolean;
  @ApiProperty() id!:string;@ApiProperty({type:String,nullable:true}) folderId!:string|null;@ApiProperty() fileName!:string;@ApiProperty() mime!:string;@ApiProperty() byteSize!:number;
  @ApiProperty() version!:number;@ApiProperty() archived!:boolean;@ApiProperty() createdAt!:string;@ApiProperty() canManage!:boolean;@ApiProperty() canDownload!:boolean;
  @ApiProperty({enum:['image','text','audio','video','none']}) preview!:'image'|'text'|'audio'|'video'|'none';

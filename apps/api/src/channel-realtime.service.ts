@@ -14,6 +14,11 @@ export class ChannelRealtimeService {
     const {rows}=await client.query<{user_id:string}>('select user_id from app.typing_recipients($1,$2)',[channelId,actor]);
     await this.send(channelId,rows.map(row=>row.user_id),'typing',{userId:actor,active});
   }
+  // The Family Helper has no account, so it types as "helper" and everyone in the conversation sees it, including whoever asked.
+  async helperTyping(client:PoolClient,channelId:string,active:boolean) {
+    const {rows}=await client.query<{user_id:string}>('select user_id from app.channel_signal_recipients($1)',[channelId]);
+    await this.send(channelId,rows.map(row=>row.user_id),'typing',{userId:'helper',active});
+  }
   private async send(channelId:string,users:string[],event:'refresh'|'typing',payload:Record<string,unknown>) {
     const url=process.env.SUPABASE_REALTIME_URL?.replace(/\/$/,'');
     const key=process.env.SUPABASE_REALTIME_KEY;

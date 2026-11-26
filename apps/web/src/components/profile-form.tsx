@@ -7,6 +7,7 @@ import { getBrowserAuth, getBrowserApi } from "@/lib/browser-auth";
 import { Field, FormFeedback, inputClass } from "./account-fields";
 import { Button } from "./ui/button";
 import { Avatar } from "./ui/avatar";
+import { AvatarEditor } from './avatar-editor';
 
 const profileSchema = z.object({
   firstName: z.string().trim().max(80, "Use at most 80 characters."),
@@ -77,6 +78,7 @@ export function ProfileForm({ userId }: { userId: string }) {
         <Avatar name={[watch("firstName"), watch("lastName")].filter(Boolean).join(" ") || "Family member"} colorKey={userId} size="lg" className="size-14" />
         <h2 className="text-lg font-semibold">Profile</h2>
       </div>
+      <AvatarEditor userId={userId} />
       {loading ? <p className="mt-4 text-muted-foreground" role="status">Loading your profile…</p> : loadError ? (
         <p className="mt-4 text-destructive" role="alert">{loadError}</p>
       ) : (

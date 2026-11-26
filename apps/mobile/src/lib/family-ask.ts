@@ -17,4 +17,4 @@ export const askNotice = [
 export const askStep = (status: AskStatus): 'unavailable' | 'off' | 'consent' | 'ready' => !status.available ? 'unavailable' : !status.enabled ? 'off' : !status.consented ? 'consent' : 'ready';
 
 /** How long to wait. A question takes the AI service up to 45 seconds; a sleeping server takes up to a minute to wake. */
-export const requestLimit = (url: string) => /\/base\/ai\/questions$/.test(url) ? 65_000 : /\/mobile\/android\/version$/.test(url) ? 70_000 : 30_000;
+export const requestLimit = (url: string) => /\/base\/ai\/questions$/.test(url) ? 65_000 : /\/helper\/ask$/.test(url) ? 120_000 : /\/mobile\/android\/version$/.test(url) ? 70_000 : 30_000;

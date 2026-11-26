@@ -4,6 +4,7 @@ export const modules = [
   { key: "tasks", title: "Tasks", icon: "checkbox-outline", milestone: "M1", built: true, tab: true },
   { key: "calendar", title: "Calendar", icon: "calendar-outline", milestone: "M1", built: true, tab: true },
   { key: "chats", title: "Chats", icon: "chatbubbles-outline", milestone: "M2", built: true, tab: true },
+  { key: "helper", title: "Adopt a family member", icon: "sparkles-outline", milestone: "M7", built: true, tab: false },
   { key: "goals", title: "Goals", icon: "flag-outline", milestone: "M1", built: true, tab: false },
   { key: "files", title: "Files", icon: "folder-outline", milestone: "M3", built: true, tab: false },
   { key: "family", title: "Family", icon: "people-outline", milestone: "M3", built: true, tab: false },

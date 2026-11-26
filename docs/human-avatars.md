@@ -1,5 +1,7 @@
 # Human avatars
 
+Personalized photo-to-avatar generation is now implemented separately; see [Personalized profile avatars](personal-avatars.md). The six characters described below remain the web defaults.
+
 ## Execution plan
 
 1. Follow Shadcn Space's circular image-and-fallback pattern using the existing Base UI Avatar primitive. Generate six original cartoonish 3D human characters; keep assets local and choose consistently from an account ID, without inferring gender or age from names.

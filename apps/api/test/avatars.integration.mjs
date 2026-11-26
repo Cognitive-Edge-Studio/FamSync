@@ -1,0 +1,100 @@
+// Isolated local fixtures and an in-process provider; no real photos or provider charges.
+import assert from 'node:assert/strict';
+import {after,test} from 'node:test';
+import {randomUUID} from 'node:crypto';
+import {createServer} from 'node:http';
+import pg from 'pg';
+import sharp from 'sharp';
+import {DatabaseService} from '../dist/database.service.js';
+import {AvatarsService} from '../dist/avatars.service.js';
+
+const admin=new pg.Pool({connectionString:process.env.ADMIN_DATABASE_URL??'postgresql://supabase_admin:famsync-local-admin@127.0.0.1:55432/postgres'});
+const worker=new pg.Pool({connectionString:process.env.JOBS_DATABASE_URL??'postgresql://famsync_jobs:famsync-local-jobs@127.0.0.1:55432/postgres'});
+process.env.DATABASE_URL??='postgresql://famsync_api:famsync-local-runtime@127.0.0.1:55432/postgres';
+process.env.GEMINI_API_KEY='fixture-only';process.env.AVATAR_AI_ENABLED='true';process.env.FAMILY_AI_ENABLED='true';
+const database=new DatabaseService(),users=Array.from({length:4},()=>randomUUID()),family=randomUUID(),handlers=new Map(),files=new Map();
+let requests=0,temporary=false;
+const portrait=await sharp({create:{width:64,height:64,channels:3,background:'#b8cab7'}}).png().toBuffer();
+const provider=createServer(async(req,res)=>{let raw='';for await(const chunk of req)raw+=chunk;const body=JSON.parse(raw);assert.equal(body.store,false);assert.equal(body.input.length,3);requests++;res.setHeader('Content-Type','application/json');if(temporary){res.writeHead(503);res.end('{}');return;}res.end(JSON.stringify({status:'completed',steps:[{type:'model_output',content:[{type:'image',data:portrait.toString('base64')}]}]}));});
+await new Promise(resolve=>provider.listen(0,'127.0.0.1',resolve));
+process.env.GEMINI_BASE_URL='http://127.0.0.1:'+provider.address().port;
+const storage={configured:true,uploadFile:async(key,bytes)=>{files.set(key,bytes);},readFile:async key=>{if(!files.has(key))throw Error('Missing file');return files.get(key);},readOptionalFile:async key=>files.get(key)??null,discard:async key=>{files.delete(key);},removeFile:async key=>{files.delete(key);},openFile:async key=>{assert.ok(files.has(key),'signed file exists');return{url:'https://private.example.test/'+key,expiresAt:new Date(Date.now()+60_000).toISOString()};}};
+const jobs={register:(kind,handler)=>handlers.set(kind,handler),notify:async()=>{}};
+const service=new AvatarsService(database,storage,jobs,{configured:true});service.onModuleInit();
+after(async()=>{
+  await admin.query("delete from app.outbox where payload->>'actorId'=any($1)",[users]);
+  await admin.query('delete from app.families where id=$1',[family]);
+  await admin.query('delete from auth.users where id=any($1)',[users]);
+  await admin.query("delete from app.outbox where payload->>'actorId'=any($1)",[users]);
+  provider.close();await database.onModuleDestroy();await Promise.all([admin.end(),worker.end()]);
+});
+await admin.query("insert into auth.users(id,email,email_confirmed_at) select id,id::text||'@avatar.example.test',now() from unnest($1::uuid[]) id",[users]);
+await admin.query("insert into app.families(id,name) values($1,'Avatar fixture')",[family]);
+await admin.query("insert into app.family_memberships(family_id,user_id,role) values($1,$2,'owner'),($1,$3,'member')",[family,users[0],users[1]]);
+const run=async(kind,actor,id,attempts=1)=>{const client=await worker.connect();try{await handlers.get(kind)(client,{payload:{actorId:actor,generationId:id},attempts});}finally{client.release();}};
+const photo={buffer:portrait,size:portrait.length,originalname:'portrait.png'};
+
+test('upload, retry, private preview, save, shared visibility, reset and cleanup',async()=>{
+  const actor=users[0],id=randomUUID();
+  assert.equal((await service.status(actor)).hasAvatar,false);
+  assert.equal((await service.upload(actor,id,photo)).status,'queued');
+  await service.upload(actor,id,photo);
+  assert.equal((await admin.query("select count(*)::int as count from app.outbox where dedupe_key=$1",['avatar-generate:'+id])).rows[0].count,1);
+  await assert.rejects(service.get(users[1],id),error=>error.getStatus()===404);
+  await assert.rejects(service.accept(actor,id),error=>error.getStatus()===400);
+  temporary=true;await assert.rejects(run('avatar.generate',actor,id));assert.equal((await service.get(actor,id)).status,'working');temporary=false;
+  await Promise.all([run('avatar.generate',actor,id,2),run('avatar.generate',actor,id,2).catch(error=>assert.match(error.message,/already running/))]);
+  assert.equal(requests,2,'one failed request and one successful request');
+  assert.equal((await service.get(actor,id)).status,'ready');
+  assert.equal(files.has(`avatars/${actor}/${id}/selfie.jpg`),false);
+  await service.accept(actor,id);await service.accept(actor,id);await run('avatar.generate',actor,id,3);
+  assert.equal(requests,2,'completed job does not regenerate');
+  assert.equal((await service.status(actor)).latestId,null);
+  assert.equal((await service.resolve(users[1],[actor])).avatars.length,1);
+  assert.equal((await service.resolve(users[2],[actor])).avatars.length,0);
+  await admin.query('delete from app.family_memberships where family_id=$1 and user_id=$2',[family,users[1]]);
+  assert.equal((await service.resolve(users[1],[actor])).avatars.length,0,'a removed member loses avatar lookup');
+  await admin.query("insert into app.family_memberships(family_id,user_id,role) values($1,$2,'member')",[family,users[1]]);
+  const channel=randomUUID();
+  await admin.query('update app.families set channel_guests_allowed=true where id=$1',[family]);
+  await admin.query("insert into app.channels(id,family_id,name,author_id,manager_id) values($1,$2,'Avatar guest fixture',$3,$3)",[channel,family,actor]);
+  await admin.query('insert into app.channel_participants(channel_id,family_id,user_id) values($1,$2,$3),($1,$2,$4)',[channel,family,actor,users[2]]);
+  await admin.query("insert into app.channel_guest_grants(channel_id,family_id,user_id,email) values($1,$2,$3,'fixture@example.test')",[channel,family,users[2]]);
+  assert.equal((await service.resolve(users[2],[actor])).avatars.length,1,'current guests see shared conversation portraits');
+  await admin.query('update app.channel_guest_grants set revoked_at=now() where channel_id=$1',[channel]);
+  assert.equal((await service.resolve(users[2],[actor])).avatars.length,0,'revocation ends guest lookup');
+  await run('avatar.cleanup',actor,id);assert.equal(files.size,1,'accepted avatar survives preview cleanup');
+  await service.reset(actor);assert.equal((await service.resolve(users[1],[actor])).avatars.length,0);
+  assert.equal((await service.get(actor,id)).status,'expired');assert.equal((await service.status(actor)).latestId,null);
+  await assert.rejects(service.accept(actor,id),error=>error.getStatus()===400);
+  await run('avatar.cleanup',actor,id);assert.equal(files.size,0);
+});
+test('concurrent reservations enforce five daily attempts and ownership',async()=>{
+  const actor=users[3],ids=Array.from({length:6},()=>randomUUID());
+  const outcomes=await Promise.allSettled(ids.map(id=>database.withActor(actor,client=>client.query('select app.reserve_avatar($1,$2)',[id,'hash']))));
+  assert.equal(outcomes.filter(row=>row.status==='fulfilled').length,5);
+  assert.equal(outcomes.find(row=>row.status==='rejected').reason.code,'P0001');
+  const id=ids[outcomes.findIndex(row=>row.status==='fulfilled')];
+  await database.withActor(actor,client=>client.query('select app.reserve_avatar($1,$2)',[id,'hash']));
+  await assert.rejects(database.withActor(users[2],client=>client.query('select app.reserve_avatar($1,$2)',[id,'hash'])),error=>error.code==='22023');
+  await assert.rejects(database.withActor(actor,client=>client.query('select app.reserve_avatar($1,$2)',[id,'changed'])),error=>error.code==='22023');
+});
+test('permanent failures and exhausted retries become visible failures',async()=>{
+  const actor=users[2],id=randomUUID();await service.upload(actor,id,photo);temporary=true;
+  await run('avatar.generate',actor,id,3);temporary=false;
+  const state=await service.get(actor,id);assert.equal(state.status,'failed');assert.ok(state.error);
+  await run('avatar.cleanup',actor,id);assert.equal(files.size,0);
+});
+test('expired previews cannot be accepted and are removed',async()=>{
+  const actor=users[2],id=randomUUID();await service.upload(actor,id,photo);await run('avatar.generate',actor,id);
+  await admin.query("update app.avatar_generations set expires_at=now()-interval '1 minute' where id=$1",[id]);
+  const preview=await service.get(actor,id);assert.equal(preview.status,'expired');assert.equal(preview.previewUrl,null);
+  await assert.rejects(service.accept(actor,id),error=>error.getStatus()===400);
+  await run('avatar.cleanup',actor,id);assert.equal(files.size,0);
+});
+test('account deletion queues cleanup even for a previously accepted avatar',async()=>{
+  const actor=users[2],id=randomUUID();await service.upload(actor,id,photo);await run('avatar.generate',actor,id);await service.accept(actor,id);
+  await admin.query('delete from auth.users where id=$1',[actor]);
+  const {rows:[row]}=await admin.query("select kind from app.outbox where dedupe_key=$1",['avatar-deleted:'+actor+':'+id]);
+  assert.equal(row.kind,'avatar.cleanup');await run('avatar.cleanup',actor,id);assert.equal(files.size,0);
+});

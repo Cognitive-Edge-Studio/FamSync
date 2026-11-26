@@ -1,4 +1,4 @@
-import { attachmentOf, clockText, messageParts, receiptOf, replyText, showsMention, type ChannelDetail, type ChannelMessage, type FeedRow, type Outgoing } from "@famsync/core/chat";
+import { attachmentOf, clockText, helperName, messageParts, receiptOf, replyText, showsMention, type ChannelDetail, type ChannelMessage, type FeedRow, type Outgoing } from "@famsync/core/chat";
 import { memo, useEffect, useState } from "react";
 import { ActivityIndicator, Image, Linking, Modal, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -7,16 +7,25 @@ import { useSignedIn } from "@/lib/session";
 import { useTheme } from "@/lib/theme";
 import { Button, Icon, Text } from "./ui";
 import { MediaAttachment } from './media-player';
+import { useAvatarUrl } from '@/lib/avatars';
 
 const tints = ["sage", "peach", "lavender", "sky", "rose"] as const;
 export function Avatar({ name, id, size = 40 }: { name: string; id: string; size?: number }) {
   const { colors } = useTheme();
+  const image=useAvatarUrl(id),[failed,setFailed]=useState<string|null>(null);
   let hash = 0;
   for (const char of id) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
   const tint = tints[hash % tints.length], words = name.trim().split(/\s+/).filter(Boolean);
   const initials = (words.length > 1 ? words[0][0] + words[words.length - 1][0] : (words[0] ?? "?").slice(0, 2)).toUpperCase();
   const text = { sage: colors.onSage, peach: colors.onPeach, lavender: colors.onLavender, sky: colors.onSky, rose: colors.onRose }[tint];
-  return <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors[tint], alignItems: "center", justifyContent: "center" }}><Text size={Math.round(size * 0.36)} weight="600" style={{ color: text }}>{initials}</Text></View>;
+  return <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden style={{ width: size, height: size, borderRadius: size / 2, overflow:'hidden', backgroundColor: colors[tint], alignItems: "center", justifyContent: "center" }}>{image&&image!==failed?<Image source={{uri:image}} style={{width:size,height:size}} onError={()=>setFailed(image)}/>:<Text size={Math.round(size * 0.36)} weight="600" style={{ color: text }}>{initials}</Text>}</View>;
+}
+
+/** The family's AI helper is shown by the emoji the family chose for it. */
+export function HelperAvatar({ emoji='🌿', size = 40, full=false }: { emoji?: string; size?: number; full?:boolean }) {
+  const { colors } = useTheme();
+  const mascot=emoji==='🌿',source=full?require('../../assets/mascots/juniper.webp'):require('../../assets/mascots/juniper-avatar.webp');
+  return <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden style={{ width: size, height: size, borderRadius: full?0:size/2, overflow:'hidden', backgroundColor:full&&mascot?'transparent':colors.sage, alignItems: "center", justifyContent: "center" }}>{mascot?<Image source={source} style={{width:size,height:size}} resizeMode="contain"/>:<Text size={Math.round(size * 0.5)}>{emoji}</Text>}</View>;
 }
 
 function RichText({ body, mentions, color }: { body: string; mentions: string[]; color: string }) {
@@ -25,7 +34,7 @@ function RichText({ body, mentions, color }: { body: string; mentions: string[];
     : part.kind === "mention" ? <Text key={index} weight="700" style={{ color }}>{part.text}</Text> : part.text)}</Text>;
 }
 
-function Photo({ familyId, fileId, name }: { familyId: string; fileId: string; name: string }) {
+function Photo({ familyId, fileId, name, sticker=false }: { familyId: string; fileId: string; name: string; sticker?:boolean }) {
   const { access_token } = useSignedIn(), { colors } = useTheme(), insets = useSafeAreaInsets();
   const [url, setUrl] = useState<string>(), [failed, setFailed] = useState(false), [attempt, setAttempt] = useState(0), [open, setOpen] = useState(false);
   useEffect(() => {
@@ -40,8 +49,8 @@ function Photo({ familyId, fileId, name }: { familyId: string; fileId: string; n
   const bad = () => { setUrl(undefined); if (attempt < 1) setAttempt(attempt + 1); else setFailed(true); };
   return (
     <>
-      <Pressable accessibilityRole="imagebutton" accessibilityLabel={"Photo, " + name} onPress={() => { if (failed) setAttempt(attempt + 1); else if (url) { setAttempt(attempt + 1); setOpen(true); } }} style={{ width: 230, height: 230, borderRadius: 12, overflow: "hidden", backgroundColor: colors.muted, alignItems: "center", justifyContent: "center" }}>
-        {url ? <Image source={{ uri: url }} style={{ width: 230, height: 230 }} resizeMode="cover" onError={bad} /> : failed ? <Text muted size={13}>Tap to load photo</Text> : <ActivityIndicator color={colors.primary} />}
+      <Pressable accessibilityRole="imagebutton" accessibilityLabel={(sticker?"Avatar sticker, ":"Photo, ") + name} onPress={() => { if (failed) setAttempt(attempt + 1); else if (url) { setAttempt(attempt + 1); setOpen(true); } }} style={{ width: sticker?160:230, height: sticker?160:230, borderRadius: 12, overflow: "hidden", backgroundColor: sticker?"transparent":colors.muted, alignItems: "center", justifyContent: "center" }}>
+        {url ? <Image source={{ uri: url }} style={{ width: sticker?160:230, height: sticker?160:230 }} resizeMode={sticker?"contain":"cover"} onError={bad} /> : failed ? <Text muted size={13}>Tap to load photo</Text> : <ActivityIndicator color={colors.primary} />}
       </Pressable>
       {open && <Modal transparent animationType="fade" onRequestClose={() => setOpen(false)} statusBarTranslucent><View accessibilityViewIsModal style={{ flex: 1, backgroundColor: "#000000f0", paddingTop: insets.top, paddingBottom: insets.bottom }}>
         <Pressable accessibilityRole="button" accessibilityLabel="Close photo" onPress={() => setOpen(false)} style={{ alignSelf: "flex-end", width: 56, height: 56, alignItems: "center", justifyContent: "center" }}><Icon name="close" size={28} color="#fff" /></Pressable>
@@ -54,7 +63,7 @@ function Photo({ familyId, fileId, name }: { familyId: string; fileId: string; n
 function FileRow({ familyId, file }: { familyId: string; file: ChannelMessage["files"][number] }) {
   const { access_token } = useSignedIn(), { colors } = useTheme(), [busy, setBusy] = useState(false), [error, setError] = useState("");
   if (!file.fileId) return <Text muted size={13}>Attached file unavailable</Text>;
-  if (file.mime?.startsWith("image/")) return <Photo familyId={familyId} fileId={file.fileId} name={file.fileName ?? "Photo"} />;
+  if (file.mime?.startsWith("image/")) return <Photo familyId={familyId} fileId={file.fileId} name={file.fileName ?? "Photo"} sticker={file.sticker} />;
   if (file.mime?.startsWith('audio/') || file.mime?.startsWith('video/')) return <MediaAttachment familyId={familyId} fileId={file.fileId} name={file.voiceSeconds ? 'Voice message' : file.fileName ?? 'Media'} kind={file.mime.startsWith('audio/') ? 'audio' : 'video'} seconds={file.voiceSeconds} />;
   async function open() {
     setBusy(true);
@@ -84,9 +93,12 @@ function Divider({ text, strong }: { text: string; strong?: boolean }) {
 }
 
 export const MessageRow = memo(function MessageRow({ row, channel, familyId, me, highlighted, actions }: { row: FeedRow; channel: ChannelDetail; familyId: string; me: string; highlighted: boolean; actions: RowActions }) {
-  const { colors } = useTheme(), { message } = row, mine = message.author?.userId === me, author = message.author?.name ?? "Former member";
+  const { colors } = useTheme(), { message } = row, helper = message.fromHelper, mine = !helper && message.author?.userId === me;
+  const author = helper ? helperName(channel) : message.author?.name ?? "Former member";
   const onBubble = mine ? colors.onPrimary : colors.foreground, receipt = mine && !message.deleted ? receiptOf(channel, message) : null;
-  const guest = !!message.author && channel.members.some((member) => member.userId === message.author!.userId && member.guest), hidden = message.mentions.filter((person) => !showsMention(message.body, person.name));
+  // The helper's reply mentions whoever asked; that mention isn't repeated under the text.
+  const guest = !!message.author && channel.members.some((member) => member.userId === message.author!.userId && member.guest), hidden = helper ? [] : message.mentions.filter((person) => !showsMention(message.body, person.name));
+  const quoted = message.replyTo ? (message.replyTo.fromHelper ? helperName(channel) : message.replyTo.author?.userId === me ? "You" : message.replyTo.author?.name ?? "Former member") : "";
   const spoken = (mine ? "You" : author) + ", " + clockText(message.createdAt) + ", " + (message.deleted ? "message deleted" : replyText({ body: message.body, deleted: false, fileCount: message.files.length, attachment: attachmentOf(message.files) })) + (receipt ? ", " + receipt : "");
   const bubble = { borderRadius: 18, paddingHorizontal: 14, paddingVertical: 9, backgroundColor: mine ? colors.primary : colors.muted, ...(mine ? { borderTopRightRadius: 6 } : { borderTopLeftRadius: 6 }) };
   return (
@@ -94,15 +106,18 @@ export const MessageRow = memo(function MessageRow({ row, channel, familyId, me,
       {row.day && <Divider text={row.day} />}
       {row.unread && <Divider strong text="Unread messages" />}
       <View style={{ flexDirection: mine ? "row-reverse" : "row", gap: 8, marginTop: row.grouped ? 3 : 10, borderRadius: 12, backgroundColor: highlighted ? colors.lavender : "transparent" }}>
-        {!mine && (row.grouped ? <View style={{ width: 32 }} /> : <Avatar name={author} id={message.author?.userId ?? author} size={32} />)}
+        {!mine && (row.grouped ? <View style={{ width: 32 }} /> : helper ? <HelperAvatar emoji={channel.helper?.emoji ?? "🌿"} size={32} /> : <Avatar name={author} id={message.author?.userId ?? author} size={32} />)}
         <View style={{ maxWidth: "82%", gap: 4, alignItems: mine ? "flex-end" : "flex-start" }}>
-          {!row.grouped && <Text size={13} muted>{(mine ? "" : author + (guest ? " · Guest" : "") + "  ") + clockText(message.createdAt)}</Text>}
+          {!row.grouped && <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Text size={13} muted>{(mine ? "" : author + (guest ? " · Guest" : "") + "  ") + clockText(message.createdAt)}</Text>
+            {helper && <View style={{ borderRadius: 8, paddingHorizontal: 6, paddingVertical: 1, backgroundColor: colors.sage }}><Text size={11} weight="600" style={{ color: colors.onSage }}>AI helper</Text></View>}
+          </View>}
           {message.deleted ? <View style={{ borderWidth: 1, borderStyle: "dashed", borderColor: colors.border, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 8 }}><Text muted style={{ fontStyle: "italic" }}>{mine ? "You deleted this message" : "This message was deleted"}</Text></View>
             : <>
               {(message.body || message.replyTo || message.forwarded || !message.files.length) ? <Pressable accessibilityLabel={spoken} accessibilityHint="Opens message actions" accessibilityActions={[{ name: "activate" }]} onAccessibilityAction={() => actions.open(message)} onLongPress={() => actions.open(message)} delayLongPress={350} style={({ pressed }) => ({ ...bubble, opacity: pressed ? 0.85 : 1 })}>
                 {message.forwarded && <Text size={13} style={{ color: onBubble, fontStyle: "italic", opacity: 0.85 }}>Forwarded</Text>}
-                {message.replyTo && <Pressable accessibilityRole="button" accessibilityLabel={"Show the original message from " + (message.replyTo.author?.name ?? "Former member")} onPress={() => actions.jump(message.replyTo!.id)} onLongPress={() => actions.open(message)} style={{ borderLeftWidth: 3, borderLeftColor: mine ? colors.onPrimary : colors.primary, paddingLeft: 8, marginBottom: 6 }}>
-                  <Text size={13} weight="600" style={{ color: onBubble }}>{message.replyTo.author?.userId === me ? "You" : message.replyTo.author?.name ?? "Former member"}</Text>
+                {message.replyTo && <Pressable accessibilityRole="button" accessibilityLabel={"Show the original message from " + quoted} onPress={() => actions.jump(message.replyTo!.id)} onLongPress={() => actions.open(message)} style={{ borderLeftWidth: 3, borderLeftColor: mine ? colors.onPrimary : colors.primary, paddingLeft: 8, marginBottom: 6 }}>
+                  <Text size={13} weight="600" style={{ color: onBubble }}>{quoted}</Text>
                   <Text size={13} numberOfLines={3} style={{ color: onBubble }}>{replyText(message.replyTo)}</Text></Pressable>}
                 {message.body ? <RichText body={message.body} mentions={message.mentions.map((person) => person.name)} color={onBubble} /> : !message.files.length ? <Text style={{ color: onBubble, fontStyle: "italic" }}>Attachment removed</Text> : null}
                 {hidden.length > 0 && <Text size={13} style={{ color: onBubble }}>{"Mentions: " + hidden.map((person) => "@" + person.name).join(", ")}</Text>}

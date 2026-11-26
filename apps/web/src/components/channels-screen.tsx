@@ -34,7 +34,7 @@ function when(value:string){
 function preview(channel:Channel,userId:string){
   const last=channel.lastMessage;
   if(!last)return channel.topic||(channel.kind==='dm'?'No messages yet':channel.memberCount+' members');
-  const author=last.author?.userId===userId?'You: ':channel.kind==='dm'?'':(last.author?.name??'Former member')+': ';
+  const author=last.fromHelper?(channel.helper?.name??'Family Helper')+': ':last.author?.userId===userId?'You: ':channel.kind==='dm'?'':(last.author?.name??'Former member')+': ';
   return author+(last.deleted?'Message deleted':last.body.replace(/\s+/g,' ')||(last.fileCount?attachmentLabel(last.attachment,last.fileCount):'Attachment removed'));
 }
 
