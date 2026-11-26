@@ -1,10 +1,21 @@
 # FamSync staging deployment
 
-Latest verification: 24 November 2026 (Asia/Dhaka).
-
-Release-source discovery on 26 November: the existing repository is `https://github.com/Cognitive-Edge-Studio/FamSync.git`, with separate Git metadata at `C:/shibly/FamSync/output/release-source.git`. GitHub `main` was verified at `37933f2` (25 November, configured AI/voice defaults enabled); this does not establish the live Render commit or environment. The 24 November runtime observations below are historical. See the [current release checklist](staging-release-2026-11-26.md) for pending helper/avatar/sticker changes.
+Latest verification: 26 November 2026 (Asia/Dhaka).
 
 ## Current release
+
+- Website: https://famsync.goppopi.com. The helper, photo avatars, chat stickers, mascot and adoption navigation are published. Seven main pages and 32 referenced assets matched the release files by SHA-256. The signed-in helper screen loaded with Juniper and no browser console errors.
+- API commit `4af4a7e4f2c6e796324eb6ad53022200aeab9eb3` is live on Render, deploy `dep-dc43tclbedkc73d3d6j0`. Health/readiness, helper/list/memory, avatar/sticker availability, avatar resolution, website CORS and Android version policy checks passed. Unauthenticated sticker access returned 401.
+- Supabase has all 43 migrations. The owner made a backup at `output/backups/staging-before-release-20261126-201128.dump`; restricted API-login checks confirmed the new tables and sticker permission.
+- Website archive: `output/famsync-web-staging-20261126-avatars-stickers.zip`. Server rollback copy: `famsync-before-20261126.zip` in the hosting account root, outside `public_html` (150.5 MiB).
+- AI and voice are available and enabled on staging; existing settings were preserved. The demo family has no helper yet; members can add one from **Adopt a family member**. No demo conversations were generated during deployment.
+- Android version 0.1.0, **build 3**, package `com.goppopi.famsync`, finished in Expo. [Build page](https://expo.dev/accounts/shibly_noman/projects/famsync/builds/b25d06de-d484-41a4-baf4-6c52eb15ce67). Downloaded and archive-verified at `output/distribution/downloads/FamSync-0.1.0-build-3.apk`. Physical-phone acceptance remains pending. iOS is deferred.
+- Git metadata: `C:/shibly/FamSync/output/release-source.git`; origin `https://github.com/Cognitive-Edge-Studio/FamSync.git`. Render tracks `main` and auto-deploys code commits. The API runtime stays on `4af4a7e`; documentation follow-ups skip Render.
+- Inngest scheduled jobs (including cleanup/reminder timing), Resend/SMTP acceptance and real-device testing remain open. The Android download is available from Expo; no permanent hosted APK distribution page or raised minimum build was configured.
+
+Full release record and rollback details: [26 November release](staging-release-2026-11-26.md). The sections below retain historical deployment observations.
+
+## Previous release: 24 November 2026
 
 - API commit `f50903575863b77bc9831bf6c3f3914f3dc6a314` is live. `/health`, `/api/v1/status`, the Android version endpoint, and authenticated Family Base graph, AI status and voice status checks passed.
 - The hosted voice migration and API execution permissions were verified. Android push reports `available: true` after the approved integration settings were deployed. Real-device delivery remains untested.
